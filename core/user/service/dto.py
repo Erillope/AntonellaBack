@@ -43,6 +43,7 @@ class UserDto(BaseModel):
     email: str
     name: str
     status: AccountStatus
+    gender: Gender
     birthdate: date
     created_date: date
     roles: List[RoleDto]

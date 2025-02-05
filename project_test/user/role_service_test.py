@@ -1,55 +1,55 @@
 import unittest
-from core.user import RoleService, Role, RoleFactory
-from core.common import ID
+from core.user import RoleService, Role
+from core.common import EventPublisher
 from core.user.domain.events import RoleCreated, RoleUpdated
 from project_test.mocks.repository_mocks import GetMock, SaveMock, DeleteMock
-from datetime import date
+from .test_data import DataFactory
 
 class RoleServiceTest(unittest.TestCase):
-    def setUp(self) -> None:
-        self.get_role = GetMock[Role]()
-        self.save_role = SaveMock[Role]((RoleCreated, RoleUpdated))
-        self.delete_role = DeleteMock[Role]()
-        self.role_service = RoleService(
-            get_role=self.get_role,
-            delete_role=self.delete_role
+    get_role: GetMock[Role]
+    save_role: SaveMock[Role]
+    delete_role: DeleteMock[Role]
+    role_service: RoleService
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.get_role = GetMock[Role]()
+        cls.save_role = SaveMock[Role]((RoleCreated, RoleUpdated))
+        cls.delete_role = DeleteMock[Role]()
+        cls.role_service = RoleService(
+            get_role=cls.get_role,
+            delete_role=cls.delete_role
         )
-        
-        self.sample_rolename = 'admin'
-        
-        self.sample_role = RoleFactory.load(
-            ID.generate(),
-            self.sample_rolename,
-            date.today()
-        )
+        EventPublisher.subscribe(cls.save_role)
+    
+    @classmethod
+    def tearDownClass(cls) -> None:
+        EventPublisher.subscribers.clear()
         
     def test_create(self) -> None:
-        self.get_role.get_input_value = self.sample_rolename
-        self.get_role.get_return_value = RoleFactory.load(
-            ID.generate(),
-            self.sample_rolename,
-            date.today()
-        )
-        role = self.role_service.create(self.sample_rolename)
-        self.assertEqual(role.name, self.sample_rolename)
-        self.assertEqual(self.save_role.saved_model.name, role.name)
+        for rolename in DataFactory.user_test_data.get_roles():
+            with self.subTest(rolename=rolename):
+                role = self.role_service.create(rolename)
+                self.assertEqual(role.name, rolename.lower())
+                self.assertEqual(self.save_role.saved_model.name, role.name)
     
     def test_rename(self) -> None:
-        role = self.role_service.rename(self.sample_rolename, self.sample_rolename)
-        self.assertEqual(role.name, self.sample_rolename)
-        self.assertEqual(self.save_role.saved_model.name, role.name)
+        for rolename in DataFactory.user_test_data.get_roles():
+            with self.subTest(rolename=rolename):
+                role = self.role_service.rename(rolename, rolename)
+                self.assertEqual(role.name, rolename.lower())
+                self.assertEqual(self.save_role.saved_model.name, role.name)
     
     def test_get_all(self) -> None:
-        self.get_role.get_all_return_value = [
-            RoleFactory.load(ID.generate(), 'admin', date.today()),
-            RoleFactory.load(ID.generate(), 'user', date.today())
-        ]
+        self.get_role.get_all_return_value = DataFactory.generate_roles()
         roles = self.role_service.get_all()
-        self.assertEqual(len(roles), 2)
+        self.assertEqual(len(roles), len(self.get_role.get_all_return_value))
         for i in range(len(self.get_role.get_all_return_value)):
             self.assertEqual(roles[i].name, self.get_role.get_all_return_value[i].name)
     
     def test_delete(self) -> None:
-        self.delete_role.delete_input_value = self.sample_rolename
-        self.role_service.delete(self.sample_rolename)
-        self.assertEqual(self.delete_role.deleted_model.name, self.sample_rolename)
+        for rolename in DataFactory.user_test_data.get_roles():
+            with self.subTest(rolename=rolename):
+                self.delete_role.delete_input_value = rolename
+                self.role_service.delete(rolename)
+                self.assertEqual(self.delete_role.deleted_model.name, rolename)

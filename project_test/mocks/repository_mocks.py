@@ -13,14 +13,18 @@ class GetMock(GetModel[Model]):
         self.filter_return_value : List[Model] = []
         
     def get(self, id: str) -> Model:
-        return self.get_return_value
+        if id == self.get_input_value:
+            return self.get_return_value
+        return 
     
     def get_all(self) -> List[Model]:
         return self.get_all_return_value
     
     def filter(self, expresion: Optional[str], order_by: str, direction: OrdenDirection,
                limit: Optional[int]=None, offset: Optional[int]=None) -> List[Model]:
-        return self.filter_return_value
+        if [expresion, order_by, direction, limit, offset] == self.filter_input_value:
+            return self.filter_return_value
+        return
 
 
 class SaveMock(SaveModel[Model], EventSubscriber[Event]):
@@ -42,4 +46,6 @@ class DeleteMock(DeleteModel[Model]):
         self.deleted_model: Model
         
     def delete(self, id: str) -> Model:
-        return self.deleted_model
+        if id == self.delete_input_value:
+            return self.deleted_model
+        return

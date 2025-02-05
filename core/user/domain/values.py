@@ -74,6 +74,7 @@ class UserEmail:
 class UserBirthdate:
     '''Validador de fechas de nacimiento de usuario'''
     MAX_AGE = 100
+    MIN_AGE = 3
     
     @classmethod
     def validate(cls, value: date) -> None:

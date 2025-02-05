@@ -4,7 +4,6 @@ from .dto import SignUpDto, UserDto, UpdateUserDto, FilterUserDto
 from core.common.abstract_repository import GetModel
 from core.user import UserAccount
 from typing import List
-from pydantic import BaseModel
 
 class AuthService(AbstractAuthService):
     def __init__(self, get_user: GetModel[UserAccount]):
