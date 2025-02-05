@@ -1,7 +1,10 @@
 from pydantic import BaseModel, model_validator
 from datetime import date
 from typing import ClassVar
-from core.common import PatternMatcher
+from core.common import PatternMatcher, ID
+from core.common.exceptions import InvalidIdException
+from domain.exceptions import InvalidUserNameException
+from domain.events import RoleUpdated
 
 class Role(BaseModel):
     '''Roles que serán asignados a los usuarios'''
@@ -14,9 +17,12 @@ class Role(BaseModel):
     @model_validator(mode='after')
     def validate_data(self) -> 'Role':
         '''Valida los datos del rol'''
-        #---Usa las clases ID y PatternMatcher del modulo common para validar los datos, no olvides lanzar 
-        # excepciones para cuando los datos sean inválidos (Borrar este comentario luego de implementar)
-        #TODO
+        if not ID.validate(id):
+            raise InvalidIdException.invalid_id(id)
+        
+        if not PatternMatcher.match(self.name):
+            raise InvalidUserNameException.invalid_name(self.name)
+        
         return self
     
     def rename(self, name: str) -> None:
@@ -24,6 +30,9 @@ class Role(BaseModel):
         #---No olvides validar los datos, puedes reutilizar el método validate_data, tampoco olvides lanzar 
         # los eventos correspondientes (Borrar este comentario luego de implementar)
         #TODO
+        self.validate_data()
+        self.name = name
+        
         pass
     
 
