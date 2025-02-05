@@ -1,0 +1,63 @@
+# Archivos y carpetas generados por el sistema operativo
+.DS_Store
+Thumbs.db
+
+# Entornos virtuales de Python
+venv/
+.env/
+*.egg-info/
+__pycache__/
+*.pyc
+*.pyo
+
+# Configuración del IDE
+.idea/
+.vscode/
+*.swp
+
+# Archivos de paquetes y distribuciones
+build/
+dist/
+*.egg
+*.whl
+
+# Archivos de configuración
+*.log
+*.env
+
+# Librerías específicas
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Archivos de caché
+.cache/
+*.pytest_cache/
+.tox/
+
+# Archivos de cobertura de pruebas
+coverage/
+.coverage
+*.cover
+.hypothesis/
+
+# Documentación generada
+_build/
+docs/_build/
+
+# Archivos de profiling
+*.prof
+
+# Archivos de lock o dependencias
+poetry.lock
+Pipfile.lock
+
+# Archivos de bases de datos locales
+*.sqlite3
+db.sqlite3
+
+# Archivos temporales o de depuración
+*.bak
+*.tmp
+*.~ 
+
+# Otros casos específicos del proyecto
