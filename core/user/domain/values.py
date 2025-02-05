@@ -1,10 +1,18 @@
 from enum import Enum
 from core.common import PatternMatcher
+from datetime import date
 
 class AccountStatus(str, Enum):
     '''Estados de la cuenta de usuario'''
     ENABLE = "ENABLE"
     DISABLE = "DISABLE"
+    
+
+class Gender(str, Enum):
+    '''Géneros de usuario'''
+    MALE = "MASCULINO"
+    FEMALE = "FEMENINO"
+    OTHER = "OTRO"
 
 
 class UserPhoneNumber:
@@ -68,6 +76,7 @@ class UserBirthdate:
     MAX_AGE = 100
     
     @classmethod
-    def validate(cls, value: str) -> None:
+    def validate(cls, value: date) -> None:
         #TODO
+        #-- Valida que la fecha de nacimiento no sea mayor a MAX_AGE años, y que no sea mayor a la fecha actual
         pass

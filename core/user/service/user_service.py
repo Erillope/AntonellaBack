@@ -6,8 +6,9 @@ from core.user import UserAccount
 from typing import List
 from pydantic import BaseModel
 
-class AuthService(BaseModel, AbstractAuthService):
-    get_user: GetModel[UserAccount]
+class AuthService(AbstractAuthService):
+    def __init__(self, get_user: GetModel[UserAccount]):
+        self.get_user = get_user
     
     def sign_up(self, dto: SignUpDto) -> UserDto:
         #TODO
@@ -20,8 +21,9 @@ class AuthService(BaseModel, AbstractAuthService):
         return user_dto
 
 
-class UpdateUserService(BaseModel, AbstractUpdateUserService):
-    get_user: GetModel[UserAccount]
+class UpdateUserService(AbstractUpdateUserService):
+    def __init__(self, get_user: GetModel[UserAccount]):
+        self.get_user = get_user
     
     def update_user(self, dto: UpdateUserDto) -> UserDto:
         #TODO
@@ -39,8 +41,9 @@ class UpdateUserService(BaseModel, AbstractUpdateUserService):
         return user_dto
 
 
-class FilterUserService(BaseModel, AbstractFilterUserService):
-    get_user: GetModel[UserAccount]
+class FilterUserService(AbstractFilterUserService):
+    def __init__(self, get_user: GetModel[UserAccount]):
+        self.get_user = get_user
     
     def filter_user(self, dto: FilterUserDto) -> List[UserDto]:
         #TODO

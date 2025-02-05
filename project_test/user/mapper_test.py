@@ -1,6 +1,6 @@
 import unittest
 from core.user.service.mapper import UserMapper, RoleMapper
-from core.user import UserAccountFactory, RoleFactory
+from core.user import UserAccountFactory, RoleFactory, Gender
 from core.user.service.dto import SignUpDto, UserDto
 from datetime import date
 
@@ -12,7 +12,8 @@ class TestUserMapper(unittest.TestCase):
             name="Erick",
             password="Contraseña-123",
             birthdate=date(1999, 1, 1),
-            roles=['ADMIN', 'USER']
+            roles=['ADMIN', 'USER'],
+            gender=Gender.MALE
         )
         
         self.sample_user = UserAccountFactory.create(
@@ -21,7 +22,8 @@ class TestUserMapper(unittest.TestCase):
             name="Erick",
             password="Contraseña-123",
             birthdate=date(1999, 1, 1),
-            roles=[RoleFactory.create('ADMIN'), RoleFactory.create('USER')]
+            roles=[RoleFactory.create('ADMIN'), RoleFactory.create('USER')],
+            gender=Gender.MALE
         )
     
     def test_to_user(self) -> None:

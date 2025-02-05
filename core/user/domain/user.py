@@ -2,7 +2,7 @@ from pydantic import BaseModel, model_validator
 from datetime import date
 from typing import Optional, List
 from core.common import ID
-from .values import AccountStatus
+from .values import AccountStatus, Gender
 from .role import Role
 
 class UserAccount(BaseModel):
@@ -13,6 +13,7 @@ class UserAccount(BaseModel):
     name: str
     password: str
     status: AccountStatus
+    gender: Gender
     birthdate: date
     created_date: date
     roles: List[Role]
@@ -67,7 +68,7 @@ class UserAccountBuilder(BaseModel):
     status: AccountStatus = AccountStatus.ENABLE
     birthdate: date
     created_date: date = date.today()
-    roles: List[Role] = []
+    roles: List[Role]
     
     def set_id(self, id: str) -> 'UserAccountBuilder':
         self.id = id
@@ -81,27 +82,23 @@ class UserAccountBuilder(BaseModel):
         self.created_date = created_date
         return self
     
-    def set_roles(self, roles: List[Role]) -> 'UserAccountBuilder':
-        self.roles = roles
-        return self
-    
     def build(self) -> UserAccount:
         return UserAccount(**self.model_dump())
 
 
 class UserAccountFactory:
     @staticmethod
-    def create(phone_number: str, email: str, name: str, password: str, birthdate: date, roles: List[Role]) -> UserAccount:
+    def create(phone_number: str, email: str, name: str, password: str, birthdate: date, gender: Gender,
+               roles: List[Role]) -> UserAccount:
         #Crearás una nueva cuenta de usuario, entonces solo necesitas los datos que te pasan, el resto de
         # parámetros como el id y la fecha las tienes que generar automaticamente, la fecha de creación debe
         # ser la de hoy. Al ser una nueva cuenta, debes lanzar el evento correspondiente, usa la clase constructora
-        #TODO
         user : UserAccount
         return user
     
     @staticmethod
     def load(id: str, phone_number: str, email: str, name: str, password: str, status: AccountStatus, 
-             birthdate: date, created_date: date, roles: List[Role]) -> UserAccount:
+             birthdate: date, created_date: date, gender: Gender, roles: List[Role]) -> UserAccount:
         '''Carga una cuenta de usuario existente'''
         #Cargarás una cuenta de usuario existente, entonces usa los parámetros que te pasan para crear la #cuenta, no necesitas lanzar un evento porque no estás creando una nueva cuenta. Usa la clase constructora
         #TODO

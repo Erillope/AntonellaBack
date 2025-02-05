@@ -3,11 +3,11 @@ from .dto import RoleDto
 from typing import List
 from core.user import Role
 from core.common.abstract_repository import GetModel, DeleteModel
-from pydantic import BaseModel
 
-class RoleService(BaseModel, AbstractRoleService):
-    get_role: GetModel[Role]
-    delete_role: DeleteModel[Role]
+class RoleService(AbstractRoleService):
+    def __init__(self, get_role: GetModel[Role], delete_role: DeleteModel[Role]):
+        self.get_role = get_role
+        self.delete_role = delete_role
     
     def create(self, name: str) -> RoleDto:
         #TODO
@@ -24,6 +24,7 @@ class RoleService(BaseModel, AbstractRoleService):
         role_dto: List[RoleDto]
         return role_dto
 
-    def delete(self, role: str) -> None:
+    def delete(self, role: str) -> RoleDto:
         #TODO
-        pass
+        role_dto: RoleDto
+        return role_dto

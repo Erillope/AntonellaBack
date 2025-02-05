@@ -25,10 +25,10 @@ class RoleUpdated(Event, BaseModel):
 
 class RoleAddedToUser(Event, BaseModel):
     '''Evento para cuando un rol es añadido a un usuario'''
-    role_id: str
+    rolename: str
     user_id: str
 
 class RoleRemovedFromUser(Event, BaseModel):
     '''Evento para cuando un rol es removido de un usuario'''
-    role_id: str
+    rolename: str
     user_id: str

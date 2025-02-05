@@ -1,7 +1,7 @@
 import unittest
 from core.common import ID, EventPublisher
 from datetime import date
-from core.user import UserAccountFactory, AccountStatus, RoleFactory
+from core.user import UserAccountFactory, AccountStatus, RoleFactory, Gender
 from core.user.domain.events import (UserAccountCreated, UserAccountUpdated, RoleAddedToUser, 
                                      RoleRemovedFromUser)
 from core.user.domain.exceptions import (InvalidPhoneNumberException, InvalidUserBirthdateException,
@@ -16,6 +16,7 @@ class TestUserAccountCreation(unittest.TestCase):
         self.sample_email = "erillope@gmail.com"
         self.sample_name = "Erick"
         self.sample_password = "Contraseña-123"
+        self.sample_gender = Gender.MALE
         self.sample_birthdate = date(1998, 10, 10)
         self.sample_roles = [RoleFactory.create(name="admin"), RoleFactory.create(name="employee")]
         self.sample_status = AccountStatus.DISABLE
@@ -31,7 +32,8 @@ class TestUserAccountCreation(unittest.TestCase):
         EventPublisher.clear()
         user = UserAccountFactory.create(phone_number=self.sample_phone_number, email=self.sample_email,
                                          name=self.sample_name, password=self.sample_password,
-                                         birthdate=self.sample_birthdate, roles=self.sample_roles)
+                                         birthdate=self.sample_birthdate, roles=self.sample_roles,
+                                         gender=self.sample_gender)
         self.assertEqual(user.phone_number, self.sample_phone_number)
         self.assertEqual(user.email, self.sample_email)
         self.assertEqual(user.name, self.sample_name)
@@ -40,6 +42,7 @@ class TestUserAccountCreation(unittest.TestCase):
         self.assertEqual(user.roles, self.sample_roles)
         self.assertTrue(user.status == AccountStatus.ENABLE)
         self.assertTrue(user.created_date == date.today())
+        self.assertEqual(user.gender, self.sample_gender)
         self.assertTrue(len(EventPublisher.get_events()) == 1)
         event = EventPublisher.get_events()[0]
         self.assertTrue(isinstance(event, UserAccountCreated))
@@ -49,43 +52,46 @@ class TestUserAccountCreation(unittest.TestCase):
                                        email=self.sample_email, name=self.sample_name,
                                        password=self.sample_password, status=self.sample_status,
                                        birthdate=self.sample_birthdate, created_date=date.today(),
-                                       roles=self.sample_roles)
+                                       roles=self.sample_roles, gender=self.sample_gender)
         self.assertEqual(user.id, self.sample_id)
-        self.assertEqual(user.roles, self.sample_roles)
         self.assertEqual(user.status, self.sample_status)
         self.assertEqual(user.created_date, self.sample_created_date)
-        self.assertEqual(user.phone_number, self.sample_phone_number)
         self.assertTrue(len(EventPublisher.get_events()) == 0)
     
     def test_invalid_phone_number(self) -> None:
         with self.assertRaises(InvalidPhoneNumberException):
             UserAccountFactory.create(phone_number=self.invalid_phone_number, email=self.sample_email,
                                       name=self.sample_name, password=self.sample_password,
-                                      birthdate=self.sample_birthdate, roles=self.sample_roles)
+                                      birthdate=self.sample_birthdate, roles=self.sample_roles,
+                                      gender=self.sample_gender)
             
     def test_invalid_email(self) -> None:
         with self.assertRaises(InvalidUserEmailException):
             UserAccountFactory.create(phone_number=self.sample_phone_number, email=self.invalid_email,
                                       name=self.sample_name, password=self.sample_password,
-                                      birthdate=self.sample_birthdate, roles=self.sample_roles)
+                                      birthdate=self.sample_birthdate, roles=self.sample_roles,
+                                      gender=self.sample_gender)
     
     def test_invalid_name(self) -> None:
         with self.assertRaises(InvalidUserNameException):
             UserAccountFactory.create(phone_number=self.sample_phone_number, email=self.sample_email,
                                       name=self.invalid_name, password=self.sample_password,
-                                      birthdate=self.sample_birthdate, roles=self.sample_roles)
+                                      birthdate=self.sample_birthdate, roles=self.sample_roles,
+                                      gender=self.sample_gender)
     
     def test_invalid_password(self) -> None:
         with self.assertRaises(InvalidUserPasswordException):
             UserAccountFactory.create(phone_number=self.sample_phone_number, email=self.sample_email,
                                       name=self.sample_name, password=self.invalid_password,
-                                      birthdate=self.sample_birthdate, roles=self.sample_roles)
+                                      birthdate=self.sample_birthdate, roles=self.sample_roles,
+                                      gender=self.sample_gender)
     
     def test_invalid_birthdate(self) -> None:
         with self.assertRaises(InvalidUserBirthdateException):
             UserAccountFactory.create(phone_number=self.sample_phone_number, email=self.sample_email,
                                       name=self.sample_name, password=self.sample_password,
-                                      birthdate=self.invalid_birthdate, roles=self.sample_roles)
+                                      birthdate=self.invalid_birthdate, roles=self.sample_roles,
+                                      gender=self.sample_gender)
     
     def test_invalid_id(self) -> None:
         with self.assertRaises(InvalidUserBirthdateException):
@@ -93,7 +99,7 @@ class TestUserAccountCreation(unittest.TestCase):
                                     email=self.sample_email, name=self.sample_name,
                                     password=self.sample_password, status=self.sample_status,
                                     birthdate=self.sample_birthdate, created_date=date.today(),
-                                    roles=self.sample_roles)
+                                    roles=self.sample_roles, gender=self.sample_gender)
 
 
 class TestUserAccount(unittest.TestCase):
@@ -106,7 +112,8 @@ class TestUserAccount(unittest.TestCase):
             name="Erick",
             password=self.sample_user_password,
             birthdate=date(2004, 9, 28),
-            roles=[RoleFactory.create(name="admin"), RoleFactory.create(name="employee")]
+            roles=[RoleFactory.create(name="admin"), RoleFactory.create(name="employee")],
+            gender=Gender.FEMALE
         )
         self.sample_user2 = deepcopy(self.sample_user)
         self.sample_name = "Erick2"

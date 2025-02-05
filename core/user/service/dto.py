@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import date
-from core.user import AccountStatus
+from core.user import AccountStatus, Gender
 from core.common import OrdenDirection
 from typing import List, Optional
 
@@ -8,6 +8,7 @@ class SignUpDto(BaseModel):
     phone_number: str
     email: str
     name: str
+    gender: Gender
     password: str
     birthdate: date
     roles: List[str]
@@ -15,11 +16,11 @@ class SignUpDto(BaseModel):
 
 class UpdateUserDto(BaseModel):
     id: str
-    phone_number: str
-    email: str
-    name: str
-    password: str
-    status: AccountStatus
+    phone_number: Optional[str] = None
+    email: Optional[str] = None
+    name: Optional[str] = None
+    password: Optional[str] = None
+    status: Optional[AccountStatus] = None
 
 
 class FilterUserDto(BaseModel):

@@ -3,6 +3,7 @@ from core.user import RoleFactory
 from core.user.domain.events import RoleCreated, RoleUpdated
 from core.user.domain.exceptions import InvalidRoleException
 from core.common import ID, EventPublisher
+from core.common.exceptions import InvalidIdException
 from datetime import date
 
 class TestRoleCreation(unittest.TestCase):
@@ -20,7 +21,7 @@ class TestRoleCreation(unittest.TestCase):
         self.assertTrue(role.created_date == date.today())
         self.assertTrue(len(EventPublisher.get_events()) == 1)
         event = EventPublisher.get_events()[0]
-        self.assertTrue(isinstance(event, RoleCreated), )
+        self.assertTrue(isinstance(event, RoleCreated))
         
     def test_load_role(self) -> None:
         role = RoleFactory.load(id=self.sample_id, name=self.sample_rolename,
@@ -35,7 +36,7 @@ class TestRoleCreation(unittest.TestCase):
             RoleFactory.create(name=self.invalid_rolename)
     
     def test_invalid_role_id(self) -> None:
-        with self.assertRaises(InvalidRoleException):
+        with self.assertRaises(InvalidIdException):
             RoleFactory.load(id=self.invalid_id, name=self.sample_rolename,
                              created_date=self.sample_created_date)
 
