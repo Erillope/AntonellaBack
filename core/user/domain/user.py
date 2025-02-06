@@ -87,7 +87,8 @@ class UserAccountBuilder(BaseModel):
 
 
 class UserAccountFactory:
-    def create(self, phone_number: str, email: str, name: str, password: str, birthdate: date, gender: Gender,
+    @staticmethod
+    def create(phone_number: str, email: str, name: str, password: str, birthdate: date, gender: Gender,
                roles: List[Role]) -> UserAccount:
         #Crearás una nueva cuenta de usuario, entonces solo necesitas los datos que te pasan, el resto de
         # parámetros como el id y la fecha las tienes que generar automaticamente, la fecha de creación debe
@@ -95,7 +96,8 @@ class UserAccountFactory:
         user : UserAccount
         return user
     
-    def load(self, id: str, phone_number: str, email: str, name: str, password: str, status: AccountStatus, 
+    @staticmethod
+    def load(id: str, phone_number: str, email: str, name: str, password: str, status: AccountStatus, 
              birthdate: date, created_date: date, gender: Gender, roles: List[Role]) -> UserAccount:
         '''Carga una cuenta de usuario existente'''
         #Cargarás una cuenta de usuario existente, entonces usa los parámetros que te pasan para crear la #cuenta, no necesitas lanzar un evento porque no estás creando una nueva cuenta. Usa la clase constructora
