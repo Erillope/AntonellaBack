@@ -27,6 +27,7 @@ class AuthServiceTest(unittest.TestCase):
     def test_sign_up(self) -> None:
         for sign_up_dto in DataFactory.generate_sign_up_dtos():
             with self.subTest(sign_up_dto=sign_up_dto):
+                self.get_user.exists_input_return_values = [(sign_up_dto.phone_number, False), (sign_up_dto.email, False)]
                 user = self.auth_service.sign_up(sign_up_dto)
                 self.assertEqual(self.save_user.saved_model.id, user.id)
         
@@ -67,6 +68,11 @@ class UpdateUserServiceTest(unittest.TestCase):
     def test_update_user(self) -> None:
         for user, update_user_dto in DataFactory.generate_user_and_update_dto():
             with self.subTest(user=user, update_user_dto=update_user_dto):
+                self.get_user.exists_input_return_values = []
+                if update_user_dto.phone_number:
+                    self.get_user.exists_input_return_values = [(update_user_dto.phone_number, False)]
+                if update_user_dto.email:
+                    self.get_user.exists_input_return_values += [(update_user_dto.email, False)]
                 self.get_user.get_input_value = user.id
                 self.get_user.get_return_value = user
                 self.update_user_service.update_user(update_user_dto)

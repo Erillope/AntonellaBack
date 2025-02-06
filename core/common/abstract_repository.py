@@ -6,6 +6,9 @@ Model = TypeVar('Model')
 
 class GetModel(ABC, Generic[Model]):
     @abstractmethod
+    def exists(self, id: str) -> bool: ...
+    
+    @abstractmethod
     def get_all(self) -> List[Model]: ...
     
     @abstractmethod

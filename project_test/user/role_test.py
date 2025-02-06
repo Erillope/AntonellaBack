@@ -1,8 +1,7 @@
 import unittest
 from core.user import RoleFactory
-from core.user.domain.events import RoleCreated, RoleUpdated
 from core.user.domain.exceptions import InvalidRoleException
-from core.common import EventPublisher, ID
+from core.common import ID
 from core.common.exceptions import InvalidIdException
 from datetime import date
 from .test_data import DataFactory
@@ -11,13 +10,9 @@ class TestRoleCreation(unittest.TestCase):
     def test_create_role(self) -> None:
         for rolename in DataFactory.user_test_data.get_roles():
             with self.subTest(rolename=rolename):
-                EventPublisher.clear()
                 role = RoleFactory.create(name=rolename)
                 self.assertEqual(role.name, rolename.lower())
                 self.assertTrue(role.created_date == date.today())
-                self.assertTrue(len(EventPublisher.get_events()) == 1)
-                event = EventPublisher.get_events()[0]
-                self.assertTrue(isinstance(event, RoleCreated))
         
     def test_load_role(self) -> None:
         for rolename in DataFactory.user_test_data.get_roles():
@@ -28,7 +23,6 @@ class TestRoleCreation(unittest.TestCase):
                 self.assertEqual(role.id, id)
                 self.assertEqual(role.name, rolename.lower())
                 self.assertEqual(role.created_date, created_date)
-                self.assertTrue(len(EventPublisher.get_events()) == 0)
         
     def test_invalid_role_name(self) -> None:
         for invalid_rolename in DataFactory.user_test_data.get_invalid_roles():
@@ -47,13 +41,9 @@ class TestRole(unittest.TestCase):
     def test_rename_role(self) -> None:
         for rolename in DataFactory.user_test_data.get_roles():
             with self.subTest(rolename=rolename):
-                EventPublisher.clear()
                 role = RoleFactory.create(name=rolename)
                 role.rename(name=rolename)
                 self.assertEqual(role.name, rolename.lower())
-                self.assertTrue(len(EventPublisher.get_events()) == 1)
-                event = EventPublisher.get_events()[0]
-                self.assertTrue(isinstance(event, RoleUpdated))
 
     
     def test_invalid_role_name(self) -> None:

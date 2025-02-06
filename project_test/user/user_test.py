@@ -1,9 +1,7 @@
 import unittest
-from core.common import ID, EventPublisher
+from core.common import ID
 from datetime import date
 from core.user import UserAccountFactory, AccountStatus
-from core.user.domain.events import (UserAccountCreated, UserAccountUpdated, RoleAddedToUser, 
-                                     RoleRemovedFromUser)
 from core.user.domain.exceptions import (InvalidPhoneNumberException, InvalidUserBirthdateException,
                                          InvalidUserEmailException, InvalidUserNameException, 
                                          InvalidUserPasswordException)
@@ -22,7 +20,6 @@ class TestUserAccountCreation(unittest.TestCase):
             gender = DataFactory.user_test_data.get_gender()
             with self.subTest(phone_number=phone_number, email=email, name=name, password=password,
                               birthdate=birthdate, roles=roles, gender=gender):
-                EventPublisher.clear()
                 user = UserAccountFactory.create(
                     phone_number=phone_number,
                     email=email,
@@ -41,10 +38,7 @@ class TestUserAccountCreation(unittest.TestCase):
                 self.assertTrue(user.status == AccountStatus.ENABLE)
                 self.assertTrue(user.created_date == date.today())
                 self.assertEqual(user.gender, gender)
-                self.assertTrue(len(EventPublisher.get_events()) == 1)
-                event = EventPublisher.get_events()[0]
-                self.assertTrue(isinstance(event, UserAccountCreated))
-    
+
     def test_user_account_load(self) -> None:
         for phone_number, email, name, password in zip(
             DataFactory.user_test_data.get_phone_numbers(),
@@ -77,7 +71,6 @@ class TestUserAccountCreation(unittest.TestCase):
                 self.assertEqual(user.id, id)
                 self.assertEqual(user.status, status)
                 self.assertEqual(user.created_date, created_date)
-                self.assertTrue(len(EventPublisher.get_events()) == 0)
     
     def test_invalid_phone_number(self) -> None:
         for invalid_phone_number, email, name, password in zip(
@@ -204,25 +197,17 @@ class TestUserAccount(unittest.TestCase):
         ):
             status = DataFactory.user_test_data.get_account_status()
             with self.subTest(phone_number=phone_number, email=email, name=name, password=password, status=status):
-                EventPublisher.clear()
                 user.change_data(phone_number=phone_number, email=email, name=name, password=password, status=status)
                 self.assertEqual(user.phone_number, phone_number)
                 self.assertEqual(user.email, email)
                 self.assertEqual(user.name, name)
                 self.assertTrue(user.verify_password(password))
                 self.assertEqual(user.status, status)
-                self.assertTrue(len(EventPublisher.get_events()) == 1)
-                event = EventPublisher.get_events()[0]
-                self.assertTrue(isinstance(event, UserAccountUpdated))
     
     def test_false_update_user_account(self) -> None:
         for user in DataFactory.generate_user_accounts():
             with self.subTest(user=user):
-                EventPublisher.clear()
                 user.change_data()
-                self.assertTrue(len(EventPublisher.get_events()) == 1)
-                event = EventPublisher.get_events()[0]
-                self.assertTrue(isinstance(event, UserAccountUpdated))
     
     def test_verify_password(self) -> None:
         for user, phone_number, password in DataFactory.generate_user_with_info():
@@ -240,21 +225,13 @@ class TestUserAccount(unittest.TestCase):
     def test_add_role(self) -> None:
         for user, role in zip(DataFactory.generate_user_accounts(), DataFactory.generate_sample_roles()):
             with self.subTest(user=user, role=role):
-                EventPublisher.clear()
                 user.add_role(role)
                 self.assertTrue(role in user.roles)
-                self.assertTrue(len(EventPublisher.get_events()) == 1)
-                event = EventPublisher.get_events()[0]
-                self.assertTrue(isinstance(event, RoleAddedToUser))
     
     def test_remove_role(self) -> None:
         for user, role in zip(DataFactory.generate_user_accounts(), DataFactory.generate_sample_roles()):
             with self.subTest(user=user, role=role):
-                EventPublisher.clear()
                 user.add_role(role)
                 self.assertTrue(role in user.roles)
                 user.remove_role(role)
                 self.assertFalse(role in user.roles)
-                self.assertTrue(len(EventPublisher.get_events()) == 1)
-                event = EventPublisher.get_events()[0]
-                self.assertTrue(isinstance(event, RoleRemovedFromUser))

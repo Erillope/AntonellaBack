@@ -37,8 +37,7 @@ class Role(BaseModel):
     
 
 class RoleFactory:
-    @staticmethod
-    def create(name: str) -> Role:
+    def create(self, name: str) -> Role:
         '''Crea un nuevo rol'''
         #Crearás un nuevo rol, entonces solo necesitas el nombre del rol, el resto de parámetros como el id
         # y la fecha las tienes que generar automaticamente, la fecha de creación debe ser la de hoy.
@@ -50,8 +49,7 @@ class RoleFactory:
         RoleCreated()
         return role
     
-    @staticmethod
-    def load(id: str, name: str, created_date: date) -> Role:
+    def load(self, id: str, name: str, created_date: date) -> Role:
         '''Carga un rol existente'''
         #Cargarás un rol existente, entonces usa los parámetros que te pasan para crear el rol
         #No necesitas lanzar un evento porque no estás creando un nuevo rol

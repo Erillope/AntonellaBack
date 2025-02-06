@@ -3,14 +3,12 @@ from .dto import SignUpDto, UserDto, RoleDto
 
 class UserMapper:
     '''Mapeador entre usuarios y dtos'''
-    @staticmethod
-    def to_user(dto: SignUpDto) -> UserAccount:
+    def to_user(self, dto: SignUpDto) -> UserAccount:
         #TODO
         user: UserAccount
         return user
 
-    @staticmethod
-    def to_dto(user: UserAccount) -> UserDto:
+    def to_dto(self, user: UserAccount) -> UserDto:
         #TODO
         dto: UserDto
         return dto
@@ -18,14 +16,12 @@ class UserMapper:
 
 class RoleMapper:
     '''Mapeador entre roles y dtos'''
-    @staticmethod
-    def to_role(rolename: str) -> Role:
+    def to_role(self, rolename: str) -> Role:
         #TODO
         role: Role
         return role
     
-    @staticmethod
-    def to_dto(role: Role) -> RoleDto:
+    def to_dto(self, role: Role) -> RoleDto:
         #TODO
         dto: RoleDto
         return dto
