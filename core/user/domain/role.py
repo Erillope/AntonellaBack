@@ -4,7 +4,7 @@ from typing import ClassVar
 from core.common import PatternMatcher, ID
 from core.common.exceptions import InvalidIdException
 from domain.exceptions import InvalidUserNameException
-from domain.events import RoleUpdated
+from domain.events import RoleUpdated, RoleCreated
 
 class Role(BaseModel):
     '''Roles que serán asignados a los usuarios'''
@@ -32,7 +32,7 @@ class Role(BaseModel):
         #TODO
         self.validate_data()
         self.name = name
-        
+        RoleUpdated()
         pass
     
 
@@ -44,7 +44,10 @@ class RoleFactory:
         # y la fecha las tienes que generar automaticamente, la fecha de creación debe ser la de hoy.
         #Al ser un nuevo rol, debes lanzar el evento correspondiente
         #TODO
+        self.id = ID.generate()
+        self.created_date = date.today()
         role: Role
+        RoleCreated()
         return role
     
     @staticmethod
@@ -53,5 +56,6 @@ class RoleFactory:
         #Cargarás un rol existente, entonces usa los parámetros que te pasan para crear el rol
         #No necesitas lanzar un evento porque no estás creando un nuevo rol
         #TODO
+        
         role: Role
         return role
