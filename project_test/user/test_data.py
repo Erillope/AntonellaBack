@@ -3,7 +3,7 @@ from typing import List, Dict, Any, Optional, Tuple
 from core.common import ID
 from core.user import AccountStatus, Gender, UserAccount, UserAccountFactory, RoleFactory, Role
 from core.user.domain.values import UserBirthdate
-from core.user.service.dto import SignUpDto
+from core.user.service.dto import SignUpDto, UpdateUserDto
 import random
 from datetime import date, timedelta
 
@@ -14,7 +14,12 @@ class UserTestData:
         self.data: Dict[str, List[Any]] = {}
         with open('project_test/user/user_test_data.json') as file:
             self.data = json.load(file)
+        self.shuffle()
     
+    def shuffle(self) -> None:
+        for key in self.data:
+            random.shuffle(self.data[key])
+            
     @classmethod
     def get_instance(cls) -> 'UserTestData':
         if cls.instance is None:
@@ -146,3 +151,18 @@ class DataFactory:
                 )
             info.append((user, phone_number, password))
         return info
+
+    @classmethod
+    def generate_user_and_update_dto(cls) -> List[Tuple[UserAccount, UpdateUserDto]]:
+        result = []
+        users = cls.generate_user_accounts()
+        cls.user_test_data.shuffle()
+        for i, user in enumerate(users):
+            update_user_dto = UpdateUserDto(
+                id=user.id,
+                name=cls.user_test_data.get_user_names()[i],
+                email=cls.user_test_data.get_emails()[i],
+                phone_number=cls.user_test_data.get_phone_numbers()[i]
+            )
+            result.append((user, update_user_dto))
+        return result

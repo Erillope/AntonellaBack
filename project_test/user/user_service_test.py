@@ -1,6 +1,6 @@
 import unittest
 from core.user import AuthService, UserAccount, UpdateUserService
-from core.common import EventPublisher, ID
+from core.common import EventPublisher
 from core.user.domain.events import UserAccountCreated, UserAccountUpdated
 from core.user.service.exceptions import IncorrectPasswordException
 from project_test.mocks.repository_mocks import GetMock, SaveMock
@@ -44,3 +44,43 @@ class AuthServiceTest(unittest.TestCase):
                 self.get_user.get_return_value = user
                 with self.assertRaises(IncorrectPasswordException):
                     self.auth_service.sign_in(phone_number, password + '1')
+
+
+class UpdateUserServiceTest(unittest.TestCase):
+    get_user: GetMock[UserAccount]
+    save_user: SaveMock[UserAccount]
+    update_user_service: UpdateUserService
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.get_user = GetMock[UserAccount]()
+        cls.save_user = SaveMock[UserAccount]((UserAccountUpdated,))
+        cls.update_user_service = UpdateUserService(
+            get_user=cls.get_user
+        )
+        EventPublisher.subscribe(cls.save_user)
+    
+    @classmethod
+    def tearDownClass(cls) -> None:
+        EventPublisher.subscribers.clear()
+    
+    def test_update_user(self) -> None:
+        for user, update_user_dto in DataFactory.generate_user_and_update_dto():
+            with self.subTest(user=user, update_user_dto=update_user_dto):
+                self.get_user.get_input_value = user.id
+                self.get_user.get_return_value = user
+                self.update_user_service.update_user(update_user_dto)
+    
+    def test_add_role(self) -> None:
+        for user, role in zip(DataFactory.generate_user_accounts(), DataFactory.user_test_data.get_roles()):
+            with self.subTest(user=user, role=role):
+                self.get_user.get_input_value = user.id
+                self.get_user.get_return_value = user
+                self.update_user_service.add_role(user.id, role)
+    
+    def test_remove_role(self) -> None:
+        for user in DataFactory.generate_user_accounts():
+            with self.subTest(user=user):
+                self.get_user.get_input_value = user.id
+                self.get_user.get_return_value = user
+                self.update_user_service.remove_role(user.id, user.roles[0].name)
