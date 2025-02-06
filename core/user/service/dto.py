@@ -11,7 +11,7 @@ class SignUpDto(BaseModel):
     gender: Gender
     password: str
     birthdate: date
-    roles: List[str]
+    roles: Optional[List[str]] = None
 
 
 class UpdateUserDto(BaseModel):
@@ -24,10 +24,10 @@ class UpdateUserDto(BaseModel):
 
 
 class FilterUserDto(BaseModel):
-    expresion: Optional[str]
+    expresion: Optional[str] = None
     order_by: str
-    offset: Optional[int]
-    limit: Optional[int]
+    offset: Optional[int] = None
+    limit: Optional[int] = None
     order_direction: Optional[OrdenDirection] = OrdenDirection.DESC
 
 

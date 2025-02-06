@@ -3,8 +3,8 @@ from datetime import date
 from typing import ClassVar
 from core.common import PatternMatcher, ID
 from core.common.exceptions import InvalidIdException
-from domain.exceptions import InvalidUserNameException
-from domain.events import RoleUpdated, RoleCreated
+from core.user.domain.exceptions import InvalidUserNameException
+from core.user.domain.events import RoleUpdated, RoleCreated
 
 class Role(BaseModel):
     '''Roles que serán asignados a los usuarios'''
