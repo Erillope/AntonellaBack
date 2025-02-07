@@ -27,12 +27,13 @@ class Role(BaseModel):
     
     def rename(self, name: str) -> None:
         '''Renombra el rol'''
-        #---No olvides validar los datos, puedes reutilizar el método validate_data, tampoco olvides lanzar 
-        # los eventos correspondientes (Borrar este comentario luego de implementar)
-        #TODO
-        self.validate_data()
+
+        if not PatternMatcher.match(self.name):
+            raise InvalidUserNameException.invalid_name(self.name)
+
         self.name = name
-        RoleUpdated()
+        self.validate_data()
+        RoleUpdated(role = self)
         pass
     
 
@@ -40,22 +41,16 @@ class RoleFactory:
     @staticmethod
     def create(name: str) -> Role:
         '''Crea un nuevo rol'''
-        #Crearás un nuevo rol, entonces solo necesitas el nombre del rol, el resto de parámetros como el id
-        # y la fecha las tienes que generar automaticamente, la fecha de creación debe ser la de hoy.
-        #Al ser un nuevo rol, debes lanzar el evento correspondiente
-        #TODO
-        self.id = ID.generate()
-        self.created_date = date.today()
-        role: Role
-        RoleCreated()
+
+        role_id = ID.generate()
+        created_date = date.today()
+        role: Role(id = role_id, name = name, created_date = created_date)
+        RoleCreated(role = role)
         return role
     
     @staticmethod
     def load(id: str, name: str, created_date: date) -> Role:
         '''Carga un rol existente'''
-        #Cargarás un rol existente, entonces usa los parámetros que te pasan para crear el rol
-        #No necesitas lanzar un evento porque no estás creando un nuevo rol
-        #TODO
         
-        role: Role
+        role: Role(id = id, name = name, created_date = created_date)
         return role
