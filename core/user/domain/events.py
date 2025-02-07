@@ -7,19 +7,11 @@ if TYPE_CHECKING:
     from .user import UserAccount
     from .role import Role
 
-class UserAccountCreated(Event, BaseModel):
-    '''Evento para cuando un usuario es creado'''
-    user: UserAccount
-
-class UserAccountUpdated(Event, BaseModel):
+class UserAccountSaved(Event, BaseModel):
     '''Evento para cuando un usuario es actualizado'''
     user: UserAccount
 
-class RoleCreated(Event, BaseModel):
-    '''Evento para cuando un rol es creado'''
-    role: Role
-
-class RoleUpdated(Event, BaseModel):
+class RoleSaved(Event, BaseModel):
     '''Evento para cuando un rol es actualizado'''
     role: Role
 

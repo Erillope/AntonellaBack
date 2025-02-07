@@ -1,7 +1,7 @@
 from django.test import TestCase
 from app.user.mapper import UserTableMapper, RoleTableMapper
 from app.user.models import UserRoleTableData
-from ..test_data import DataFactory
+from core_test.user.test_data import DataFactory
 
 class TestUserTableMapper(TestCase):
     user_mapper: UserTableMapper

@@ -1,7 +1,7 @@
 import unittest
 from core.user import AuthService, UserAccount, UpdateUserService
 from core.user.service.exceptions import IncorrectPasswordException
-from project_test.mocks.repository_mocks import GetMock
+from core_test.mocks.repository_mocks import GetMock
 from ..test_data import DataFactory
 
 class AuthServiceTest(unittest.TestCase):

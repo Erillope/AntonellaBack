@@ -2,6 +2,7 @@ import unittest
 from core.common import ID
 from datetime import date
 from core.user import UserAccountFactory, AccountStatus
+from core.common.exceptions import InvalidIdException
 from core.user.domain.exceptions import (InvalidPhoneNumberException, InvalidUserBirthdateException,
                                          InvalidUserEmailException, InvalidUserNameException, 
                                          InvalidUserPasswordException)
@@ -178,7 +179,7 @@ class TestUserAccountCreation(unittest.TestCase):
             with self.subTest(invalid_id=invalid_id, phone_number=phone_number, email=email, name=name,
                               password=password, birthdate=birthdate, roles=roles, created_date=created_date,
                               gender=gender, status=status):
-                with self.assertRaises(InvalidUserBirthdateException):
+                with self.assertRaises(InvalidIdException):
                     UserAccountFactory.load(id=invalid_id, phone_number=phone_number,
                                             email=email, name=name,
                                             password=password, status=status,
@@ -219,7 +220,7 @@ class TestUserAccount(unittest.TestCase):
             with self.subTest(user=user, phone_number=phone_number, password=password):
                 self.assertTrue(user.verify_account(phone_number, password))
                 self.assertFalse(user.verify_account(phone_number, password+'1'))
-                other_phone_number = phone_number[:3] + '1' + phone_number[4:]
+                other_phone_number = phone_number[:3] + str((int(phone_number[3])+1)%10) + phone_number[4:]
                 self.assertFalse(user.verify_account(other_phone_number, password))
     
     def test_add_role(self) -> None:

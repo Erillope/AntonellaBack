@@ -1,7 +1,7 @@
 import unittest
 from core.user import RoleService, Role
 from core.user.service.exceptions import AlreadyExistsRoleException
-from project_test.mocks.repository_mocks import GetMock, DeleteMock
+from core_test.mocks.repository_mocks import GetMock, DeleteMock
 from ..test_data import DataFactory
 
 class RoleServiceTest(unittest.TestCase):

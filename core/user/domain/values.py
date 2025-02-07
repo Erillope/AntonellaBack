@@ -1,8 +1,8 @@
 from enum import Enum
 from core.common import PatternMatcher
 from datetime import date
-from django.contrib.auth.hashers import make_password
 from .exceptions import *
+import bcrypt
 
 class AccountStatus(str, Enum):
     '''Estados de la cuenta de usuario'''
@@ -19,15 +19,14 @@ class Gender(str, Enum):
 
 class UserPhoneNumber:
     '''Validador de números de teléfono'''
-    REGREX = r"^(0)?9\\d{8}$"
+    REGREX = r"^(0)?9\d{8}$"
     MATCHER = PatternMatcher(pattern=REGREX)
     
     @classmethod
     def validate(cls, value: str) -> None:
         if not cls.MATCHER.match(value):
             raise InvalidPhoneNumberException.invalid_phone_number(value)
-        pass
-
+        
 
 class UserPassword:
     '''Validador de contraseñas de usuario'''
@@ -38,15 +37,17 @@ class UserPassword:
     def validate(cls, value: str) -> None:
         if not cls.MATCHER.match(value):
             raise InvalidUserPasswordException.invalid_password(value)
-        pass
 
     @classmethod
-    def verify(cls, value: str, password: str) -> bool:
-        return encode(value) == password
+    def verify(cls, hashed: str, password: str) -> bool:
+        password_bytes = password.encode()
+        return bcrypt.checkpw(password_bytes, hashed.encode())
     
     @classmethod
-    def encode(cls, value: str) -> str:
-        return make_password(value)
+    def encode(cls, password: str) -> str:
+        password_bytes = password.encode()
+        hashed = bcrypt.hashpw(password_bytes, bcrypt.gensalt(12))
+        return hashed.decode()
 
 
 class UserName:
@@ -58,19 +59,17 @@ class UserName:
     def validate(cls, value: str) -> None:
         if not cls.MATCHER.match(value):
             raise InvalidUserNameException.invalid_name(value)
-        pass
 
 
 class UserEmail:
     '''Validador de correos electrónicos de usuario'''
-    REGREX = r"^[a-zA-Z0-9._%+-]+@gmail\\.com$"
+    REGREX = r"^[a-zA-Z0-9._%+-]+@gmail\.com$"
     MATCHER = PatternMatcher(pattern=REGREX)
     
     @classmethod
     def validate(cls, value: str) -> None:
         if not cls.MATCHER.match(value):
             raise InvalidUserEmailException.invalid_user_email(value)
-        pass
 
 
 class UserBirthdate:
@@ -85,4 +84,3 @@ class UserBirthdate:
         edad = date.today().year - value.year
         if edad > cls.MAX_AGE or edad < cls.MIN_AGE:
             raise InvalidUserBirthdateException.invalid_birthdate(value)
-        pass

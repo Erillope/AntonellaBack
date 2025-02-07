@@ -18,27 +18,12 @@ class EventSubscriber:
 class EventPublisher:
     '''Publicador de eventos'''
     subscribers : List[EventSubscriber]= []
-    events : List[Event] = []
     
     @classmethod
     def subscribe(cls, subscriber: EventSubscriber) -> None:
         cls.subscribers.append(subscriber)
     
     @classmethod  
-    def publish(cls) -> None:
-        for event in cls.events:
-            for subscriber in cls.subscribers:
-                subscriber.handle(event)
-        cls.clear()
-    
-    @classmethod
-    def add_event(cls, event: Event) -> None:
-        cls.events.append(event)
-    
-    @classmethod
-    def get_events(cls) -> List[Event]:
-        return cls.events
-
-    @classmethod
-    def clear(cls) -> None:
-        cls.events.clear()
+    def publish(cls, event: Event) -> None:
+        for subscriber in cls.subscribers:
+            subscriber.handle(event)

@@ -4,7 +4,7 @@ from core.common import ID
 from core.user import AccountStatus, Gender, UserAccount, UserAccountFactory, RoleFactory, Role
 from core.user.domain.values import UserBirthdate
 from core.user.service.dto import SignUpDto, UpdateUserDto
-from app.user.models import UserAccountTableData, RoleTableData
+#from app.user.models import UserAccountTableData, RoleTableData
 import random
 from datetime import date, timedelta
 
@@ -13,7 +13,7 @@ class UserTestData:
     
     def __init__(self) -> None:
         self.data: Dict[str, List[Any]] = {}
-        with open('project_test/user/user_test_data.json') as file:
+        with open('core_test/user/user_test_data.json') as file:
             self.data = json.load(file)
         self.shuffle()
     
@@ -168,7 +168,7 @@ class DataFactory:
             result.append((user, update_user_dto))
         return result
     
-    @classmethod
+    '''@classmethod
     def generate_user_tables(cls) -> List[UserAccountTableData]:
         return [
             UserAccountTableData(
@@ -192,4 +192,4 @@ class DataFactory:
                 name=role_name,
                 created_date=cls.user_test_data.get_created_date(),
             ) for role_name in cls.user_test_data.get_roles()
-        ]
+        ]'''
