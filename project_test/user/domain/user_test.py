@@ -5,7 +5,7 @@ from core.user import UserAccountFactory, AccountStatus
 from core.user.domain.exceptions import (InvalidPhoneNumberException, InvalidUserBirthdateException,
                                          InvalidUserEmailException, InvalidUserNameException, 
                                          InvalidUserPasswordException)
-from .test_data import DataFactory
+from ..test_data import DataFactory
 
 class TestUserAccountCreation(unittest.TestCase):
     def test_user_account_creation(self) -> None:

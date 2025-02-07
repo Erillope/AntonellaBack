@@ -4,7 +4,7 @@ from core.user.domain.exceptions import InvalidRoleException
 from core.common import ID
 from core.common.exceptions import InvalidIdException
 from datetime import date
-from .test_data import DataFactory
+from ..test_data import DataFactory
 
 class TestRoleCreation(unittest.TestCase):    
     def test_create_role(self) -> None:

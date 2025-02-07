@@ -1,6 +1,6 @@
 import unittest
 from core.user.service.mapper import UserMapper, RoleMapper
-from .test_data import DataFactory
+from ..test_data import DataFactory
 
 class TestUserMapper(unittest.TestCase):    
     def test_to_user(self) -> None:

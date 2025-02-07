@@ -89,7 +89,7 @@ class UserAccountBuilder(BaseModel):
 class UserAccountFactory:
     @staticmethod
     def create(phone_number: str, email: str, name: str, password: str, birthdate: date, gender: Gender,
-               roles: Optional[List[Role]] = None) -> UserAccount:
+               roles: List[Role] = []) -> UserAccount:
         #Crearás una nueva cuenta de usuario, entonces solo necesitas los datos que te pasan, el resto de
         # parámetros como el id y la fecha las tienes que generar automaticamente, la fecha de creación debe
         # ser la de hoy. Al ser una nueva cuenta, debes lanzar el evento correspondiente, usa la clase constructora

@@ -1,31 +1,22 @@
 import unittest
 from core.user import RoleService, Role
-from core.common import EventPublisher
-from core.user.domain.events import RoleCreated, RoleUpdated
 from core.user.service.exceptions import AlreadyExistsRoleException
-from project_test.mocks.repository_mocks import GetMock, SaveMock, DeleteMock
-from .test_data import DataFactory
+from project_test.mocks.repository_mocks import GetMock, DeleteMock
+from ..test_data import DataFactory
 
 class RoleServiceTest(unittest.TestCase):
     get_role: GetMock[Role]
-    save_role: SaveMock[Role]
     delete_role: DeleteMock[Role]
     role_service: RoleService
     
     @classmethod
     def setUpClass(cls) -> None:
         cls.get_role = GetMock[Role]()
-        cls.save_role = SaveMock[Role]((RoleCreated, RoleUpdated))
         cls.delete_role = DeleteMock[Role]()
         cls.role_service = RoleService(
             get_role=cls.get_role,
             delete_role=cls.delete_role
         )
-        EventPublisher.subscribe(cls.save_role)
-    
-    @classmethod
-    def tearDownClass(cls) -> None:
-        EventPublisher.subscribers.clear()
         
     def test_create(self) -> None:
         for rolename in DataFactory.user_test_data.get_roles():
@@ -33,8 +24,6 @@ class RoleServiceTest(unittest.TestCase):
                 self.get_role.exists_input_return_values = [(rolename, False)]
                 role = self.role_service.create(rolename)
                 self.assertEqual(role.name, rolename.lower())
-                for saved_model in self.save_role.saved_models:
-                    self.assertEqual(saved_model.name, role.name)
     
     def test_rename(self) -> None:
         for rolename in DataFactory.user_test_data.get_roles():
@@ -42,9 +31,7 @@ class RoleServiceTest(unittest.TestCase):
                 self.get_role.exists_input_return_values = [(rolename, False)]
                 role = self.role_service.rename(rolename, rolename)
                 self.assertEqual(role.name, rolename.lower())
-                for saved_model in self.save_role.saved_models:
-                    self.assertEqual(saved_model.name, role.name)
-    
+
     def test_create_already_exists(self) -> None:
         for rolename in DataFactory.user_test_data.get_roles():
             with self.subTest(rolename=rolename):

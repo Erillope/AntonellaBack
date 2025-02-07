@@ -11,7 +11,7 @@ class SignUpDto(BaseModel):
     gender: Gender
     password: str
     birthdate: date
-    roles: Optional[List[str]] = None
+    roles: List[str] = []
 
 
 class UpdateUserDto(BaseModel):

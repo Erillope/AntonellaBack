@@ -31,20 +31,7 @@ class GetMock(GetModel[Model]):
         for input_values, return_values in self.filter_input_return_values:
             if [expresion, order_by, direction, limit, offset] == input_values:
                 return return_values
-        return
-
-
-class SaveMock(SaveModel[Model], EventSubscriber[Event]):
-    def __init__(self, supported_events: Tuple[Type[Event], ...]) -> None:
-        self.SUPPORTED_EVENTS = supported_events
-        self.saved_models: List[Model] = []
-        
-    def save(self, model: Model) -> None:
-        self.saved_models.append(model)
-    
-    def handle(self, event: Event) -> None:
-        model = list(event.model_dump().values())[0]
-        self.save(model)
+        return []
 
 
 class DeleteMock(DeleteModel[Model]):

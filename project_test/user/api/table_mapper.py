@@ -1,13 +1,13 @@
 from django.test import TestCase
 from app.user.mapper import UserTableMapper, RoleTableMapper
 from app.user.models import UserRoleTableData
-from .test_data import DataFactory
+from ..test_data import DataFactory
 
 class TestUserTableMapper(TestCase):
     user_mapper: UserTableMapper
     
     @classmethod
-    def setUpClass(cls) -> None:
+    def setUpTestData(cls) -> None:
         cls.user_mapper = UserTableMapper()
         cls.role_mapper = RoleTableMapper()
     
@@ -46,7 +46,7 @@ class TestRoleTableMapper(TestCase):
     role_mapper: RoleTableMapper
     
     @classmethod
-    def setUpClass(cls) -> None:
+    def setUpTestData(cls) -> None:
         cls.role_mapper = RoleTableMapper()
     
     def test_to_role(self) -> None:
