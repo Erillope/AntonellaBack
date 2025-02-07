@@ -1,6 +1,8 @@
 from enum import Enum
 from core.common import PatternMatcher
 from datetime import date
+from django.contrib.auth.hashers import make_password
+from .exceptions import *
 
 class AccountStatus(str, Enum):
     '''Estados de la cuenta de usuario'''
@@ -22,9 +24,8 @@ class UserPhoneNumber:
     
     @classmethod
     def validate(cls, value: str) -> None:
-        #---Usa el MATCHER para las validaciones y lanzar las excepciones del archivo exceptions en caso de 
-        # que los valores no sean validos (Borrar este comentario luego de implementar)
-        #TODO
+        if not cls.MATCHER.match(value):
+            raise InvalidPhoneNumberException.invalid_phone_number(value)
         pass
 
 
@@ -35,18 +36,17 @@ class UserPassword:
     
     @classmethod
     def validate(cls, value: str) -> None:
-        #TODO
+        if not cls.MATCHER.match(value):
+            raise InvalidUserPasswordException.invalid_password(value)
         pass
 
     @classmethod
     def verify(cls, value: str, password: str) -> bool:
-        #TODO
-        return False
+        return encode(value) == password
     
     @classmethod
     def encode(cls, value: str) -> str:
-        #TODO
-        return ""
+        return make_password(value)
 
 
 class UserName:
@@ -56,7 +56,8 @@ class UserName:
     
     @classmethod
     def validate(cls, value: str) -> None:
-        #TODO
+        if not cls.MATCHER.match(value):
+            raise InvalidUserNameException.invalid_name(value)
         pass
 
 
@@ -67,7 +68,8 @@ class UserEmail:
     
     @classmethod
     def validate(cls, value: str) -> None:
-        #TODO
+        if not cls.MATCHER.match(value):
+            raise InvalidUserEmailException.invalid_user_email(value)
         pass
 
 
@@ -80,4 +82,7 @@ class UserBirthdate:
     def validate(cls, value: date) -> None:
         #TODO
         #-- Valida que la fecha de nacimiento no sea mayor a MAX_AGE años, y que no sea mayor a la fecha actual
+        edad = date.today().year - value.year
+        if edad > cls.MAX_AGE or edad < cls.MIN_AGE:
+            raise InvalidUserBirthdateException.invalid_birthdate(value)
         pass
