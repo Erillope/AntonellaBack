@@ -13,4 +13,10 @@ def run_user_test() -> None:
 def run_mapper_test() -> None:
     test_executer('user/service/mapper_test')
     
-run_mapper_test()
+def run_role_service_test() -> None:
+    test_executer('user/service/role_service_test')
+
+def run_user_service_test() -> None:
+    test_executer('user/service/user_service_test')
+    
+run_user_service_test()

@@ -1,26 +1,33 @@
 from __future__ import annotations
 from core.common import Event
-from pydantic import BaseModel
 from typing import TYPE_CHECKING
-from datetime import date
 if TYPE_CHECKING:
     from .user import UserAccount
     from .role import Role
 
-class UserAccountSaved(Event, BaseModel):
+class UserAccountSaved(Event):
     '''Evento para cuando un usuario es actualizado'''
-    user: UserAccount
+    def __init__(self, user: UserAccount):
+        self.user = user
 
-class RoleSaved(Event, BaseModel):
+class RoleSaved(Event):
     '''Evento para cuando un rol es actualizado'''
-    role: Role
+    def __init__(self, role: Role):
+        self.role = role
 
-class RoleAddedToUser(Event, BaseModel):
+class RoleDeleted(Event):
+    '''Evento para cuando un rol es eliminado'''
+    def __init__(self, rolename: str):
+        self.rolename = rolename
+
+class RoleAddedToUser(Event):
     '''Evento para cuando un rol es añadido a un usuario'''
-    rolename: str
-    user_id: str
+    def __init__(self, rolename: str, user_id: str):
+        self.rolename = rolename
+        self.user_id = user_id
 
-class RoleRemovedFromUser(Event, BaseModel):
+class RoleRemovedFromUser(Event):
     '''Evento para cuando un rol es removido de un usuario'''
-    rolename: str
-    user_id: str
+    def __init__(self, rolename: str, user_id: str):
+        self.rolename = rolename
+        self.user_id = user_id

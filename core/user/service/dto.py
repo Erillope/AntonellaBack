@@ -28,7 +28,7 @@ class FilterUserDto(BaseModel):
     order_by: str
     offset: Optional[int] = None
     limit: Optional[int] = None
-    order_direction: Optional[OrdenDirection] = OrdenDirection.DESC
+    order_direction: OrdenDirection = OrdenDirection.DESC
 
 
 class RoleDto(BaseModel):

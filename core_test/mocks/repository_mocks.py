@@ -32,14 +32,3 @@ class GetMock(GetModel[Model]):
             if [expresion, order_by, direction, limit, offset] == input_values:
                 return return_values
         return []
-
-
-class DeleteMock(DeleteModel[Model]):
-    def __init__(self) -> None:
-        self.delete_input_return_values: Tuple[str, Model] = []
-        
-    def delete(self, id: str) -> Model:
-        for _id, model in self.delete_input_return_values:
-            if _id == id:
-                return model
-        return

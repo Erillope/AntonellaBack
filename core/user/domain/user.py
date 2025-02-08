@@ -1,4 +1,4 @@
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, model_validator, PrivateAttr
 from datetime import date
 from typing import Optional, List
 from core.common import ID, EventPublisher, Event
@@ -18,7 +18,7 @@ class UserAccount(BaseModel):
     birthdate: date
     created_date: date
     roles: List[Role]
-    events: List[Event] = []
+    _events: List[Event] = PrivateAttr(default=[])
     
     @model_validator(mode='after')
     def validate_data(self) -> 'UserAccount':
@@ -60,13 +60,15 @@ class UserAccount(BaseModel):
     
     def add_role(self, role: Role) -> None:
         '''Añade un rol a la cuenta de usuario'''
+        if role in self.roles: return
         self.roles.append(role)
-        self.events.append(RoleAddedToUser(rolename=role.name, user_id=self.id))
+        self._events.append(RoleAddedToUser(rolename=role.name, user_id=self.id))
     
     def remove_role(self, role: Role) -> None:
         '''Remueve un rol de la cuenta de usuario'''
+        if role not in self.roles: return
         self.roles.remove(role)
-        self.events.append(RoleRemovedFromUser(rolename=role.name, user_id=self.id))
+        self._events.append(RoleRemovedFromUser(rolename=role.name, user_id=self.id))
         pass
     
     def verify_password(self, password: str) -> bool:
@@ -79,9 +81,9 @@ class UserAccount(BaseModel):
     
     def save(self) -> None:
         EventPublisher.publish(UserAccountSaved(user=self))
-        for event in self.events:
+        for event in self._events:
             EventPublisher.publish(event)
-        self.events.clear()
+        self._events.clear()
 
 
 class UserAccountFactory:

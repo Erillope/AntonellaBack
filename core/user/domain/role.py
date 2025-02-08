@@ -3,7 +3,7 @@ from datetime import date
 from typing import ClassVar
 from core.common import PatternMatcher, ID
 from core.user.domain.exceptions import InvalidRoleException
-from core.user.domain.events import RoleSaved
+from core.user.domain.events import RoleSaved, RoleDeleted
 from core.common.events import EventPublisher
 
 class Role(BaseModel):
@@ -13,6 +13,7 @@ class Role(BaseModel):
     created_date: date
     REGREX: ClassVar[str] = r"^[a-zA-Z0-9_]{3,20}$"
     MATCHER: ClassVar[PatternMatcher] = PatternMatcher(pattern=REGREX)
+    
     
     @model_validator(mode='after')
     def constructor(self) -> 'Role':
@@ -33,6 +34,9 @@ class Role(BaseModel):
     
     def save(self) -> None:
         EventPublisher.publish(RoleSaved(role=self))
+    
+    def delete(self) -> None:
+        EventPublisher.publish(RoleDeleted(rolename=self.name))
 
 class RoleFactory:
     @staticmethod

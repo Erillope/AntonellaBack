@@ -1,21 +1,18 @@
 import unittest
 from core.user import RoleService, Role
 from core.user.service.exceptions import AlreadyExistsRoleException
-from core_test.mocks.repository_mocks import GetMock, DeleteMock
+from core_test.mocks.repository_mocks import GetMock
 from ..test_data import DataFactory
 
 class RoleServiceTest(unittest.TestCase):
     get_role: GetMock[Role]
-    delete_role: DeleteMock[Role]
     role_service: RoleService
     
     @classmethod
     def setUpClass(cls) -> None:
         cls.get_role = GetMock[Role]()
-        cls.delete_role = DeleteMock[Role]()
         cls.role_service = RoleService(
             get_role=cls.get_role,
-            delete_role=cls.delete_role
         )
         
     def test_create(self) -> None:
@@ -26,11 +23,12 @@ class RoleServiceTest(unittest.TestCase):
                 self.assertEqual(role.name, rolename.lower())
     
     def test_rename(self) -> None:
-        for rolename in DataFactory.user_test_data.get_roles():
-            with self.subTest(rolename=rolename):
-                self.get_role.exists_input_return_values = [(rolename, False)]
-                role = self.role_service.rename(rolename, rolename)
-                self.assertEqual(role.name, rolename.lower())
+        for role in DataFactory.generate_roles():
+            with self.subTest(role=role):
+                self.get_role.exists_input_return_values = [(role.name, False)]
+                self.get_role.get_input_return_values = [(role.name, role)]
+                role_dto = self.role_service.rename(role.name, "renamed")
+                self.assertEqual(role_dto.name, role.name)
 
     def test_create_already_exists(self) -> None:
         for rolename in DataFactory.user_test_data.get_roles():
@@ -56,5 +54,5 @@ class RoleServiceTest(unittest.TestCase):
     def test_delete(self) -> None:
         for role in DataFactory.generate_roles():
             with self.subTest(role=role):
-                self.delete_role.delete_input_return_values = (role.name, role)
+                self.get_role.get_input_return_values = [(role.name, role)]
                 self.role_service.delete(role.name)

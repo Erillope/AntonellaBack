@@ -4,9 +4,10 @@ from pydantic import BaseModel
 from datetime import datetime
 
 
-class Event(BaseModel, ABC):
+class Event(ABC):
     '''Eventos del programa'''
-    created_date: datetime = datetime.now()
+    def __init__(self) -> None:
+        self.created_date = datetime.now()
 
 
 class EventSubscriber:
