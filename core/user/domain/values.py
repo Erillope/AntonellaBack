@@ -31,7 +31,9 @@ class UserPhoneNumber:
 class UserPassword:
     '''Validador de contraseñas de usuario'''
     REGREX = r"^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$"
+    BCRYPT_REGREX = r'^\$2[ayb]\$[0-9]{2}\$[./A-Za-z0-9]{53}$'
     MATCHER = PatternMatcher(pattern=REGREX)
+    BCRYPT_MATCHER = PatternMatcher(pattern=BCRYPT_REGREX)
     
     @classmethod
     def validate(cls, value: str) -> None:
@@ -45,9 +47,15 @@ class UserPassword:
     
     @classmethod
     def encode(cls, password: str) -> str:
+        if cls.is_encoded(password):
+            return password
         password_bytes = password.encode()
         hashed = bcrypt.hashpw(password_bytes, bcrypt.gensalt(12))
         return hashed.decode()
+    
+    @classmethod
+    def is_encoded(cls, password: str) -> bool:
+        return cls.BCRYPT_MATCHER.match(password)
 
 
 class UserName:

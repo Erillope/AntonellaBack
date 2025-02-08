@@ -167,29 +167,3 @@ class DataFactory:
             )
             result.append((user, update_user_dto))
         return result
-    
-    '''@classmethod
-    def generate_user_tables(cls) -> List[UserAccountTableData]:
-        return [
-            UserAccountTableData(
-                id=ID.generate(),
-                name=cls.user_test_data.get_user_names()[i],
-                email=cls.user_test_data.get_emails()[i],
-                password=cls.user_test_data.get_passwords()[i],
-                phone_number=cls.user_test_data.get_phone_numbers()[i],
-                birthdate=cls.user_test_data.get_birthdate(),
-                status=cls.user_test_data.get_account_status(),
-                gender=cls.user_test_data.get_gender(),
-                created_date=cls.user_test_data.get_created_date(),
-            ) for i in range(10)
-        ]
-    
-    @classmethod
-    def generate_role_tables(cls) -> List[RoleTableData]:
-        return [
-            RoleTableData(
-                id=ID.generate(),
-                name=role_name,
-                created_date=cls.user_test_data.get_created_date(),
-            ) for role_name in cls.user_test_data.get_roles()
-        ]'''

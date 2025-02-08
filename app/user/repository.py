@@ -1,8 +1,8 @@
-from app.common.django_repository import DjangoSaveModel
+from app.common.django_repository import DjangoSaveModel, DjangoDeleteModel
 from core.user import UserAccount, Role
-from core.common import EventSubscriber, Event
-from core.user.domain.events import (UserAccountCreated, UserAccountUpdated, RoleCreated, RoleUpdated,
-                                     RoleAddedToUser, RoleRemovedFromUser)
+from core.common import EventSubscriber, Event, EventPublisher
+from core.user.domain.events import (UserAccountSaved, RoleSaved, RoleAddedToUser,
+                                     RoleRemovedFromUser, RoleDeleted)
 from .models import UserAccountTableData, RoleTableData, UserRoleTableData
 from .mapper import UserTableMapper, RoleTableMapper
 
@@ -11,24 +11,29 @@ class DjangoSaveUser(DjangoSaveModel[UserAccountTableData, UserAccount], EventSu
         super().__init__(UserTableMapper())
     
     def handle(self, event: Event) -> None:
-        if isinstance(event, UserAccountCreated):
-            self.save(event.user)
-        elif isinstance(event, UserAccountUpdated):
+        if isinstance(event, UserAccountSaved):
             self.save(event.user)
 
 
 class DjangoSaveRole(DjangoSaveModel[RoleTableData, Role], EventSubscriber):    
     def __init__(self) -> None:
         super().__init__(RoleTableMapper())
+        EventPublisher.subscribe(self)
     
     def handle(self, event: Event) -> None:
-        if isinstance(event, RoleCreated):
-            self.save(event.role)
-        elif isinstance(event, RoleUpdated):
+        if isinstance(event, RoleSaved):
             self.save(event.role)
 
 
-class RoleToUserSubscriber(EventSubscriber):    
+class DjangoDeleteRole(DjangoDeleteModel[RoleTableData, Role], EventSubscriber):
+    def __init__(self) -> None:
+        super().__init__(RoleTableData, RoleTableMapper())
+    
+    def handle(self, event: Event) -> None:
+        if isinstance(event, RoleDeleted):
+            self.delete(event.rolename)
+            
+class RoleToUserSubscriber(EventSubscriber):
     def add_role(self, user_id: str, role: str) -> None:
         #TODO
         return

@@ -35,11 +35,13 @@ EventPublisher.subscribe(save_role)
 EventPublisher.subscribe(role_to_user_subscriber)
 
 auth_service = AuthService(
-    get_user=get_user
+    get_user=get_user,
+    get_role=get_role
 )
 
 update_user_service = UpdateUserService(
-    get_user=get_user
+    get_user=get_user,
+    get_role=get_role
 )
 
 filter_user_service = FilterUserService(
@@ -47,6 +49,5 @@ filter_user_service = FilterUserService(
 )
 
 role_service = RoleService(
-    get_role=get_role,
-    delete_role=delete_role
+    get_role=get_role
 )

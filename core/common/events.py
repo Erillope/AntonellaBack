@@ -10,7 +10,10 @@ class Event(ABC):
         self.created_date = datetime.now()
 
 
-class EventSubscriber:
+class EventSubscriber(ABC):
+    def __init__(self) -> None:
+        EventPublisher.subscribe(self)
+        
     '''Suscriptores de eventos'''    
     @abstractmethod
     def handle(self, event: Event) -> None: ...

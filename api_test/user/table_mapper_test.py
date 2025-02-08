@@ -1,7 +1,7 @@
 from django.test import TestCase
 from app.user.mapper import UserTableMapper, RoleTableMapper
 from app.user.models import UserRoleTableData
-from core_test.user.test_data import DataFactory
+from .test_data import DataFactory
 
 class TestUserTableMapper(TestCase):
     user_mapper: UserTableMapper
@@ -18,7 +18,7 @@ class TestUserTableMapper(TestCase):
                 user = self.user_mapper.to_model(user_table)
                 role_tables = UserRoleTableData.get_roles_from_user(user_table)
                 self.assertEqual(user.id, str(user_table.id))
-                self.assertEqual(user.name, user_table.username)
+                self.assertEqual(user.name, user_table.name)
                 self.assertEqual(user.email, user_table.email)
                 self.assertEqual(user.password, user_table.password)
                 self.assertEqual(user.roles, [self.role_mapper.to_model(role) for role in role_tables])

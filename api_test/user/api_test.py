@@ -2,7 +2,7 @@ from django.test import TestCase
 from core.common import ID
 from core.user import AccountStatus
 from datetime import date
-from core_test.user.test_data import DataFactory
+from .test_data import DataFactory
 
 class AuthAPITest(TestCase):
     route = '/user'
