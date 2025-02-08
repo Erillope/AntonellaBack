@@ -9,5 +9,8 @@ def run_role_test() -> None:
 
 def run_user_test() -> None:
     test_executer('user/domain/user_test')
+
+def run_mapper_test() -> None:
+    test_executer('user/service/mapper_test')
     
-run_user_test()
+run_mapper_test()

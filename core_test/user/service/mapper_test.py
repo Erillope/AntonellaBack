@@ -8,11 +8,10 @@ class TestUserMapper(unittest.TestCase):
             with self.subTest(sign_up_dto=sign_up_dto):
                 user = UserMapper.to_user(sign_up_dto)
                 self.assertEqual(sign_up_dto.phone_number, user.phone_number)
-                self.assertEqual(sign_up_dto.email.lower(), user.email.lower())
-                self.assertEqual(sign_up_dto.name, user.name)
+                self.assertEqual(sign_up_dto.email.lower(), user.email)
+                self.assertEqual(sign_up_dto.name.lower(), user.name)
                 self.assertTrue(user.verify_password(sign_up_dto.password))
                 self.assertEqual(sign_up_dto.birthdate, user.birthdate)
-                self.assertEqual([role.lower() for role in sign_up_dto.roles], [role.name for role in user.roles])
     
     def test_to_dto(self) -> None:
         for user in DataFactory.generate_user_accounts():
@@ -25,7 +24,7 @@ class TestUserMapper(unittest.TestCase):
                 self.assertEqual(user.birthdate, dto.birthdate)
                 self.assertEqual(user.created_date, dto.created_date)
                 self.assertEqual(user.status, dto.status)
-                self.assertEqual([role.name for role in user.roles], dto.roles)
+                self.assertEqual([role.name for role in user.roles], [role.name for role in dto.roles])
 
 class TestRoleMapper(unittest.TestCase):
     def test_to_role(self) -> None:

@@ -24,15 +24,17 @@ class UserAccount(BaseModel):
     def validate_data(self) -> 'UserAccount':
         '''Valida los datos de la cuenta de usuario'''
         self._validate_data()
-        self.password = UserPassword.encode(self.password)
         return self
     
     def _validate_data(self) -> None:
+        self.email = self.email.lower()
+        self.name = self.name.lower()
         ID.validate(self.id)
         UserPhoneNumber.validate(self.phone_number)
         UserEmail.validate(self.email)
         UserName.validate(self.name)
         UserPassword.validate(self.password)
+        self.password = UserPassword.encode(self.password)
         UserBirthdate.validate(self.birthdate)
         
     def change_data(self, phone_number: Optional[str]=None, email: Optional[str]=None,
@@ -49,7 +51,7 @@ class UserAccount(BaseModel):
             self.name = name
 
         if password is not None:
-            self.password = UserPassword.encode(password)
+            self.password = password
 
         if status is not None:
             self.status = status
@@ -84,8 +86,7 @@ class UserAccount(BaseModel):
 
 class UserAccountFactory:
     @staticmethod
-    def create(phone_number: str, email: str, name: str, password: str, birthdate: date, gender: Gender,
-               roles: List[Role] = []) -> UserAccount:
+    def create(phone_number: str, email: str, name: str, password: str, birthdate: date, gender: Gender) -> UserAccount:
         return UserAccount(
             id = ID.generate(),
             phone_number = phone_number,
@@ -96,7 +97,7 @@ class UserAccountFactory:
             birthdate= birthdate,
             created_date = date.today(),
             gender=gender,
-            roles=roles
+            roles=[]
         )
     
     @staticmethod

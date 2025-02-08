@@ -80,7 +80,6 @@ class UserBirthdate:
     @classmethod
     def validate(cls, value: date) -> None:
         #TODO
-        #-- Valida que la fecha de nacimiento no sea mayor a MAX_AGE años, y que no sea mayor a la fecha actual
         edad = date.today().year - value.year
-        if edad > cls.MAX_AGE or edad < cls.MIN_AGE:
+        if edad >= cls.MAX_AGE or edad <= cls.MIN_AGE:
             raise InvalidUserBirthdateException.invalid_birthdate(value)

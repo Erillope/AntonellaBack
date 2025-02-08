@@ -17,18 +17,18 @@ class Role(BaseModel):
     @model_validator(mode='after')
     def constructor(self) -> 'Role':
         '''Valida los datos del rol'''
-        self.name = self.name.lower()
         self._validate_data()
         return self
     
     def _validate_data(self) -> None:
+        self.name = self.name.lower()
         ID.validate(self.id)
         if not self.MATCHER.match(self.name):
             raise InvalidRoleException.invalid_role(self.name)
         
     def rename(self, name: str) -> None:
         '''Renombra el rol'''
-        self.name = name.lower()
+        self.name = name
         self._validate_data()
     
     def save(self) -> None:
