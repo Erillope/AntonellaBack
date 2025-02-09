@@ -11,11 +11,12 @@ def success_response(data: Dict[str, Any]|List[Dict[str, Any]]) -> Response:
         'data': data
     }, status = status.HTTP_200_OK)
 
-def failure_response(message: str) -> Response:
+def failure_response(e: SystemException) -> Response:
     return Response({
         'status': 'failure',
         'code': 400,
-        'message': message
+        'error': e.__class__.__name__,
+        'message': str(e)
     }, status = status.HTTP_400_BAD_REQUEST)
 
 def internal_server_error_response() -> Response:
@@ -28,13 +29,13 @@ def internal_server_error_response() -> Response:
 def invalid_field_response(errors: Dict) -> Response:
     msg = "Asegurese de llenar correctamente los campos requeridos: " + str(list(errors.keys()))
     e = Exception(msg)
-    return failure_response(str(e))
+    return failure_response(e)
 
 def validate(format: Type[serializers.Serializer] = None) -> Callable:
     def decorator(func):
         def wrapper(self, request, *args, **kwargs):
             try:
-                if request.method == "GET" or request.method == "DELETE":
+                if format is None:
                     return func(self, request)
                 else:
                     serializer = format(data=request.data)
@@ -42,7 +43,7 @@ def validate(format: Type[serializers.Serializer] = None) -> Callable:
                         return invalid_field_response(serializer.errors)
                     return func(self, serializer)
             except SystemException as e:
-                return failure_response(str(e))
+                return failure_response(e)
             #except:
                 #return internal_server_error_response()
         return wrapper

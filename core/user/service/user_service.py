@@ -18,11 +18,11 @@ class AuthService(AbstractAuthService):
         if self.get_user.exists(dto.email):
             raise AlreadyExistsUserException.already_exists(dto.email)
         user = UserMapper.to_user(dto)
-        user.save()
         for role in dto.roles:
             role_model = self.get_role.get(role)
             user.add_role(role_model)
-        return UserMapper.to_dto(user)
+        user.save()
+        return UserMapper.to_dto(self.get_user.get(user.id))
 
     def sign_in(self, phone_number: str, password: str) -> UserDto:
         user = self.get_user.get(phone_number)
@@ -44,21 +44,21 @@ class UpdateUserService(AbstractUpdateUserService):
         user = self.get_user.get(dto.id)
         user.change_data(dto.phone_number, dto.email, dto.name, dto.password, dto.status)
         user.save()
-        return UserMapper.to_dto(user)
+        return UserMapper.to_dto(self.get_user.get(user.id))
 
     def add_role(self, user_id: str, role: str) -> UserDto:
         user = self.get_user.get(user_id)
         role_model = self.get_role.get(role)
         user.add_role(role_model)
         user.save()
-        return UserMapper.to_dto(user)
+        return UserMapper.to_dto(self.get_user.get(user.id))
 
     def remove_role(self, user_id: str, role: str) -> UserDto:
         user = self.get_user.get(user_id)
         role_model = self.get_role.get(role)
         user.remove_role(role_model)
         user.save()
-        return UserMapper.to_dto(user)
+        return UserMapper.to_dto(self.get_user.get(user.id))
 
 
 class FilterUserService(AbstractFilterUserService):

@@ -70,8 +70,8 @@ class UserTestData:
         return random.choice(list(Gender))
     
     def get_birthdate(self) -> date:
-        start_date = date(date.today().year - UserBirthdate.MAX_AGE, date.today().month, date.today().day)
-        end_date = date(date.today().year - UserBirthdate.MIN_AGE, date.today().month, date.today().day)
+        start_date = date(date.today().year - UserBirthdate.MAX_AGE + 1, date.today().month, date.today().day)
+        end_date = date(date.today().year - UserBirthdate.MIN_AGE - 1, date.today().month, date.today().day)
         delta = end_date - start_date
         return start_date + timedelta(days=random.randint(0, delta.days))
     
@@ -163,7 +163,8 @@ class DataFactory:
                 id=user.id,
                 name=cls.user_test_data.get_user_names()[i],
                 email=cls.user_test_data.get_emails()[i],
-                phone_number=cls.user_test_data.get_phone_numbers()[i]
+                phone_number=cls.user_test_data.get_phone_numbers()[i],
+                password=cls.user_test_data.get_passwords()[i],
             )
             result.append((user, update_user_dto))
         return result

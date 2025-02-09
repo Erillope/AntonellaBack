@@ -1,38 +1,28 @@
-from core.user import AuthService, UpdateUserService, FilterUserService, UserAccount, Role, RoleService
+from core.user import AuthService, UpdateUserService, FilterUserService, Role, RoleService
 from .models import UserAccountTableData, RoleTableData
-from app.common.django_repository import DjangoGetModel, DjangoDeleteModel
-from core.common import EventPublisher
+from app.common.django_repository import DjangoDeleteModel
 from .mapper import UserTableMapper, RoleTableMapper
-from .repository import DjangoSaveUser, DjangoSaveRole, RoleToUserSubscriber
+from .repository import DjangoSaveUser, DjangoSaveRole, RoleToUserSubscriber, DjangoGetRole, DjangoGetUser
 
 user_mapper = UserTableMapper()
 
 role_mapper = RoleTableMapper()
 
-get_user = DjangoGetModel[UserAccountTableData, UserAccount](
-    table=UserAccountTableData,
-    mapper=user_mapper
-)
+get_user = DjangoGetUser()
 
 save_user = DjangoSaveUser()
 
-get_role = DjangoGetModel[RoleTableData, Role](
-    table=UserAccountTableData,
-    mapper=role_mapper
-)
+get_role = DjangoGetRole()
 
 save_role = DjangoSaveRole()
 
 delete_role = DjangoDeleteModel[RoleTableData, Role](
     table=UserAccountTableData,
-    mapper=role_mapper
+    mapper=role_mapper,
+    get_model=get_role
 )
 
 role_to_user_subscriber = RoleToUserSubscriber()
-
-EventPublisher.subscribe(save_user)
-EventPublisher.subscribe(save_role)
-EventPublisher.subscribe(role_to_user_subscriber)
 
 auth_service = AuthService(
     get_user=get_user,

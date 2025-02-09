@@ -7,7 +7,7 @@ class BinaryExpresion:
     DJANGO_OPERATIONS = {'>': 'gt', '<': 'lt', '=': 'exact'}
     
     def __init__(self, binary_expresion: str) -> None:
-        self.expresion = binary_expresion.lower().strip()
+        self.expresion = binary_expresion.strip()
         self.tokens = self.get_tokens()
     
     def get_tokens(self) -> Tuple[str, str, str]:
@@ -45,7 +45,7 @@ class DjangoFilter:
         self.q_filter |= self.generate_q_filter(binary_expresion) 
     
     def generate_q_filter(self, binary_expresion: str) -> Q:
-        binary_expresion = binary_expresion.lower().strip()
+        binary_expresion = binary_expresion.strip()
         if binary_expresion is None or binary_expresion == "":
             return Q()
         expresion = BinaryExpresion(binary_expresion)
@@ -69,17 +69,17 @@ class DjangoFilter:
         if self.limit is None:
             if self.offset is not None:
                 return models[self.offset:]
-        return models[self.offset: self.offset+self.__limit]
+        return models[self.offset: self.offset+self.limit]
     
     @classmethod
     def construct_filter(cls, table: Type[Model], expresion: Optional[str], limit: Optional[int],
                          offset: Optional[int], order_by: str, direction: OrdenDirection, fields: List[str]) -> "DjangoFilter":
         if expresion is None or expresion.strip() == "":
             expresion = ""
-        expresion = expresion.lower().strip().replace(' ', ',')
+        expresion = expresion.strip().replace(' ', ',')
         exps = expresion.split(',')
         _filter = cls(table, exps[0], limit, offset, order_by, direction, fields)
-        for i in range(1, len(exps)-2, 2):
+        for i in range(1, len(exps), 2):
             if exps[i] == "and":
                 _filter.and_(exps[i+1])
             if exps[i] == "or":

@@ -13,6 +13,7 @@ class Event(ABC):
 class EventSubscriber(ABC):
     def __init__(self) -> None:
         EventPublisher.subscribe(self)
+        super().__init__()
         
     '''Suscriptores de eventos'''    
     @abstractmethod

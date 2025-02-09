@@ -15,17 +15,18 @@ class AuthView(APIView):
 class UserView(APIView):
     @validate(SignUpSerializer)
     def post(self, request: SignUpSerializer) -> Response:
-        user = auth_service.sign_up(SignUpSerializer.to_dto())
+        user = auth_service.sign_up(request.to_dto())
         return success_response(user.model_dump())
 
     @validate(UpdateUserSerializer)
     def put(self, request: UpdateUserSerializer) -> Response:
-        user = update_user_service.update_user(UpdateUserSerializer.to_dto())
+        user = update_user_service.update_user(request.to_dto())
         return success_response(user.model_dump())
 
-    @validate(FilterUserSerializer)
-    def get(self, request: FilterUserSerializer) -> Response:
-        users = filter_user_service.filter_user(FilterUserSerializer.to_dto())
+    def get(self, request: Request) -> Response:
+        filter_serializer = FilterUserSerializer(data=request.GET)
+        filter_serializer.is_valid(raise_exception=True)
+        users = filter_user_service.filter_user(filter_serializer.to_dto())
         return success_response([user.model_dump() for user in users])
 
 

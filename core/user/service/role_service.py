@@ -15,7 +15,7 @@ class RoleService(AbstractRoleService):
             raise AlreadyExistsRoleException.already_exists(name)
         role = RoleMapper.to_role(name)
         role.save()
-        return RoleMapper.to_dto(role)
+        return RoleMapper.to_dto(self.get_role.get(role.name))
 
     def rename(self, role: str, name: str) -> RoleDto:
         if self.get_role.exists(name):
@@ -23,7 +23,7 @@ class RoleService(AbstractRoleService):
         role_model = self.get_role.get(role)
         role_model.rename(name)
         role_model.save()
-        return RoleMapper.to_dto(role_model)
+        return RoleMapper.to_dto(self.get_role.get(role_model.name))
 
     def get_all(self) -> List[RoleDto]:
         roles = self.get_role.get_all()

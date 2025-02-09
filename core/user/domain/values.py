@@ -14,7 +14,6 @@ class Gender(str, Enum):
     '''Géneros de usuario'''
     MALE = "MASCULINO"
     FEMALE = "FEMENINO"
-    OTHER = "OTRO"
 
 
 class UserPhoneNumber:
@@ -24,8 +23,12 @@ class UserPhoneNumber:
     
     @classmethod
     def validate(cls, value: str) -> None:
-        if not cls.MATCHER.match(value):
+        if not cls.is_phone_number(value):
             raise InvalidPhoneNumberException.invalid_phone_number(value)
+    
+    @classmethod
+    def is_phone_number(cls, value: str) -> bool:
+        return cls.MATCHER.match(value)
         
 
 class UserPassword:
@@ -76,8 +79,12 @@ class UserEmail:
     
     @classmethod
     def validate(cls, value: str) -> None:
-        if not cls.MATCHER.match(value):
+        if not cls.is_email(value):
             raise InvalidUserEmailException.invalid_user_email(value)
+    
+    @classmethod
+    def is_email(cls, value: str) -> bool:
+        return cls.MATCHER.match(value)
 
 
 class UserBirthdate:

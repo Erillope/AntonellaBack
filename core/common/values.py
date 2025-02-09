@@ -6,16 +6,22 @@ from .exceptions import InvalidOrderDirectionException, InvalidIdException
 
 class ID:
     '''Validador y generador de UUIDs'''
-    @staticmethod
-    def validate(value: str) -> None:
-        try:
-            uuid.UUID(value)
-        except:
+    @classmethod
+    def validate(cls, value: str) -> None:
+        if not cls.is_id(value):
             raise InvalidIdException.invalid_id(value)
     
-    @staticmethod
-    def generate() -> str:
+    @classmethod
+    def generate(cls) -> str:
         return str(uuid.uuid4())
+    
+    @classmethod
+    def is_id(cls, value: str) -> bool:
+        try:
+            uuid.UUID(value)
+            return True
+        except:
+            return False
 
 
 class PatternMatcher(BaseModel):

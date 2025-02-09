@@ -46,14 +46,14 @@ class DjangoSaveModel(SaveModel[Model], Generic[Table, Model]):
 
 
 class DjangoDeleteModel(DeleteModel[Model], Generic[Table, Model]):
-    def __init__(self, table: Type[Table], mapper: TableMapper[Table, Model]) -> None:
+    def __init__(self, table: Type[Table], mapper: TableMapper[Table, Model],
+                 get_model: GetModel[Model]) -> None:
         self.mapper = mapper
         self.table = table
+        self.get_model = get_model
     
     def delete(self, id: str) -> Model:
-        if not self.table.objects.filter(id=id).exists():
-            raise ModelNotFoundException.not_found(id)
-        table = self.table.objects.get(id=id)
-        model = self.mapper.to_model(table)
+        model = self.get_model.get(id)
+        table = self.mapper.to_table(model)
         table.delete()
         return model

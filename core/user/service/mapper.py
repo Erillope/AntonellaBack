@@ -1,6 +1,5 @@
 from core.user import UserAccount, Role, UserAccountFactory, RoleFactory
 from .dto import SignUpDto, UserDto, RoleDto
-from typing import List
 
 class UserMapper:
     '''Mapeador entre usuarios y dtos'''
