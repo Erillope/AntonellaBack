@@ -1,5 +1,5 @@
 import unittest
-from core.user import RoleService, Role
+from core.user import RoleService, Role, RoleFactory
 from core.user.service.exceptions import AlreadyExistsRoleException
 from core_test.mocks.repository_mocks import GetMock
 from ..test_data import DataFactory
@@ -18,15 +18,16 @@ class RoleServiceTest(unittest.TestCase):
     def test_create(self) -> None:
         for rolename in DataFactory.user_test_data.get_roles():
             with self.subTest(rolename=rolename):
-                self.get_role.exists_input_return_values = [(rolename, False)]
+                self.get_role.exists_input_return_values = [(rolename.lower(), False)]
+                self.get_role.get_input_return_values = [(rolename.lower(), RoleFactory.create(rolename))]
                 role = self.role_service.create(rolename)
                 self.assertEqual(role.name, rolename.lower())
     
     def test_rename(self) -> None:
         for role in DataFactory.generate_roles():
             with self.subTest(role=role):
-                self.get_role.exists_input_return_values = [(role.name, False)]
-                self.get_role.get_input_return_values = [(role.name, role)]
+                self.get_role.exists_input_return_values = [('renamed', False)]
+                self.get_role.get_input_return_values = [(role.name, role), ('renamed', RoleFactory.create('renamed'))]
                 role_dto = self.role_service.rename(role.name, "renamed")
                 self.assertEqual(role_dto.name, role.name)
 

@@ -3,7 +3,8 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from .config import auth_service, update_user_service, filter_user_service, role_service
 from app.common.response import validate, success_response
-from .serializer import SignInSerializer, SignUpSerializer, UpdateUserSerializer, FilterUserSerializer
+from .serializer import (SignInSerializer, SignUpSerializer, UpdateUserSerializer, FilterUserSerializer,
+                         AddRoleToUserSerializer)
 
 class AuthView(APIView):
     @validate(SignInSerializer)
@@ -53,9 +54,11 @@ class RoleView(APIView):
 
 
 class UserRoleView(APIView):
-    @validate()
-    def post(self, request: Request) -> Response:
-        user = update_user_service.add_role(request.GET.get('user_id'), request.GET.get('role'))
+    @validate(AddRoleToUserSerializer)
+    def post(self, request: AddRoleToUserSerializer) -> Response:
+        data = request.validated_data
+        data['user_id'] = str(data['user_id'])
+        user = update_user_service.add_role(**data)
         return success_response(user.model_dump())
 
     @validate()

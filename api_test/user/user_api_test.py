@@ -4,7 +4,7 @@ from core.user import AccountStatus
 from datetime import date
 from .test_data import DataFactory
 
-class UserAPITest(TestCase):
+class SignUpUserAPITest(TestCase):
     route = '/api/user/'
     auth_route = '/api/user/auth/'
     
@@ -101,30 +101,39 @@ class UserAPITest(TestCase):
                 response = self.client.post(self.route, user_data)
                 self.assertEqual(response.status_code, 400)
                 self.assertEqual(response.json()['error'], 'InvalidUserPasswordException')
+
+class UserAPITest(TestCase):
+    route = '/api/user/'
+    auth_route = '/api/user/auth/'
     
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.client = cls.client_class()
+        for role in DataFactory.user_test_data.get_roles():
+            cls.client.post(f'/api/role/?name={role}')
+        cls.user_request = DataFactory.generate_sign_up_request()
+        cls.user_dto = [cls.client.post(cls.route, user_data).json()['data'] for user_data in cls.user_request]
+        
     def test_sign_in(self) -> None:
-        for user_data in DataFactory.generate_sign_up_request():
+        for user_data, user in zip(self.user_request, self.user_dto):
             with self.subTest(user_data=user_data):
-                user = self.client.post(self.route, user_data).json()['data']
                 response = self.client.post(self.auth_route, {'phone_number': user_data['phone_number'], 'password': user_data['password']})
                 data = response.json()['data']
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(data, user)
     
     def test_sign_in_incorrect_password(self) -> None:
-        for user_data in DataFactory.generate_sign_up_request():
+        for user_data in self.user_request:
             with self.subTest(user_data=user_data):
-                self.client.post(self.route, user_data).json()['data']
                 response = self.client.post(self.auth_route, {'phone_number': user_data['phone_number'], 'password': user_data['password']+'p'})
                 self.assertEqual(response.status_code, 400)
                 self.assertEqual(response.json()['error'], 'IncorrectPasswordException')
     
     def test_update_user(self) -> None:
-        for user, user_data in zip(DataFactory.generate_sign_up_request(),
-                                   DataFactory.generate_update_user_request()):
+        for user, user_data in zip(self.user_dto, DataFactory.generate_update_user_request()):
             with self.subTest(user_data=user_data):
-                created_user = self.client.post(self.route, user).json()['data']
-                user_data['id'] = created_user['id']
+                user_data['id'] = user['id']
                 user_data['phone_number'] = user_data['phone_number'][0:5] + str((int(user_data['phone_number'][5])+1)%10) + user_data['phone_number'][6:]
                 user_data['email'] = 'test_' + user_data['email']
                 response = self.client.put(self.route, user_data, content_type='application/json')
@@ -134,26 +143,20 @@ class UserAPITest(TestCase):
                 self.assertEqual(data['email'], user_data['email'].lower())
     
     def test_update_user_void(self) -> None:
-        for user_data in DataFactory.generate_sign_up_request():
-            created_user = self.client.post(self.route, user_data).json()['data']
-            user_data['id'] = created_user['id']
+        for user_data in self.user_dto:
             with self.subTest(user_data=user_data):
                 response = self.client.put(self.route, {'id': user_data['id']}, content_type='application/json')
                 self.assertEqual(response.status_code, 200)
     
     def test_filter_users(self) -> None:
-        user_request = DataFactory.generate_sign_up_request()
-        for user_data in user_request:
-            self.client.post(self.route, user_data)
         response = self.client.get(self.route, data={'order_by': 'name'})
         data = response.json()['data']
-        expected_data = [user_data['name'].lower() for user_data in user_request]
+        expected_data = [user_data['name'].lower() for user_data in self.user_request]
         for user in data:
             self.assertTrue(user['name'] in expected_data)
+        self.assertTrue(len(data)==len(self.user_request))
     
     def test_filter_users_query(self) -> None:
-        user_request = DataFactory.generate_sign_up_request()
-        user_dto = [self.client.post(self.route, user_data).json()['data'] for user_data in user_request]
         request = {
             'expresion': 'birthdate>1940-01-01 and gender=FEMENINO',
             'order_by': 'name',
@@ -164,9 +167,37 @@ class UserAPITest(TestCase):
         response = self.client.get(self.route, data=request)
         data = response.json()['data']
         filtered_data = []
-        for user in user_dto:
+        for user in self.user_dto:
             if date.fromisoformat(user['birthdate'])>date(1940, 1, 1) and user['gender']=='FEMENINO':
                 filtered_data.append(user)
         expected_data = sorted([user['name'] for user in filtered_data], reverse=True)
         for user in data:
             self.assertTrue(user['name'] in expected_data)
+        self.assertTrue(len(data)<=2)
+
+    def test_add_role(self) -> None:
+        for user in self.user_dto:
+            for role in DataFactory.user_test_data.get_sample_list_roles():
+                with self.subTest(user=user, role=role):
+                    request = {'user_id': user['id'], 'role': role}
+                    response = self.client.post(f'{self.route}role/', request)
+                    self.assertEqual(response.status_code, 200)
+                    data = response.json()['data']
+                    self.assertTrue(role.lower() in [role['name'] for role in data['roles']])
+
+    def test_delete_role(self) -> None:
+        for user in self.user_dto:
+            for role in DataFactory.user_test_data.get_sample_list_roles():
+                with self.subTest(user=user, role=role):
+                    response = self.client.delete(f'{self.route}role/?user_id={user["id"]}&role={role}')
+                    self.assertEqual(response.status_code, 200)
+                    data = response.json()['data']
+                    self.assertFalse(role.lower() in [role['name'] for role in data['roles']])
+    
+    def test_add_not_registered_role(self) -> None:
+        for user in self.user_dto:
+            for role in DataFactory.user_test_data.get_sample_list_roles():
+                with self.subTest(user=user, role=role):
+                    response = self.client.post(f'{self.route}role/', {'user_id': user['id'], 'role': role+'_invalid'})
+                    self.assertEqual(response.status_code, 400)
+                    self.assertEqual(response.json()['error'], 'ModelNotFoundException')

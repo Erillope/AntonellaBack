@@ -35,4 +35,14 @@ def run_role_api_test() -> None:
 def run_user_api_test() -> None:
     django_test_executer('api_test.user.user_api_test')
     
-run_user_api_test()
+def run_all() -> None:
+    run_role_test()
+    run_user_test()
+    run_mapper_test()
+    run_role_service_test()
+    run_user_service_test()
+    run_user_table_mapper_test()
+    run_role_api_test()
+    run_user_api_test()
+
+run_all()

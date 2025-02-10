@@ -63,3 +63,8 @@ class FilterUserSerializer(serializers.Serializer):
             limit=self.validated_data.get('limit'),
             order_direction=OrdenDirection(order_direction) if order_direction else OrdenDirection.DESC
         )
+
+
+class AddRoleToUserSerializer(serializers.Serializer):
+    user_id = serializers.UUIDField()
+    role = serializers.CharField(max_length=250)

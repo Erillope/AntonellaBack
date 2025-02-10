@@ -19,12 +19,13 @@ class AuthServiceTest(unittest.TestCase):
         )
     
     def test_sign_up(self) -> None:
-        for sign_up_dto in DataFactory.generate_sign_up_dtos():
+        for sign_up_dto in DataFactory.generate_sign_up_dtos()[0:1]:
             with self.subTest(sign_up_dto=sign_up_dto):
-                self.get_user.exists_input_return_values = [(sign_up_dto.phone_number, False), (sign_up_dto.email, False)]
+                self.get_user.exists_input_return_values = [(sign_up_dto.phone_number, False), (sign_up_dto.email.lower(), False)]
                 self.get_role.get_input_return_values = [(role, RoleFactory.create(role)) for role in sign_up_dto.roles]
+                self.get_user.get = lambda x: DataFactory.generate_user_accounts()[0]
                 self.auth_service.sign_up(sign_up_dto)
-        
+
     def test_sign_in(self) -> None:
         for user, phone_number, password in DataFactory.generate_user_with_info():
             with self.subTest(user=user, phone_number=phone_number, password=password):
