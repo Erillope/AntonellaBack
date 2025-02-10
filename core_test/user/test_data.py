@@ -4,7 +4,6 @@ from core.common import ID
 from core.user import AccountStatus, Gender, UserAccount, UserAccountFactory, RoleFactory, Role
 from core.user.domain.values import UserBirthdate
 from core.user.service.dto import SignUpDto, UpdateUserDto
-#from app.user.models import UserAccountTableData, RoleTableData
 import random
 from datetime import date, timedelta
 

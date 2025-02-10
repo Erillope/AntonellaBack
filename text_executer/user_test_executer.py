@@ -1,15 +1,9 @@
-import subprocess
 import os
 import django # type: ignore
+from .text_executer import test_executer, django_test_executer
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "antonella_back.settings")
 django.setup()
-
-def test_executer(file: str) -> None:
-    subprocess.run(f"python -m unittest {file}.py", shell=True)
-
-def django_test_executer(file: str) -> None:
-    subprocess.run(f"python manage.py test {file}", shell=True)
     
 def run_role_test() -> None:
     test_executer('core_test/user/domain/role_test')
@@ -44,5 +38,3 @@ def run_all() -> None:
     run_user_table_mapper_test()
     run_role_api_test()
     run_user_api_test()
-
-run_all()
