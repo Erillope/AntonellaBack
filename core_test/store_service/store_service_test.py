@@ -1,18 +1,27 @@
 import unittest
-from core.store_service import StoreServiceFactory
+from core.store_service import StoreServiceFactory, StoreService
 from core.store_service.domain.exceptions import InvalidServiceNameException
 from .test_data import DataFactory
+from typing import List
+import shutil
 
 class StoreServiceCreationTest(unittest.TestCase):
+    @classmethod
+    def tearDownClass(cls) -> None:
+        deleter = StoreService.IMAGE_DELETER
+        shutil.rmtree(deleter.folder_name)
+        
     def test_store_service_creation(self) -> None:
         for name in DataFactory.store_test_data.get_names():
             description = DataFactory.store_test_data.get_description()
             service_type = DataFactory.store_test_data.get_service_type()
+            images = DataFactory.store_test_data.get_sample_base64_images()
             with self.subTest(name=name, description=description, service_type=service_type):
                 service = StoreServiceFactory.create(name=name, description=description, type=service_type)
                 self.assertEqual(service.name, name.lower())
                 self.assertEqual(service.description, description.lower())
                 self.assertEqual(service.type, service_type)
+                self.assertEqual(len(service.images), len(images))
 
     def test_store_service_create_invalid_name(self) -> None:
         for invalid_name in DataFactory.store_test_data.get_invalid_names():
@@ -35,3 +44,33 @@ class StoreServiceCreationTest(unittest.TestCase):
                 self.assertEqual(store_service.description, description.lower())
                 self.assertEqual(store_service.type, service_type)
                 self.assertEqual(store_service.status, status)
+
+
+class StoreServiceTest(unittest.TestCase):
+    store_services: List[StoreService] = []
+    base64_images: List[str] = []
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.store_services = DataFactory.generate_store_services()
+        cls.base64_images = DataFactory.store_test_data.get_sample_base64_images()
+    
+    
+    @classmethod
+    def tearDownClass(cls) -> None:
+        deleter = StoreService.IMAGE_DELETER
+        shutil.rmtree(deleter.folder_name)
+            
+    def test_add_image(self) -> None:
+        for store_service, image in zip(self.store_services, self.base64_images):
+            len_images = len(store_service.images)
+            with self.subTest(store_service=store_service, image=image):
+                store_service.add_image(image)
+                self.assertEqual(len_images+1, len(store_service.images))
+    
+    def delete_image(self) -> None:
+        for store_service, image in zip(self.store_services, self.base64_images):
+            len_images = len(store_service.images)
+            with self.subTest(store_service=store_service, image=image):
+                store_service.delete_image(image)
+                self.assertEqual(len_images-1, len(store_service.images))

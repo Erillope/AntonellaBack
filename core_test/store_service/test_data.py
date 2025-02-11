@@ -2,10 +2,12 @@ import json
 from typing import List, Dict, Any, Optional, Tuple
 import random
 from core.store_service import StoreServiceFactory, StoreService, ServiceType, ServiceStatus
+from core_test.images_data import get_base64_strings
 import lorem
 
 class StoreTestData:
     instance: Optional['StoreTestData'] = None
+    BASE64_IMAGES = get_base64_strings()
     
     def __init__(self) -> None:
         self.data: Dict[str, List[Any]] = {}
@@ -37,6 +39,9 @@ class StoreTestData:
     
     def get_description(self) -> str:
         return lorem.sentence()
+    
+    def get_sample_base64_images(self) -> List[str]:
+        return random.sample(self.BASE64_IMAGES, random.randint(1, len(self.BASE64_IMAGES)))
 
 
 class DataFactory:
@@ -48,7 +53,8 @@ class DataFactory:
             StoreServiceFactory.create(
                 name=name,
                 description=cls.store_test_data.get_description(),
-                type=cls.store_test_data.get_service_type()
+                type=cls.store_test_data.get_service_type(),
+                images=cls.store_test_data.get_sample_base64_images()
             )
             for name in cls.store_test_data.get_names()
         ]

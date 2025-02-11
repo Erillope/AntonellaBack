@@ -53,13 +53,13 @@ class StoreService(BaseModel):
 
 class StoreServiceFactory:
     @staticmethod
-    def create(name: str, description: str, type: ServiceType) -> StoreService:
+    def create(name: str, description: str, type: ServiceType, images: List[str]=[]) -> StoreService:
         #TODO
         store_service: StoreService
         return store_service
     
     @staticmethod
-    def load(id: str, name: str, description: str, status: ServiceStatus, type: ServiceType, created_date: date) -> StoreService:
+    def load(id: str, name: str, description: str, status: ServiceStatus, type: ServiceType, created_date: date, images: List[str]=[]) -> StoreService:
         #TODO
         store_service: StoreService
         return store_service
