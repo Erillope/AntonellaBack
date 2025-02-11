@@ -1,8 +1,7 @@
-from core.user import AuthService, UpdateUserService, FilterUserService, Role, RoleService
-from .models import UserAccountTableData, RoleTableData
-from app.common.django_repository import DjangoDeleteModel
+from core.user import AuthService, UpdateUserService, FilterUserService, RoleService
 from .mapper import UserTableMapper, RoleTableMapper
-from .repository import DjangoSaveUser, DjangoSaveRole, RoleToUserSubscriber, DjangoGetRole, DjangoGetUser
+from .repository import (DjangoSaveUser, DjangoSaveRole, RoleToUserSubscriber,
+                         DjangoGetRole, DjangoGetUser, DjangoDeleteRole)
 
 user_mapper = UserTableMapper()
 
@@ -16,11 +15,7 @@ get_role = DjangoGetRole()
 
 save_role = DjangoSaveRole()
 
-delete_role = DjangoDeleteModel[RoleTableData, Role](
-    table=UserAccountTableData,
-    mapper=role_mapper,
-    get_model=get_role
-)
+delete_role = DjangoDeleteRole()
 
 role_to_user_subscriber = RoleToUserSubscriber()
 
