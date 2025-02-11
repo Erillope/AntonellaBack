@@ -16,30 +16,25 @@ class StoreTestData:
     def shuffle(self) -> None:
         for key in self.data:
             random.shuffle(self.data[key])
-            
-    @classmethod
+    
+    @classmethod      
     def get_instance(cls) -> 'StoreTestData':
         if cls.instance is None:
             cls.instance = StoreTestData()
         return cls.instance
     
-    @classmethod
     def get_names(self) -> List[str]:
         return self.data['names']
     
-    @classmethod
     def get_invalid_names(self) -> List[str]:
         return self.data['invalid_names']
     
-    @classmethod
     def get_service_type(self) -> ServiceType:
         return random.choice(list(ServiceType))
     
-    @classmethod
     def get_service_status(self) -> ServiceStatus:
         return random.choice(list(ServiceStatus))
     
-    @classmethod
     def get_description(self) -> str:
         return lorem.sentence()
 
