@@ -7,7 +7,7 @@ class StoreServiceTableData(models.Model):
     description = models.TextField()
     status = models.CharField(max_length=50, choices=[(s.value, s.value) for s in ServiceStatus])
     type = models.CharField(max_length=50, choices=[(t.value, t.value) for t in ServiceType])
-    created_date = models.DateField()
+    created_date = models.DateField(auto_now=True)
     
     class Meta:
         db_table = 'store_service'

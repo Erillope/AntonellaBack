@@ -2,6 +2,7 @@ import json
 from typing import List, Dict, Any, Optional, Tuple
 import random
 from core.store_service import StoreServiceFactory, StoreService, ServiceType, ServiceStatus
+from core.store_service.service.dto import CreateStoreServiceDto
 from core_test.images_data import get_base64_strings
 import lorem
 
@@ -56,5 +57,16 @@ class DataFactory:
                 type=cls.store_test_data.get_service_type(),
                 images=cls.store_test_data.get_sample_base64_images()
             )
+            for name in cls.store_test_data.get_names()
+        ]
+    
+    @classmethod
+    def generate_create_store_services_dto(cls) -> List[CreateStoreServiceDto]:
+        return [
+            CreateStoreServiceDto(
+                name=name,
+                description=cls.store_test_data.get_description(),
+                type=cls.store_test_data.get_service_type()
+                )
             for name in cls.store_test_data.get_names()
         ]

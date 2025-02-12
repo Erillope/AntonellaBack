@@ -6,7 +6,7 @@ from core.store_service.service.dto import CreateStoreServiceDto, UpdateStoreSer
 class CreateStoreSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=250)
     description = serializers.CharField()
-    type = serializers.ChoiceField(choices=[(t.name, t.name) for t in ServiceType])
+    type = serializers.ChoiceField(choices=[(t.value, t.value) for t in ServiceType])
     images = serializers.ListField(child=serializers.CharField(max_length=250))
     
     def to_dto(self) -> CreateStoreServiceDto:

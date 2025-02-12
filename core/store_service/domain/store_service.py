@@ -73,7 +73,6 @@ class StoreService(BaseModel):
 class StoreServiceFactory:
     @staticmethod
     def create(name: str, description: str, type: ServiceType, images: List[str]=[]) -> StoreService:
-        #TODO
         return StoreService(
             id = ID.generate(),
             name = name,
@@ -85,7 +84,6 @@ class StoreServiceFactory:
     
     @staticmethod
     def load(id: str, name: str, description: str, status: ServiceStatus, type: ServiceType, created_date: date, images: List[str]=[]) -> StoreService:
-        #TODO
         return StoreService(
             id = id,
             name = name,

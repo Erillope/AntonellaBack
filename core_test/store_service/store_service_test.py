@@ -3,14 +3,8 @@ from core.store_service import StoreServiceFactory, StoreService
 from core.store_service.domain.exceptions import InvalidServiceNameException
 from .test_data import DataFactory
 from typing import List
-import shutil
 
-class StoreServiceCreationTest(unittest.TestCase):
-    @classmethod
-    def tearDownClass(cls) -> None:
-        deleter = StoreService.IMAGE_DELETER
-        shutil.rmtree(deleter.folder_name)
-        
+class StoreServiceCreationTest(unittest.TestCase):        
     def test_store_service_creation(self) -> None:
         for name in DataFactory.store_test_data.get_names():
             description = DataFactory.store_test_data.get_description()
@@ -55,12 +49,6 @@ class StoreServiceTest(unittest.TestCase):
         cls.store_services = DataFactory.generate_store_services()
         cls.base64_images = DataFactory.store_test_data.get_sample_base64_images()
     
-    
-    @classmethod
-    def tearDownClass(cls) -> None:
-        deleter = StoreService.IMAGE_DELETER
-        shutil.rmtree(deleter.folder_name)
-            
     def test_add_image(self) -> None:
         for store_service, image in zip(self.store_services, self.base64_images):
             len_images = len(store_service.images)

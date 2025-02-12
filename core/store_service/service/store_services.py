@@ -37,7 +37,7 @@ class StoreServices(AbstractStoreServices):
         for image in dto.images:
             service.add_image(image)
         service.save()
-        return StoreServiceMapper.to_dto(service)
+        return StoreServiceMapper.to_dto(self.get_service.get(service.id))
     
     def update(self, dto: UpdateStoreServiceDto) -> StoreServiceDto:
         service = self.get_service.get(dto.id)
@@ -48,7 +48,7 @@ class StoreServices(AbstractStoreServices):
             status=dto.status
         )
         service.save()
-        return StoreServiceMapper.to_dto(service)
+        return StoreServiceMapper.to_dto(self.get_service.get(service.id))
     
     def delete(self, id: str) -> StoreServiceDto:
         service = self.get_service.get(id)
@@ -73,10 +73,10 @@ class StoreServices(AbstractStoreServices):
         service = self.get_service.get(service_id)
         service.add_image(image)
         service.save()
-        return StoreServiceMapper.to_dto(service)
+        return StoreServiceMapper.to_dto(self.get_service.get(service_id))
     
     def delete_image(self, service_id: str, image: str) -> StoreServiceDto:
         service = self.get_service.get(service_id)
         service.delete_image(image)
         service.save()
-        return StoreServiceMapper.to_dto(service)
+        return StoreServiceMapper.to_dto(self.get_service.get(service_id))

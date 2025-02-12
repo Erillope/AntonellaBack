@@ -3,7 +3,7 @@ from .models import StoreServiceTableData
 from core.store_service import (StoreService, StoreServiceFactory,
                                                      ServiceStatus, ServiceType)
 
-class StoreServiceMapper(TableMapper[StoreServiceTableData, StoreService]):
+class StoreServiceTableMapper(TableMapper[StoreServiceTableData, StoreService]):
     def to_table(self, store_service: StoreService) -> StoreServiceTableData:
         return StoreServiceTableData(
             id=store_service.id,

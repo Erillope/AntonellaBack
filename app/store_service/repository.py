@@ -4,11 +4,11 @@ from .models import StoreServiceTableData, StoreServiceImage
 from core.common import EventSubscriber, Event
 from core.store_service.domain.events import (StoreServiceSaved, StoreServiceDeleted,
                                               StoreServiceImageAdded, StoreServiceImageDeleted)
-from .mapper import StoreServiceMapper
+from .mapper import StoreServiceTableMapper
 
 class DjangoSaveStoreService(DjangoSaveModel[StoreServiceTableData, StoreService], EventSubscriber):
     def __init__(self) -> None:
-        super().__init__(StoreServiceMapper())
+        super().__init__(StoreServiceTableMapper())
         EventSubscriber.__init__(self)
         
     def add_image(self, store_service_id: str, image: str) -> None:
@@ -31,8 +31,8 @@ class DjangoSaveStoreService(DjangoSaveModel[StoreServiceTableData, StoreService
 
 class DjangoDeleteStoreService(DjangoDeleteModel[StoreServiceTableData, StoreService], EventSubscriber):
     def __init__(self) -> None:
-        get_store_service = DjangoGetModel[StoreServiceTableData, StoreService](StoreServiceTableData, StoreServiceMapper())
-        super().__init__(StoreServiceTableData, StoreServiceMapper(), get_store_service)
+        get_store_service = DjangoGetModel[StoreServiceTableData, StoreService](StoreServiceTableData, StoreServiceTableMapper())
+        super().__init__(StoreServiceTableData, StoreServiceTableMapper(), get_store_service)
         
     def handle(self, event: Event) -> None:
         if isinstance(event, StoreServiceDeleted):

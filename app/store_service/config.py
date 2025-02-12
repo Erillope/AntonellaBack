@@ -1,11 +1,11 @@
 from app.common.django_repository import DjangoGetModel
 from .repository import DjangoSaveStoreService, DjangoDeleteStoreService
-from .mapper import StoreServiceMapper
+from .mapper import StoreServiceTableMapper
 from .models import StoreServiceTableData
 from core.store_service import StoreService, StoreServices
 
 get_store_service = DjangoGetModel[StoreServiceTableData, StoreService](
-    mapper=StoreServiceMapper(),
+    mapper=StoreServiceTableMapper(),
     table=StoreServiceTableData
 )
 
