@@ -20,5 +20,6 @@ class ServiceName:
     
     @classmethod
     def validate(cls, value: str) -> None:
+        print(f"Validando: {value}")
         if not cls.MATCHER.match(value):
             raise InvalidServiceNameException.invalid_service_name(value)

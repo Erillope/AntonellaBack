@@ -1,7 +1,7 @@
 from pydantic import BaseModel, model_validator, PrivateAttr
 from datetime import date
 from .values import ServiceStatus, ServiceType, ServiceName
-from .events import StoreServiceDeleted, StoreServiceSaved
+from .events import StoreServiceDeleted, StoreServiceSaved, StoreServiceImageAdded, StoreServiceImageDeleted
 from core.common import ID, EventPublisher, Event, Base64SaveStorageImage, DeleteStorageImage
 from typing import Optional, List, ClassVar
 
@@ -29,7 +29,7 @@ class StoreService(BaseModel):
         self.name = self.name.lower()
         self.description = self.description.lower()
         ID.validate(self.id)
-        ServiceName.MATCHER.validate(self.name)
+        ServiceName.validate(self.name)
         pass
     
     def change_data(self, name: Optional[str]=None, description: Optional[str]=None,
@@ -47,16 +47,22 @@ class StoreService(BaseModel):
         if type is not None:
             self.type = type
         
+        self._validate_data()
         pass
     
     def add_image(self, base64_image: str) -> None:
         '''Agrega una imagen al servicio de tienda'''
         #TODO
+        if image not in self.images: return
+        self.images.append(base64_image)
+        self._events.append(StoreServiceImageAdded(store_service_id=self.id, image=base64_image))
         pass
 
     def delete_image(self, image: str) -> None:
         '''Elimina una imagen del servicio de tienda'''
-        #TODO
+        if image not in self.images: return
+        self.images.remove(image)
+        self._events.append(StoreServiceImageDeleted(store_service_id=self.id, image=image))
         pass
     
     def save(self) -> None:
