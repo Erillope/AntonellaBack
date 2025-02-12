@@ -29,7 +29,7 @@ class PatternMatcher(BaseModel):
     pattern: str
     
     def match(self, value: str) -> bool:
-        return bool(re.match(self.pattern, value))
+        return bool(re.match(self.pattern, value.encode('utf-8').decode('utf-8')))
 
 
 class OrdenDirection(Enum):

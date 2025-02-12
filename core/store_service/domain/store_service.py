@@ -30,7 +30,6 @@ class StoreService(BaseModel):
         self.description = self.description.lower()
         ID.validate(self.id)
         ServiceName.validate(self.name)
-        pass
     
     def change_data(self, name: Optional[str]=None, description: Optional[str]=None,
                     status: Optional[ServiceStatus]=None, type: Optional[ServiceType]=None) -> None:
@@ -48,33 +47,27 @@ class StoreService(BaseModel):
             self.type = type
         
         self._validate_data()
-        pass
     
     def add_image(self, base64_image: str) -> None:
         '''Agrega una imagen al servicio de tienda'''
-        #TODO
         if image not in self.images: return
         self.images.append(base64_image)
         self._events.append(StoreServiceImageAdded(store_service_id=self.id, image=base64_image))
-        pass
 
     def delete_image(self, image: str) -> None:
         '''Elimina una imagen del servicio de tienda'''
         if image not in self.images: return
         self.images.remove(image)
         self._events.append(StoreServiceImageDeleted(store_service_id=self.id, image=image))
-        pass
     
     def save(self) -> None:
         EventPublisher.publish(StoreServiceSaved(service = self))
         for event in self._events:
             EventPublisher.publish(event)
         self._events.clear()
-        pass
     
     def delete(self) -> None:
         EventPublisher.publish(StoreServiceDeleted(service = self))
-        pass
 
 
 class StoreServiceFactory:

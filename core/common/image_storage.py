@@ -15,6 +15,7 @@ class Base64SaveStorageImage:
             os.makedirs(self.folder_url)
         
     def save(self, image: str) -> str:
+        """Guarda una imagen en un directorio y retorna la URL"""
         self.verify_base64(image)
         binary_image = base64.b64decode(image)
         image_url = f'{self.folder_url}/{ID.generate()}.png'

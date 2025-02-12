@@ -11,7 +11,7 @@ class StoreTestData:
     
     def __init__(self) -> None:
         self.data: Dict[str, List[Any]] = {}
-        with open('core_test/store_service/store_service_test_data.json') as file:
+        with open('core_test/store_service/store_service_test_data.json', encoding='utf-8') as file:
             self.data = json.load(file)
         self.shuffle()
     
