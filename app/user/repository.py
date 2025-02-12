@@ -83,7 +83,7 @@ class DjangoSaveRole(DjangoSaveModel[RoleTableData, Role], EventSubscriber):
 
 class DjangoDeleteRole(DjangoDeleteModel[RoleTableData, Role], EventSubscriber):
     def __init__(self) -> None:
-        super().__init__(RoleTableData, RoleTableMapper())
+        super().__init__(RoleTableData, RoleTableMapper(), DjangoGetRole())
         EventSubscriber.__init__(self)
     
     def handle(self, event: Event) -> None:

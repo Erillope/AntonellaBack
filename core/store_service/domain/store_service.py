@@ -1,9 +1,9 @@
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, model_validator, PrivateAttr
 from datetime import date
-from core.common import ID, EventPublisher, Event
 from .values import ServiceStatus, ServiceType, ServiceName
-from typing import Optional
 from .events import StoreServiceDeleted, StoreServiceSaved
+from core.common import ID, EventPublisher, Event, Base64SaveStorageImage, DeleteStorageImage
+from typing import Optional, List, ClassVar
 
 class StoreService(BaseModel):
     "Servicio de tienda"
@@ -12,7 +12,12 @@ class StoreService(BaseModel):
     description: str
     status: ServiceStatus
     type: ServiceType
+    images: List[str] = []
     created_date: date
+    IMAGES_FOLDER: ClassVar[str] = 'store_service_images'
+    IMAGE_CONVERTER: ClassVar[Base64SaveStorageImage] = Base64SaveStorageImage(IMAGES_FOLDER)
+    IMAGE_DELETER: ClassVar[DeleteStorageImage] = DeleteStorageImage(IMAGES_FOLDER)
+    _events: List[Event] = PrivateAttr(default=[])
     
     @model_validator(mode='after')
     def validate_data(self) -> 'StoreService':
@@ -44,6 +49,16 @@ class StoreService(BaseModel):
         
         pass
     
+    def add_image(self, base64_image: str) -> None:
+        '''Agrega una imagen al servicio de tienda'''
+        #TODO
+        pass
+
+    def delete_image(self, image: str) -> None:
+        '''Elimina una imagen del servicio de tienda'''
+        #TODO
+        pass
+    
     def save(self) -> None:
         EventPublisher.publish(StoreServiceSaved(service = self))
         for event in self._events:
@@ -58,7 +73,7 @@ class StoreService(BaseModel):
 
 class StoreServiceFactory:
     @staticmethod
-    def create(name: str, description: str, type: ServiceType) -> StoreService:
+    def create(name: str, description: str, type: ServiceType, images: List[str]=[]) -> StoreService:
         #TODO
         return StoreService(
             id = ID.generate(),
@@ -70,7 +85,7 @@ class StoreServiceFactory:
         )
     
     @staticmethod
-    def load(id: str, name: str, description: str, status: ServiceStatus, type: ServiceType, created_date: date) -> StoreService:
+    def load(id: str, name: str, description: str, status: ServiceStatus, type: ServiceType, created_date: date, images: List[str]=[]) -> StoreService:
         #TODO
         return StoreService(
             id = id,

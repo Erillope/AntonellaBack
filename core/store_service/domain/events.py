@@ -15,3 +15,17 @@ class StoreServiceDeleted(Event):
     '''Evento para cuando un servicio de tienda es eliminado'''
     def __init__(self, store_service_id: str):
         self.store_service_id = store_service_id
+
+
+class StoreServiceImageAdded(Event):
+    '''Evento para cuando una imagen es agregada a un servicio de tienda'''
+    def __init__(self, store_service_id: str, image: str):
+        self.store_service_id = store_service_id
+        self.image = image
+
+
+class StoreServiceImageDeleted(Event):
+    '''Evento para cuando una imagen es eliminada de un servicio de tienda'''
+    def __init__(self, store_service_id: str, image: str):
+        self.store_service_id = store_service_id
+        self.image = image
