@@ -35,3 +35,4 @@ class StoreServiceCreationTest(unittest.TestCase):
                 self.assertEqual(store_service.description, description.lower())
                 self.assertEqual(store_service.type, service_type)
                 self.assertEqual(store_service.status, status)
+
