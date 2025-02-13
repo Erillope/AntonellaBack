@@ -9,13 +9,11 @@ class StoreServiceCreationTest(unittest.TestCase):
         for name in DataFactory.store_test_data.get_names():
             description = DataFactory.store_test_data.get_description()
             service_type = DataFactory.store_test_data.get_service_type()
-            images = DataFactory.store_test_data.get_sample_base64_images()
             with self.subTest(name=name, description=description, service_type=service_type):
                 service = StoreServiceFactory.create(name=name, description=description, type=service_type)
                 self.assertEqual(service.name, name.lower())
                 self.assertEqual(service.description, description.lower())
                 self.assertEqual(service.type, service_type)
-                self.assertEqual(len(service.images), len(images))
 
     def test_store_service_create_invalid_name(self) -> None:
         for invalid_name in DataFactory.store_test_data.get_invalid_names():

@@ -56,7 +56,6 @@ class DataFactory:
                 name=name,
                 description=cls.store_test_data.get_description(),
                 type=cls.store_test_data.get_service_type(),
-                images=cls.store_test_data.get_sample_base64_images()
             )
             for name in cls.store_test_data.get_names()
         ]

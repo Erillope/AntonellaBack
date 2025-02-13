@@ -26,7 +26,7 @@ class StoreService(BaseModel):
         return self
     
     def _validate_data(self) -> None:
-        self.name = self.name.lower()
+        self.name = self.name.lower().strip()
         self.description = self.description.lower()
         ID.validate(self.id)
         ServiceName.validate(self.name)
@@ -72,20 +72,18 @@ class StoreService(BaseModel):
 
 class StoreServiceFactory:
     @staticmethod
-    def create(name: str, description: str, type: ServiceType, images: List[str]=[]) -> StoreService:
-        if images is None: print(images)
+    def create(name: str, description: str, type: ServiceType) -> StoreService:
         return StoreService(
             id = ID.generate(),
             name = name,
             description = description,
             status = ServiceStatus.ENABLE,
             type = type,
-            images = images,
             created_date = date.today(),
         )
     
     @staticmethod
-    def load(id: str, name: str, description: str, status: ServiceStatus, type: ServiceType, created_date: date, images: List[str]=[]) -> StoreService:
+    def load(id: str, name: str, description: str, status: ServiceStatus, type: ServiceType, created_date: date, images: List[str]) -> StoreService:
         return StoreService(
             id = id,
             name = name,

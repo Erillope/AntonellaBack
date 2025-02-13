@@ -1,8 +1,9 @@
 from __future__ import annotations
 from core.common import Event
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 if TYPE_CHECKING:
     from .store_service import StoreService
+    from .question import Question
     
 
 class StoreServiceSaved(Event):
@@ -29,3 +30,30 @@ class StoreServiceImageDeleted(Event):
     def __init__(self, store_service_id: str, image: str):
         self.store_service_id = store_service_id
         self.image = image
+
+
+class QuestionCreated(Event):
+    '''Evento para cuando una pregunta de formulario es creada'''
+    def __init__(self, question: Question):
+        self.question = question
+
+
+class QuestionDeleted(Event):
+    '''Evento para cuando una pregunta de formulario es eliminada'''
+    def __init__(self, question_id: str):
+        self.question_id = question_id
+
+
+class ChoiceAdded(Event):
+    '''Evento para cuando una imagen es agregada a una opción de pregunta de selección'''
+    def __init__(self, question_id: str, option: str, image: Optional[str]=None):
+        self.question_id = question_id
+        self.option = option
+        self.image = image
+
+
+class ChoiceDeleted(Event):
+    '''Evento para cuando una imagen es eliminada de una opción de pregunta de selección'''
+    def __init__(self, question_id: str, option: str):
+        self.question_id = question_id
+        self.option = option
