@@ -61,13 +61,13 @@ class StoreService(BaseModel):
         self._events.append(StoreServiceImageDeleted(store_service_id=self.id, image=image))
     
     def save(self) -> None:
-        EventPublisher.publish(StoreServiceSaved(service = self))
+        EventPublisher.publish(StoreServiceSaved(store_service= self))
         for event in self._events:
             EventPublisher.publish(event)
         self._events.clear()
     
     def delete(self) -> None:
-        EventPublisher.publish(StoreServiceDeleted(service = self))
+        EventPublisher.publish(StoreServiceDeleted(store_service_id = self.id))
 
 
 class StoreServiceFactory:

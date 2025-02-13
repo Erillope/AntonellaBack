@@ -39,7 +39,8 @@ class StoreTestData:
         return random.choice(list(ServiceStatus))
     
     def get_description(self) -> str:
-        return lorem.sentence()
+        text: str = lorem.sentence()
+        return text
     
     def get_sample_base64_images(self) -> List[str]:
         return random.sample(self.BASE64_IMAGES, random.randint(1, len(self.BASE64_IMAGES)))
