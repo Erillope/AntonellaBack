@@ -50,14 +50,14 @@ class StoreService(BaseModel):
     
     def add_image(self, base64_image: str) -> None:
         '''Agrega una imagen al servicio de tienda'''
-        if image not in self.images: return
-        self.images.append(base64_image)
-        self._events.append(StoreServiceImageAdded(store_service_id=self.id, image=base64_image))
+        image = self.IMAGE_CONVERTER.save(base64_image)
+        self.images.append(image)
+        self._events.append(StoreServiceImageAdded(store_service_id=self.id, image=image))
 
     def delete_image(self, image: str) -> None:
         '''Elimina una imagen del servicio de tienda'''
-        if image not in self.images: return
         self.images.remove(image)
+        self.IMAGE_DELETER.delete(image)
         self._events.append(StoreServiceImageDeleted(store_service_id=self.id, image=image))
     
     def save(self) -> None:
@@ -73,13 +73,15 @@ class StoreService(BaseModel):
 class StoreServiceFactory:
     @staticmethod
     def create(name: str, description: str, type: ServiceType, images: List[str]=[]) -> StoreService:
+        if images is None: print(images)
         return StoreService(
             id = ID.generate(),
             name = name,
             description = description,
             status = ServiceStatus.ENABLE,
             type = type,
-            created_date = date.today()
+            images = images,
+            created_date = date.today(),
         )
     
     @staticmethod
@@ -90,5 +92,6 @@ class StoreServiceFactory:
             description = description,
             status = status,
             type = type,
-            created_date = created_date
+            images = images,
+            created_date = created_date,
         )
