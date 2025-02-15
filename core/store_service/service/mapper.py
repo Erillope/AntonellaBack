@@ -1,20 +1,29 @@
 from core.store_service import (StoreService, StoreServiceFactory, Question, QuestionFactory, InputType,
-                                FormQuestion, TextChoiceQuestion, ImageChoiceQuestion, Choice)
-from .dto import CreateStoreServiceDto, StoreServiceDto, CreateQuestionDto, QuestionInputType, QuestionDto, ChoiceType
-from typing import List
+                                FormQuestion, TextChoiceQuestion, ImageChoiceQuestion)
+from .dto import (CreateStoreServiceDto, StoreServiceDto, CreateQuestionDto, QuestionInputType,
+                  QuestionDto, ChoiceType, ChoiceDto)
+from typing import List, Optional
+from core.common.image_storage import Base64ImageStorage
+from core.common.config import MEDIA
 
 class StoreServiceMapper:
-    @staticmethod
-    def to_store_service(dto: CreateStoreServiceDto) -> StoreService:
-        return StoreServiceFactory.create(
+    IMAGE_FOLDER = 'store_service'
+    IMAGE_PATH = f'{MEDIA}/{IMAGE_FOLDER}'
+    
+    @classmethod
+    def to_store_service(cls, dto: CreateStoreServiceDto) -> StoreService:
+        store_service = StoreServiceFactory.create(
             name=dto.name,
             description=dto.description,
-            type=dto.type,
-            images=dto.images
+            type=dto.type
         )
+        for base64_image in dto.images:
+            image = Base64ImageStorage(folder=cls.IMAGE_PATH, base64_image=base64_image)
+            store_service.add_image(image)
+        return store_service
     
-    @staticmethod
-    def to_dto(service: StoreService, questions: List[QuestionDto]) -> StoreServiceDto:
+    @classmethod
+    def to_dto(cls, service: StoreService, questions: Optional[List[QuestionDto]]=None) -> StoreServiceDto:
         return StoreServiceDto(
             id=service.id,
             name=service.name,
@@ -28,6 +37,9 @@ class StoreServiceMapper:
 
 
 class QuestionMapper:
+    IMAGE_FOLDER = 'choices'
+    IMAGE_PATH = f'{MEDIA}/{IMAGE_FOLDER}'
+    
     @classmethod
     def to_question(cls, dto: CreateQuestionDto) -> Question:
         if dto.input_type == QuestionInputType.CHOICE and dto.choice_type == ChoiceType.TEXT:
@@ -62,7 +74,8 @@ class QuestionMapper:
                 title=dto.title,
             )
         for choice in dto.choices:
-            question.add_choice(choice)
+            image = Base64ImageStorage(folder=cls.IMAGE_PATH, base64_image=choice.image)
+            question.add_choice(choice.option, image)
         return question
     
     @classmethod
@@ -87,7 +100,7 @@ class QuestionMapper:
             title=question.title,
             input_type=QuestionInputType.CHOICE,
             choice_type=ChoiceType.TEXT,
-            choices = [Choice(option=option) for option in question.choices]
+            choices = [ChoiceDto(option=option) for option in question.choices]
         )
     
     @classmethod
@@ -97,5 +110,6 @@ class QuestionMapper:
             title=question.title,
             input_type=QuestionInputType.CHOICE,
             choice_type=ChoiceType.IMAGE,
-            choices = question.choices
+            choices = [ChoiceDto(option=choice.option, image=choice.image.get_url())
+                       for choice in question.choices]
         )

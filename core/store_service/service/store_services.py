@@ -4,6 +4,7 @@ from .dto import (StoreServiceDto, CreateStoreServiceDto, UpdateStoreServiceDto,
 from typing import List, Optional
 from .repository import GetQuestion
 from core.common.abstract_repository import GetModel
+from core.common.image_storage import Base64ImageStorage
 from core.store_service import StoreService, TextChoiceQuestion, ImageChoiceQuestion
 from .exceptions import MissingImageException, QuestionAlreadyExistsException
 from .mapper import StoreServiceMapper, QuestionMapper
@@ -34,12 +35,13 @@ class FormQuestionService(AbstractFormQuestionService):
         question = self.get_question.get(id)
         return QuestionMapper.to_dto(question)
     
-    def add_choice(self, question_id: str, option: str, image: Optional[str]=None) -> QuestionDto:
+    def add_choice(self, question_id: str, option: str, base64_image: Optional[str]=None) -> QuestionDto:
         question = self.get_question.get(question_id)
         if isinstance(question, TextChoiceQuestion):
             question.add_choice(option)
         if isinstance(question, ImageChoiceQuestion):
-            if not image: raise MissingImageException.missing_image()
+            if not base64_image: raise MissingImageException.missing_image()
+            image = Base64ImageStorage(folder=QuestionMapper.IMAGE_PATH, base64_image=base64_image)
             question.add_choice(option, image)
         return QuestionMapper.to_dto(question)
     
@@ -66,8 +68,6 @@ class StoreServices(AbstractStoreServices):
     
     def create(self, dto: CreateStoreServiceDto) -> StoreServiceDto:
         service = StoreServiceMapper.to_store_service(dto)
-        for image in dto.images:
-            service.add_image(image)
         service.save()
         questions = [self.form_question_service.create(question) for question in dto.questions]
         return StoreServiceMapper.to_dto(service, questions)
@@ -81,7 +81,7 @@ class StoreServices(AbstractStoreServices):
             status=dto.status
         )
         service.save()
-        return self.find(service.id)
+        return StoreServiceMapper.to_dto(service)
     
     def delete(self, id: str) -> StoreServiceDto:
         service = self.get_service.get(id)
@@ -104,14 +104,15 @@ class StoreServices(AbstractStoreServices):
         )
         return [self.find(service.id) for service in services]
     
-    def add_image(self, service_id: str, image: str) -> StoreServiceDto:
+    def add_image(self, service_id: str, base64_image: str) -> StoreServiceDto:
         service = self.get_service.get(service_id)
+        image = Base64ImageStorage(folder=StoreServiceMapper.IMAGE_PATH, base64_image=base64_image)
         service.add_image(image)
         service.save()
-        return self.find(service.id)
+        return StoreServiceMapper.to_dto(service)
     
     def delete_image(self, service_id: str, image: str) -> StoreServiceDto:
         service = self.get_service.get(service_id)
         service.delete_image(image)
         service.save()
-        return self.find(service.id)
+        return StoreServiceMapper.to_dto(service)

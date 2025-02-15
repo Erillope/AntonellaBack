@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from core.store_service import ServiceType, ServiceStatus, Choice
+from core.store_service import ServiceType, ServiceStatus
 from core.common import OrdenDirection
 from typing import List, Optional
 from datetime import date
@@ -17,11 +17,16 @@ class ChoiceType(str, Enum):
     VOID = 'VOID'
 
 
+class ChoiceDto(BaseModel):
+    option: str
+    image: str = ''
+    
+    
 class CreateQuestionDto(BaseModel):
     title: str
     input_type: QuestionInputType
     choice_type: ChoiceType = ChoiceType.VOID
-    choices: List[Choice] = []
+    choices: List[ChoiceDto] = []
 
 
 class CreateStoreServiceDto(BaseModel):
@@ -53,7 +58,7 @@ class QuestionDto(BaseModel):
     title: str
     input_type: QuestionInputType
     choice_type: ChoiceType = ChoiceType.VOID
-    choices: List[Choice] = []
+    choices: List[ChoiceDto] = []
        
 class StoreServiceDto(BaseModel):
     id: str
@@ -62,5 +67,5 @@ class StoreServiceDto(BaseModel):
     status: ServiceStatus
     type: ServiceType
     images: List[str] = []
-    questions: List[QuestionDto]
+    questions: Optional[List[QuestionDto]] = None
     created_date: date

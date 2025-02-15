@@ -2,9 +2,12 @@ import json
 from typing import List, Dict, Any, Optional
 import random
 from core.store_service import (StoreServiceFactory, StoreService, ServiceType, ServiceStatus, InputType,
-                                QuestionFactory, TextChoiceQuestion, ImageChoiceQuestion)
-from core.store_service.service.dto import CreateStoreServiceDto
+                                QuestionFactory, TextChoiceQuestion, ImageChoiceQuestion, FormQuestion)
+from core.store_service.service.dto import (CreateStoreServiceDto, CreateQuestionDto, QuestionInputType,
+                                            ChoiceType, ChoiceDto)
 from core_test.images_data import get_base64_strings
+from core.common.config import MEDIA
+from core.common import ID
 import lorem
 
 class StoreTestData:
@@ -49,6 +52,12 @@ class StoreTestData:
     def get_input_type(self) -> InputType:
         return random.choice(list(InputType))
 
+    def get_question_input_type(self) -> QuestionInputType:
+        return random.choice(list(QuestionInputType))
+    
+    def generate_image_url(self) -> str:
+        return f'{MEDIA}/{ID.generate()}.png'
+
 
 class DataFactory:
     store_test_data: StoreTestData = StoreTestData.get_instance()
@@ -76,6 +85,14 @@ class DataFactory:
         ]
     
     @classmethod
+    def generate_form_questions(cls) -> List[FormQuestion]:
+        return [
+            QuestionFactory.create_form_question(title=cls.store_test_data.get_description(),
+                                                 input_type=cls.store_test_data.get_input_type())
+            for _ in range(10)
+        ]
+        
+    @classmethod
     def generate_text_choice_questions(cls) -> List[TextChoiceQuestion]:
         return [
             QuestionFactory.create_text_choice_question(title=cls.store_test_data.get_description())
@@ -86,5 +103,40 @@ class DataFactory:
     def generate_image_choice_questions(cls) -> List[ImageChoiceQuestion]:
         return [
             QuestionFactory.create_image_choice_question(title=cls.store_test_data.get_description())
+            for _ in range(10)
+        ]
+    
+    @classmethod
+    def generate_create_form_question_dto(cls) -> List[CreateQuestionDto]:
+        return [
+            CreateQuestionDto(
+                title=cls.store_test_data.get_description(),
+                input_type=random.choice([QuestionInputType.TEXT, QuestionInputType.IMAGE])
+            )
+            for _ in range(10)
+        ]
+    
+    @classmethod
+    def generate_create_text_choice_question_dto(cls) -> List[CreateQuestionDto]:
+        return [
+            CreateQuestionDto(
+                title=cls.store_test_data.get_description(),
+                input_type=QuestionInputType.CHOICE,
+                choice_type=ChoiceType.TEXT,
+                choices=[ChoiceDto(option=cls.store_test_data.get_description()) for _ in range(3)]
+            )
+            for _ in range(10)
+        ]
+    
+    @classmethod
+    def generate_create_image_choice_question_dto(cls) -> List[CreateQuestionDto]:
+        return [
+            CreateQuestionDto(
+                title=cls.store_test_data.get_description(),
+                input_type=QuestionInputType.CHOICE,
+                choice_type=ChoiceType.IMAGE,
+                choices=[ChoiceDto(option=cls.store_test_data.get_description(), image=cls.store_test_data.generate_image_url())
+                         for _ in range(3)]
+            )
             for _ in range(10)
         ]
