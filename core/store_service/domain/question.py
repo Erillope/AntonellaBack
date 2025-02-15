@@ -5,6 +5,7 @@ from .values import InputType, Choice
 from .exceptions import MissingStoreServiceException, OptionAlreadyExistsException
 from typing import List, Optional
 from datetime import date
+from core.common.image_storage import Base64ImageStorage
     
 class Question(BaseModel):
     id: str = ID.generate()
@@ -74,12 +75,11 @@ class TextChoiceQuestion(Question):
 class ImageChoiceQuestion(Question):
     choices: List[Choice] = []
     
-    def add_choice(self, option: str, image: str) -> None:
+    def add_choice(self, option: str, image: Base64ImageStorage) -> None:
         '''Agrega una opción a la pregunta de selección'''
         choice = Choice(option=option, image=image)
         if choice in self.choices: raise OptionAlreadyExistsException.already_exists(option)
         self.choices.append(choice)
-        choice.save_image()
         self._events.append(ChoiceAdded(question_id=self.id, option=choice.option, image=choice.image))
     
     def remove_choice(self, option: str) -> None:
@@ -87,7 +87,6 @@ class ImageChoiceQuestion(Question):
         for choice in self.choices:
             if choice.option == option:
                 self.choices.remove(choice)
-                choice.delete_image()
                 self._events.append(ChoiceDeleted(question_id=self.id, option=option))
 
 

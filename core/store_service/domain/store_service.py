@@ -2,8 +2,9 @@ from pydantic import BaseModel, model_validator, PrivateAttr
 from datetime import date
 from .values import ServiceStatus, ServiceType, ServiceName
 from .events import StoreServiceDeleted, StoreServiceSaved, StoreServiceImageAdded, StoreServiceImageDeleted
-from core.common import ID, EventPublisher, Event, Base64SaveStorageImage, DeleteStorageImage
-from typing import Optional, List, ClassVar
+from core.common import ID, EventPublisher, Event
+from typing import Optional, List
+from core.common.image_storage import Base64ImageStorage
 
 class StoreService(BaseModel):
     "Servicio de tienda"
@@ -14,9 +15,6 @@ class StoreService(BaseModel):
     type: ServiceType
     images: List[str] = []
     created_date: date
-    IMAGES_FOLDER: ClassVar[str] = 'store_service_images'
-    IMAGE_CONVERTER: ClassVar[Base64SaveStorageImage] = Base64SaveStorageImage(IMAGES_FOLDER)
-    IMAGE_DELETER: ClassVar[DeleteStorageImage] = DeleteStorageImage(IMAGES_FOLDER)
     _events: List[Event] = PrivateAttr(default=[])
     
     @model_validator(mode='after')
@@ -48,17 +46,15 @@ class StoreService(BaseModel):
         
         self._validate_data()
     
-    def add_image(self, base64_image: str) -> None:
+    def add_image(self, image: Base64ImageStorage) -> None:
         '''Agrega una imagen al servicio de tienda'''
-        image = self.IMAGE_CONVERTER.save(base64_image)
-        self.images.append(image)
+        self.images.append(image.get_url())
         self._events.append(StoreServiceImageAdded(store_service_id=self.id, image=image))
 
-    def delete_image(self, image: str) -> None:
+    def delete_image(self, image_url: str) -> None:
         '''Elimina una imagen del servicio de tienda'''
-        self.images.remove(image)
-        self.IMAGE_DELETER.delete(image)
-        self._events.append(StoreServiceImageDeleted(store_service_id=self.id, image=image))
+        self.images.remove(image_url)
+        self._events.append(StoreServiceImageDeleted(store_service_id=self.id, image_url=image_url))
     
     def save(self) -> None:
         EventPublisher.publish(StoreServiceSaved(store_service= self))
