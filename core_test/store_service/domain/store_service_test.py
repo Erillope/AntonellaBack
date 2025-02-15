@@ -1,9 +1,9 @@
 import unittest
 from core.store_service import StoreServiceFactory, StoreService
 from core.store_service.domain.exceptions import InvalidServiceNameException
-from .test_data import DataFactory
+from ..test_data import DataFactory
 from typing import List
-import shutil
+from core.common.image_storage import Base64ImageStorage
 
 class StoreServiceCreationTest(unittest.TestCase):        
     def test_store_service_creation(self) -> None:
@@ -42,26 +42,25 @@ class StoreServiceCreationTest(unittest.TestCase):
 class StoreServiceTest(unittest.TestCase):
     store_services: List[StoreService] = []
     base64_images: List[str] = []
+    test_folder: str = 'resources/media/prueba'
     
     @classmethod
     def setUpClass(cls) -> None:
         cls.store_services = DataFactory.generate_store_services()
         cls.base64_images = DataFactory.store_test_data.get_sample_base64_images()
-    
-    @classmethod
-    def tearDownClass(cls) -> None:
-        shutil.rmtree(f'resources/media/{StoreService.IMAGES_FOLDER}')
         
     def test_add_image(self) -> None:
         for store_service, image in zip(self.store_services, self.base64_images):
             len_images = len(store_service.images)
-            with self.subTest(store_service=store_service, image=image):
-                store_service.add_image(image)
+            with self.subTest(store_service=store_service, image=image):  
+                store_service.add_image(Base64ImageStorage(folder=self.test_folder, base64_image=image))
                 self.assertEqual(len_images+1, len(store_service.images))
     
-    def delete_image(self) -> None:
+    def test_delete_image(self) -> None:
         for store_service, image in zip(self.store_services, self.base64_images):
             len_images = len(store_service.images)
-            with self.subTest(store_service=store_service, image=image):
-                store_service.delete_image(image)
-                self.assertEqual(len_images-1, len(store_service.images))
+            with self.subTest(store_service=store_service):
+                base64_image = Base64ImageStorage(folder=self.test_folder, base64_image=image)
+                store_service.add_image(base64_image)
+                store_service.delete_image(base64_image.get_url())
+                self.assertEqual(len_images, len(store_service.images))

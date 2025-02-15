@@ -25,6 +25,10 @@ class InputType(Enum):
 class Choice(BaseModel):
     option: str
     image: Optional[Base64ImageStorage] = None
+    
+    def __eq__(self, value: object) -> bool:
+        if not isinstance(value, Choice): return False
+        return self.option == value.option
 
 
 class ServiceName:

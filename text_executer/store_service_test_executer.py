@@ -1,7 +1,10 @@
 from .text_executer import test_executer, django_test_executer
 
 def run_store_service_test() -> None:
-    test_executer('core_test/store_service/store_service_test')
+    test_executer('core_test/store_service/domain/store_service_test')
+
+def run_question_test() -> None:
+    test_executer('core_test/store_service/domain/question_test')
     
 def run_store_service_mapper_test() -> None:
     test_executer('core_test/store_service/mapper_test')

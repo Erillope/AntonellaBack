@@ -1,7 +1,8 @@
 import json
 from typing import List, Dict, Any, Optional
 import random
-from core.store_service import StoreServiceFactory, StoreService, ServiceType, ServiceStatus
+from core.store_service import (StoreServiceFactory, StoreService, ServiceType, ServiceStatus, InputType,
+                                QuestionFactory, TextChoiceQuestion, ImageChoiceQuestion)
 from core.store_service.service.dto import CreateStoreServiceDto
 from core_test.images_data import get_base64_strings
 import lorem
@@ -44,6 +45,9 @@ class StoreTestData:
     
     def get_sample_base64_images(self) -> List[str]:
         return random.sample(self.BASE64_IMAGES, random.randint(1, len(self.BASE64_IMAGES)))
+    
+    def get_input_type(self) -> InputType:
+        return random.choice(list(InputType))
 
 
 class DataFactory:
@@ -69,4 +73,18 @@ class DataFactory:
                 type=cls.store_test_data.get_service_type()
                 )
             for name in cls.store_test_data.get_names()
+        ]
+    
+    @classmethod
+    def generate_text_choice_questions(cls) -> List[TextChoiceQuestion]:
+        return [
+            QuestionFactory.create_text_choice_question(title=cls.store_test_data.get_description())
+            for _ in range(10)
+        ]
+    
+    @classmethod
+    def generate_image_choice_questions(cls) -> List[ImageChoiceQuestion]:
+        return [
+            QuestionFactory.create_image_choice_question(title=cls.store_test_data.get_description())
+            for _ in range(10)
         ]
