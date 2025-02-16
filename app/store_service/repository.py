@@ -24,9 +24,9 @@ class DjangoSaveStoreService(DjangoSaveModel[StoreServiceTableData, StoreService
         if isinstance(event, StoreServiceSaved):
             self.save(event.store_service)
         if isinstance(event, StoreServiceImageAdded):
-            self.add_image(event.store_service_id, event.image)
+            self.add_image(event.store_service_id, event.image.get_url())
         if isinstance(event, StoreServiceImageDeleted):
-            self.delete_image(event.store_service_id, event.image)
+            self.delete_image(event.store_service_id, event.image_url)
 
 
 class DjangoDeleteStoreService(DjangoDeleteModel[StoreServiceTableData, StoreService], EventSubscriber):

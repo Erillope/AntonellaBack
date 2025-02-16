@@ -3,7 +3,6 @@ from core.store_service import StoreServiceFactory, StoreService
 from core.store_service.domain.exceptions import InvalidServiceNameException
 from ..test_data import DataFactory
 from typing import List
-from core.common.image_storage import Base64ImageStorage
 
 class StoreServiceCreationTest(unittest.TestCase):        
     def test_store_service_creation(self) -> None:
@@ -53,14 +52,13 @@ class StoreServiceTest(unittest.TestCase):
         for store_service, image in zip(self.store_services, self.base64_images):
             len_images = len(store_service.images)
             with self.subTest(store_service=store_service, image=image):  
-                store_service.add_image(Base64ImageStorage(folder=self.test_folder, base64_image=image))
+                store_service.add_image(image)
                 self.assertEqual(len_images+1, len(store_service.images))
     
     def test_delete_image(self) -> None:
         for store_service, image in zip(self.store_services, self.base64_images):
             len_images = len(store_service.images)
             with self.subTest(store_service=store_service):
-                base64_image = Base64ImageStorage(folder=self.test_folder, base64_image=image)
-                store_service.add_image(base64_image)
-                store_service.delete_image(base64_image.get_url())
+                store_service.add_image(image)
+                store_service.delete_image(store_service.images[-1])
                 self.assertEqual(len_images, len(store_service.images))

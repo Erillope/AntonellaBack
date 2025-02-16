@@ -26,7 +26,7 @@ class AbstractStoreServices(ABC):
     def delete_image(self, service_id: str, image: str) -> StoreServiceDto: ...
 
 
-class AbstractFormQuestionService(ABC):
+class AbstractQuestionService(ABC):
     @abstractmethod
     def create(self, dto: CreateQuestionDto) -> QuestionDto: ...
     

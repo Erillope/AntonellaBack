@@ -2,7 +2,7 @@ import unittest
 from core.store_service.service.mapper import StoreServiceMapper, QuestionMapper
 from core.store_service import FormQuestion, TextChoiceQuestion, ImageChoiceQuestion
 from core.store_service.service.dto import QuestionInputType
-from .test_data import DataFactory
+from ..test_data import DataFactory
 from typing import cast
 
 class StoreServiceMapperTest(unittest.TestCase):
@@ -78,4 +78,3 @@ class QuestionMappertTest(unittest.TestCase):
                 self.assertEqual(image_choice_question.title, dto.title.lower())
                 self.assertEqual(dto.input_type, QuestionInputType.CHOICE)
                 self.assertEqual(len(image_choice_question.choices), len(dto.choices))
-        

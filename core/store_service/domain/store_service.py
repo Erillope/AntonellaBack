@@ -3,7 +3,7 @@ from datetime import date
 from .values import ServiceStatus, ServiceType, ServiceName
 from .events import StoreServiceDeleted, StoreServiceSaved, StoreServiceImageAdded, StoreServiceImageDeleted
 from core.common import ID, EventPublisher, Event
-from typing import Optional, List
+from typing import Optional, List, ClassVar
 from core.common.image_storage import Base64ImageStorage
 
 class StoreService(BaseModel):
@@ -15,6 +15,7 @@ class StoreService(BaseModel):
     type: ServiceType
     images: List[str] = []
     created_date: date
+    IMAGE_PATH: ClassVar[str] = f'store_service'
     _events: List[Event] = PrivateAttr(default=[])
     
     @model_validator(mode='after')
@@ -46,8 +47,9 @@ class StoreService(BaseModel):
         
         self._validate_data()
     
-    def add_image(self, image: Base64ImageStorage) -> None:
+    def add_image(self, base64_image: str) -> None:
         '''Agrega una imagen al servicio de tienda'''
+        image = Base64ImageStorage(folder=self.IMAGE_PATH, base64_image=base64_image)
         self.images.append(image.get_url())
         self._events.append(StoreServiceImageAdded(store_service_id=self.id, image=image))
 

@@ -1,6 +1,7 @@
 from .values import PatternMatcher
 from .exceptions import InvalidBase64FormatException, MediaNotFoundException
 from .config import MEDIA
+from .events import Event, EventSubscriber
 import base64
 import os
 from pydantic import BaseModel, PrivateAttr, model_validator
@@ -19,10 +20,23 @@ class Base64ImageStorage(BaseModel):
     def get_url(self) -> str:
         return self._url
     
-class Base64SaveStorageImage:
+
+class ImageSaved(Event):
+    '''Evento para cuando una imagen es guardada'''
+    def __init__(self, image: Base64ImageStorage):
+        self.image = image
+    
+        
+class ImageDeleted(Event):
+    '''Evento para cuando una imagen es guardada'''
+    def __init__(self, image_url: str):
+        self.image_url = image_url
+        
+        
+class Base64SaveStorageImage(EventSubscriber):
     URL_REGEX = r'^[A-Za-z0-9+/]+={0,2}$'
     MATCHER = PatternMatcher(pattern=URL_REGEX)
-        
+    
     def save(self, image: Base64ImageStorage) -> None:
         """Guarda una imagen en un directorio y retorna la URL"""
         self.verify_base64(image.base64_image)
@@ -41,10 +55,18 @@ class Base64SaveStorageImage:
         directory = os.path.dirname(path)
         os.makedirs(directory, exist_ok=True)
 
+    def handle(self, event: Event) -> None:
+        if isinstance(event, ImageSaved):
+            self.save(event.image)
 
-class DeleteStorageImage:
+
+class DeleteStorageImage(EventSubscriber):
     def delete(self, path: str) -> None:
         if os.path.exists(path) and path.startswith(MEDIA):
             os.remove(path)
             return
         raise MediaNotFoundException.media_not_found(path)
+    
+    def handle(self, event: Event) -> None:
+        if isinstance(event, ImageDeleted):
+            self.delete(event.image_url)

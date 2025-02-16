@@ -1,7 +1,6 @@
 import unittest
 from core.store_service import QuestionFactory, FormQuestion, TextChoiceQuestion, ImageChoiceQuestion
 from core.store_service.domain.exceptions import OptionAlreadyExistsException
-from core.common.image_storage import Base64ImageStorage
 from ..test_data import DataFactory
 
 class QuestionCreationTest(unittest.TestCase):
@@ -63,18 +62,15 @@ class ImageChoiceQuestionTest(unittest.TestCase):
     
     def test_add_choice(self) -> None:
         for question in self.questions:
-            image = Base64ImageStorage(folder=self.test_folder,
-                                       base64_image=DataFactory.store_test_data.get_sample_base64_images()[0])
+            image = DataFactory.store_test_data.get_sample_base64_images()[0]
             option = DataFactory.store_test_data.get_description()
             with self.subTest(question=question, option=option):
                 question.add_choice(option, image)
     
     def test_already_exists_option(self) -> None:
         for question in self.questions:
-            image = Base64ImageStorage(folder=self.test_folder,
-                                       base64_image=DataFactory.store_test_data.get_sample_base64_images()[0])
-            image2 = Base64ImageStorage(folder=self.test_folder,
-                                       base64_image=DataFactory.store_test_data.get_sample_base64_images()[0])
+            image = DataFactory.store_test_data.get_sample_base64_images()[0]
+            image2 = DataFactory.store_test_data.get_sample_base64_images()[0]
             option = DataFactory.store_test_data.get_description()
             with self.subTest(option=option):
                 question.add_choice(option, image)
@@ -83,8 +79,7 @@ class ImageChoiceQuestionTest(unittest.TestCase):
     
     def test_delete_choice(self) -> None:
         for question in self.questions:
-            image = Base64ImageStorage(folder=self.test_folder,
-                                       base64_image=DataFactory.store_test_data.get_sample_base64_images()[0])
+            image = DataFactory.store_test_data.get_sample_base64_images()[0]
             option = DataFactory.store_test_data.get_description()
             question.add_choice(option, image)
             with self.subTest(question=question, option=option):

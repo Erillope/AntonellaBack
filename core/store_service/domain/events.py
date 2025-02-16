@@ -1,6 +1,6 @@
 from __future__ import annotations
 from core.common import Event
-from core.common.image_storage import Base64ImageStorage
+from core.common.image_storage import Base64ImageStorage, ImageSaved, ImageDeleted
 from typing import TYPE_CHECKING, Optional
 if TYPE_CHECKING:
     from .store_service import StoreService
@@ -19,18 +19,18 @@ class StoreServiceDeleted(Event):
         self.store_service_id = store_service_id
 
 
-class StoreServiceImageAdded(Event):
+class StoreServiceImageAdded(ImageSaved):
     '''Evento para cuando una imagen es agregada a un servicio de tienda'''
     def __init__(self, store_service_id: str, image: Base64ImageStorage):
+        super().__init__(image)
         self.store_service_id = store_service_id
-        self.image = image
 
 
-class StoreServiceImageDeleted(Event):
+class StoreServiceImageDeleted(ImageDeleted):
     '''Evento para cuando una imagen es eliminada de un servicio de tienda'''
     def __init__(self, store_service_id: str, image_url: str):
+        super().__init__(image_url)
         self.store_service_id = store_service_id
-        self.image_url = image_url
 
 
 class QuestionCreated(Event):

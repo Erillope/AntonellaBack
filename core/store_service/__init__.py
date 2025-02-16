@@ -1,6 +1,7 @@
 from .domain import (ServiceStatus, ServiceType, StoreService, StoreServiceFactory, InputType, Choice,
                      FormQuestion, Question, QuestionFactory, TextChoiceQuestion, ImageChoiceQuestion)
-from .service.store_services import StoreServices
+from .service.store_services import StoreServices, QuestionService
+from .service.abstract_services import AbstractStoreServices, AbstractQuestionService
 
 __all__ = [
     'ServiceStatus',
@@ -14,5 +15,8 @@ __all__ = [
     'Question',
     'QuestionFactory',
     'TextChoiceQuestion',
-    'ImageChoiceQuestion'
+    'ImageChoiceQuestion',
+    'QuestionService',
+    'AbstractStoreServices',
+    'AbstractQuestionService'
 ]

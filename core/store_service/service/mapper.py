@@ -3,13 +3,8 @@ from core.store_service import (StoreService, StoreServiceFactory, Question, Que
 from .dto import (CreateStoreServiceDto, StoreServiceDto, CreateQuestionDto, QuestionInputType,
                   QuestionDto, ChoiceType, ChoiceDto)
 from typing import List, Optional
-from core.common.image_storage import Base64ImageStorage
-from core.common.config import MEDIA
 
 class StoreServiceMapper:
-    IMAGE_FOLDER = 'store_service'
-    IMAGE_PATH = f'{MEDIA}/{IMAGE_FOLDER}'
-    
     @classmethod
     def to_store_service(cls, dto: CreateStoreServiceDto) -> StoreService:
         store_service = StoreServiceFactory.create(
@@ -18,8 +13,7 @@ class StoreServiceMapper:
             type=dto.type
         )
         for base64_image in dto.images:
-            image = Base64ImageStorage(folder=cls.IMAGE_PATH, base64_image=base64_image)
-            store_service.add_image(image)
+            store_service.add_image(base64_image)
         return store_service
     
     @classmethod
@@ -37,9 +31,6 @@ class StoreServiceMapper:
 
 
 class QuestionMapper:
-    IMAGE_FOLDER = 'choices'
-    IMAGE_PATH = f'{MEDIA}/{IMAGE_FOLDER}'
-    
     @classmethod
     def to_question(cls, dto: CreateQuestionDto) -> Question:
         if dto.input_type == QuestionInputType.CHOICE and dto.choice_type == ChoiceType.TEXT:
@@ -74,8 +65,7 @@ class QuestionMapper:
                 title=dto.title,
             )
         for choice in dto.choices:
-            image = Base64ImageStorage(folder=cls.IMAGE_PATH, base64_image=choice.image)
-            question.add_choice(choice.option, image)
+            question.add_choice(choice.option, choice.image)
         return question
     
     @classmethod
