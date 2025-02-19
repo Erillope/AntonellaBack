@@ -1,4 +1,3 @@
-from .values import PatternMatcher
 from .exceptions import InvalidBase64FormatException, MediaNotFoundException
 from .config import MEDIA
 from .events import Event, EventSubscriber
@@ -6,6 +5,7 @@ import base64
 import os
 from pydantic import BaseModel, PrivateAttr, model_validator
 from core.common import ID
+from typing import List
 
 class Base64ImageStorage(BaseModel):
     folder: str
@@ -23,33 +23,31 @@ class Base64ImageStorage(BaseModel):
 
 class ImageSaved(Event):
     '''Evento para cuando una imagen es guardada'''
-    def __init__(self, image: Base64ImageStorage):
-        self.image = image
+    def __init__(self, images: List[Base64ImageStorage]):
+        self.images = images
     
         
 class ImageDeleted(Event):
     '''Evento para cuando una imagen es guardada'''
-    def __init__(self, image_url: str):
-        self.image_url = image_url
+    def __init__(self, image_urls: List[str]):
+        self.image_urls = image_urls
         
         
 class Base64SaveStorageImage(EventSubscriber):
-    URL_REGEX = r'^[A-Za-z0-9+/]+={0,2}$'
-    MATCHER = PatternMatcher(pattern=URL_REGEX)
-    
     def save(self, image: Base64ImageStorage) -> None:
         """Guarda una imagen en un directorio y retorna la URL"""
-        self.verify_base64(image.base64_image)
-        binary_image = base64.b64decode(image.base64_image)
+        binary_image = self.decode(image.base64_image)
         self.create_if_not_exists(image.get_url())
         with open(image.get_url(), "wb") as file:
             file.write(binary_image)
-
-    @classmethod
-    def verify_base64(cls, image: str) -> None:
-        if not cls.MATCHER.match(image):
-            raise InvalidBase64FormatException.invalid_format()
     
+    @classmethod
+    def decode(cls, base64_image: str) -> bytes:
+        try:
+            return base64.b64decode(base64_image)
+        except Exception:
+            raise InvalidBase64FormatException.invalid_format()
+        
     @classmethod
     def create_if_not_exists(cls, path: str) -> None:
         directory = os.path.dirname(path)
@@ -57,7 +55,8 @@ class Base64SaveStorageImage(EventSubscriber):
 
     def handle(self, event: Event) -> None:
         if isinstance(event, ImageSaved):
-            self.save(event.image)
+            for image in event.images:
+                self.save(image)
 
 
 class DeleteStorageImage(EventSubscriber):
@@ -69,4 +68,5 @@ class DeleteStorageImage(EventSubscriber):
     
     def handle(self, event: Event) -> None:
         if isinstance(event, ImageDeleted):
-            self.delete(event.image_url)
+            for image in event.image_urls:
+                self.delete(image)

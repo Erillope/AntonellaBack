@@ -1,30 +1,28 @@
 from enum import Enum
 from core.common import PatternMatcher
 from .exceptions import InvalidServiceNameException
-from typing import Optional, ClassVar
 from pydantic import BaseModel
-from core.common.image_storage import Base64ImageStorage
 
-class ServiceType(Enum):
+class ServiceType(str, Enum):
     HAIR = "CABELLO"
     SPA = "SPA"
     NAIL = "UÑAS"
     MAKEUP = "MAQUILLAJE"
 
 
-class ServiceStatus(Enum):
+class ServiceStatus(str, Enum):
     ENABLE = "ENABLE"
     DISABLE = "DISABLE"
     
 
-class InputType(Enum):
+class InputType(str, Enum):
     TEXT = "TEXT"
     IMAGE = "IMAGE"
 
     
 class Choice(BaseModel):
     option: str
-    image: Base64ImageStorage
+    image_url: str
     
     def __eq__(self, value: object) -> bool:
         if not isinstance(value, Choice): return False

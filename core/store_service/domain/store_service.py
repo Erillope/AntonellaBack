@@ -2,7 +2,7 @@ from pydantic import BaseModel, model_validator, PrivateAttr
 from datetime import date
 from .values import ServiceStatus, ServiceType, ServiceName
 from .events import StoreServiceDeleted, StoreServiceSaved, StoreServiceImageAdded, StoreServiceImageDeleted
-from core.common import ID, EventPublisher, Event
+from core.common import ID, Event
 from typing import Optional, List, ClassVar
 from core.common.image_storage import Base64ImageStorage
 
@@ -59,14 +59,13 @@ class StoreService(BaseModel):
         self._events.append(StoreServiceImageDeleted(store_service_id=self.id, image_url=image_url))
     
     def save(self) -> None:
-        EventPublisher.publish(StoreServiceSaved(store_service= self))
+        StoreServiceSaved(store_service= self).publish()
         for event in self._events:
-            EventPublisher.publish(event)
+            event.publish()
         self._events.clear()
     
     def delete(self) -> None:
-        EventPublisher.publish(StoreServiceDeleted(store_service_id = self.id))
-
+        StoreServiceDeleted(store_service = self).publish()
 
 class StoreServiceFactory:
     @staticmethod

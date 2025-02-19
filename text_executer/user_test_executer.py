@@ -1,9 +1,5 @@
 import os
-import django # type: ignore
 from .text_executer import test_executer, django_test_executer
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "antonella_back.settings")
-django.setup()
     
 def run_role_test() -> None:
     test_executer('core_test/user/domain/role_test')

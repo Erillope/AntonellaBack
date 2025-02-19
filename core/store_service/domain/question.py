@@ -1,6 +1,6 @@
 from pydantic import BaseModel, model_validator, PrivateAttr
-from core.common import ID, Event, EventPublisher
-from .events import QuestionCreated, QuestionDeleted, ChoiceAdded, ChoiceDeleted
+from core.common import ID, Event
+from .events import QuestionSaved, QuestionDeleted, ChoiceAdded, ChoiceDeleted, ChoiceImageAdded, ChoiceImageDeleted
 from .values import InputType, Choice
 from .exceptions import MissingStoreServiceException, OptionAlreadyExistsException
 from typing import List, Optional, ClassVar
@@ -8,9 +8,9 @@ from datetime import date
 from core.common.image_storage import Base64ImageStorage
 
 class Question(BaseModel):
-    id: str = ID.generate()
+    id: str
     title: str
-    created_date: date = date.today()
+    created_date: date
     _store_service_id: str = PrivateAttr(default='')
     _events: List[Event] = PrivateAttr(default=[])
     
@@ -42,14 +42,15 @@ class Question(BaseModel):
     def save(self) -> None:
         '''Guarda la pregunta de formulario'''
         if self._store_service_id:
-            EventPublisher.publish(QuestionCreated(question=self))
+            QuestionSaved(question=self).publish()
             for event in self._events:
-                EventPublisher.publish(event)
+                event.publish()
+            return
         raise MissingStoreServiceException.not_asigned()
 
     def delete(self) -> None:
         '''Elimina la pregunta de formulario'''
-        EventPublisher.publish(QuestionDeleted(question_id=self.id))
+        QuestionDeleted(question=self).publish()
         
 
 class FormQuestion(Question):
@@ -79,37 +80,44 @@ class ImageChoiceQuestion(Question):
     def add_choice(self, option: str, base64_image: str) -> None:
         '''Agrega una opción a la pregunta de selección'''
         image = Base64ImageStorage(folder=self.IMAGE_PATH, base64_image=base64_image)
-        choice = Choice(option=option, image=image)
+        choice = Choice(option=option, image_url=image.get_url())
         if choice in self.choices: raise OptionAlreadyExistsException.already_exists(option)
         self.choices.append(choice)
-        self._events.append(ChoiceAdded(question_id=self.id, option=choice.option, image=choice.image))
+        self._events.append(ChoiceImageAdded(question_id=self.id, option=choice.option, image=image))
     
     def remove_choice(self, option: str) -> None:
         '''Elimina una opción de la pregunta de selección'''
         for choice in self.choices:
             if choice.option == option:
                 self.choices.remove(choice)
-                self._events.append(ChoiceDeleted(question_id=self.id, option=option))
+                self._events.append(ChoiceImageDeleted(question_id=self.id,
+                                                       option=choice.option, image_url=choice.image_url))
 
 
 class QuestionFactory:
     @staticmethod
     def create_form_question(title: str, input_type: InputType) -> FormQuestion:
         return FormQuestion(
+            id=ID.generate(),
             title = title,
-            input_type = input_type
+            input_type = input_type,
+            created_date = date.today()
         )
     
     @staticmethod
     def create_text_choice_question(title: str) -> TextChoiceQuestion:
         return TextChoiceQuestion(
-            title = title
+            id = ID.generate(),
+            title = title,
+            created_date = date.today()
         )
     
     @staticmethod
     def create_image_choice_question(title: str) -> ImageChoiceQuestion:
         return ImageChoiceQuestion(
-            title = title
+            id = ID.generate(),
+            title = title,
+            created_date = date.today()
         )
     
     @staticmethod

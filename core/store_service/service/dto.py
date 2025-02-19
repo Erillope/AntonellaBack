@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from core.store_service import ServiceType, ServiceStatus
 from core.common import OrdenDirection
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from datetime import date
 from enum import Enum
 
@@ -34,7 +34,7 @@ class CreateStoreServiceDto(BaseModel):
     description: str
     type: ServiceType
     images: List[str] = []
-    questions: List[CreateQuestionDto] = []
+    questions: List[CreateQuestionDto]
 
 
 class UpdateStoreServiceDto(BaseModel):
@@ -59,6 +59,15 @@ class QuestionDto(BaseModel):
     input_type: QuestionInputType
     choice_type: ChoiceType = ChoiceType.VOID
     choices: List[ChoiceDto] = []
+    
+    def question_dump(self) -> Dict[str, Any]:
+        data = self.model_dump()
+        if self.choice_type == ChoiceType.VOID:
+            data.pop('choices')
+            data.pop('choice_type')
+        if self.choice_type == ChoiceType.TEXT:
+            data['choices'] = [choice.option for choice in self.choices]
+        return data
        
 class StoreServiceDto(BaseModel):
     id: str
@@ -69,3 +78,11 @@ class StoreServiceDto(BaseModel):
     images: List[str] = []
     questions: Optional[List[QuestionDto]] = None
     created_date: date
+    
+    def service_dump(self) -> Dict[str, Any]:
+        data = self.model_dump()
+        if self.questions:
+            data['questions'] = [question.question_dump() for question in self.questions]
+        else:
+            data.pop('questions')
+        return data

@@ -8,6 +8,9 @@ class Event(ABC):
     '''Eventos del programa'''
     def __init__(self) -> None:
         self.created_date = datetime.now()
+    
+    def publish(self) -> None:
+        EventPublisher.publish(self)
 
 
 class EventSubscriber(ABC):

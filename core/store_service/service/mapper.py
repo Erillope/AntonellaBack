@@ -100,6 +100,6 @@ class QuestionMapper:
             title=question.title,
             input_type=QuestionInputType.CHOICE,
             choice_type=ChoiceType.IMAGE,
-            choices = [ChoiceDto(option=choice.option, image=choice.image.get_url())
+            choices = [ChoiceDto(option=choice.option, image=choice.image_url)
                        for choice in question.choices]
         )

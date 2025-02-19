@@ -12,9 +12,10 @@ class QuestionService(AbstractQuestionService):
     def __init__(self, get_question: GetQuestion) -> None:
         self.get_question = get_question
         
-    def create(self, dto: CreateQuestionDto) -> QuestionDto:
+    def create(self, service_id: str, dto: CreateQuestionDto) -> QuestionDto:
         self._verify_already_exists_question(dto.title)
         question = QuestionMapper.to_question(dto)
+        question.set_store_service(service_id)
         question.save()
         return QuestionMapper.to_dto(question)
 
@@ -60,14 +61,14 @@ class QuestionService(AbstractQuestionService):
 
 class StoreServices(AbstractStoreServices):
     def __init__(self, get_service: GetModel[StoreService],
-                 form_question_service: AbstractQuestionService) -> None:
+                 question_service: AbstractQuestionService) -> None:
         self.get_service = get_service
-        self.form_question_service = form_question_service
+        self.question_service = question_service
     
     def create(self, dto: CreateStoreServiceDto) -> StoreServiceDto:
         service = StoreServiceMapper.to_store_service(dto)
         service.save()
-        questions = [self.form_question_service.create(question) for question in dto.questions]
+        questions = [self.question_service.create(service.id, question) for question in dto.questions]
         return StoreServiceMapper.to_dto(service, questions)
     
     def update(self, dto: UpdateStoreServiceDto) -> StoreServiceDto:
@@ -89,7 +90,7 @@ class StoreServices(AbstractStoreServices):
     
     def find(self, id: str) -> StoreServiceDto:
         service = self.get_service.get(id)
-        questions = self.form_question_service.service_questions(service.id)
+        questions = self.question_service.service_questions(service.id)
         return StoreServiceMapper.to_dto(service, questions)
     
     def filter(self, dto: FilterStoreServiceDto) -> List[StoreServiceDto]:
