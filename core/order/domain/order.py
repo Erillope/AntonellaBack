@@ -3,6 +3,7 @@ from typing import List
 from decimal import Decimal
 from .item import ServiceItem
 from .values import OrderStatusInfo, Price
+from core.common.values import ID
 
 class Order(BaseModel):
     id: str
@@ -17,6 +18,8 @@ class Order(BaseModel):
         return self
     
     def _validate_data(self) -> None:
+        ID.validate(self.id)
+        ID.validate(self.client_id)
         pass
     
     def total_payment(self) -> Decimal:

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, model_validator
 from enum import Enum
 from decimal import Decimal
-from core.common.values import AmountValue
+from core.common.values import AmountValue, ID
 from core.common.exceptions import InvalidTimeRange
 from datetime import date, time
 
@@ -51,6 +51,10 @@ class Price(BaseModel):
         return self
 
     def _validate_data(self) -> None:
+        AmountValue.validate(self.base_price)
+        AmountValue.validate(self.sale_price)
+        AmountValue.validate(self.iva)
+        AmountValue.validate(self.card_charge)
         pass
     
     @classmethod
@@ -71,6 +75,9 @@ class Payment(BaseModel):
         return self
     
     def _validate_data(self) -> None:
+        ID.validate(self.employee_id)
+        AmountValue.validate(self.percentage)
+        AmountValue.validate(self.amount)
         pass
     
     @classmethod
@@ -92,4 +99,6 @@ class DateInfo(BaseModel):
         return self
     
     def _validate_data(self) -> None:
+        if(self.end_time < self.start_time):
+            raise Exception("Hora incorrecta")
         pass

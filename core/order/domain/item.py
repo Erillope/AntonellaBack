@@ -4,6 +4,7 @@ from datetime import date, time
 from .values import Progresstatus, Price, Payment, DateInfo
 from typing import List
 from core.common.config import AppConfig
+from core.common.values import ID, AmountValue
 
 class ServiceItem(BaseModel):
     id: str
@@ -23,6 +24,12 @@ class ServiceItem(BaseModel):
         return self
     
     def _validate_data(self) -> None:
+        ID.validate(self.id)
+        ID.validate(self.service_id)
+        ID.validate(self.order_id)
+        AmountValue.validate(self.payment_percentage)
+        self.date_info._validate_data()
+        self.price._validate_data()
         pass
     
     def total_payment(self) -> Decimal:
@@ -32,6 +39,7 @@ class ServiceItem(BaseModel):
         return Decimal(0)
     
     def add_employee(self) -> None:
+        
         pass
     
     def remove_employee(self) -> None:
