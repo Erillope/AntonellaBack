@@ -2,7 +2,8 @@ from pydantic import BaseModel
 from enum import Enum
 import uuid
 import re
-from .exceptions import InvalidOrderDirectionException, InvalidIdException
+from .exceptions import InvalidOrderDirectionException, InvalidIdException, InvalidAmount
+from decimal import Decimal
 
 class ID:
     '''Validador y generador de UUIDs'''
@@ -42,3 +43,10 @@ class OrdenDirection(Enum):
         if name in cls._member_names_:
             return cls(name)
         raise InvalidOrderDirectionException.invalid_direction(name)
+
+
+class AmountValue:
+    @classmethod
+    def validate(cls, value: Decimal) -> None:
+        if value < 0:
+            raise InvalidAmount.invalid_amount(value)
