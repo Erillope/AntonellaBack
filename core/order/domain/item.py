@@ -33,14 +33,15 @@ class ServiceItem(BaseModel):
         pass
     
     def total_payment(self) -> Decimal:
-        return Decimal(0)
+        return self.price + AppConfig.iva()
     
     def profits(self) -> Decimal:
-        return Decimal(0)
+        return self.price * (1 - self.payment_percentage)
     
-    def add_employee(self) -> None:
-        
+    def add_employee(self, employee_id) -> None:
+        self.payments.append(employee_id)
         pass
     
-    def remove_employee(self) -> None:
+    def remove_employee(self, employee_id) -> None:
+        self.payments.remove(employee_id)
         pass

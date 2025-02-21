@@ -4,6 +4,7 @@ from decimal import Decimal
 from core.common.values import AmountValue, ID
 from core.common.exceptions import InvalidTimeRange
 from datetime import date, time
+from core.common.config import AppConfig
 
 class Progresstatus(str, Enum):
     '''Estados de un item de servicio'''
@@ -59,9 +60,9 @@ class Price(BaseModel):
     
     @classmethod
     def calculate(cls, base_price: Decimal) -> 'Price':
-        price: Price
-        return price
-
+        cls._validate_data()
+        cls.sale_price = base_price + AppConfig.iva() + cls.card_charge
+        return cls
 
 class Payment(BaseModel):
     employee_id: str
@@ -81,9 +82,10 @@ class Payment(BaseModel):
         pass
     
     @classmethod
-    def calculate(cls, emplotee_id: str, percentage: Decimal) -> 'Payment':
-        payment: Payment
-        return payment
+    def calculate(cls, employee_id: str, percentage: Decimal) -> 'Payment':
+        cls._validate_data()
+        cls.amount = Price.base_price * percentage
+        return cls
 
 
 class DateInfo(BaseModel):
@@ -100,5 +102,9 @@ class DateInfo(BaseModel):
     
     def _validate_data(self) -> None:
         if(self.end_time < self.start_time):
-            raise Exception("Hora incorrecta")
+            raise InvalidTimeRange.invalid_range(self.start_time, self.end_time)
+        
+        if(self.day < date.today().day):
+            raise Exception("Dia Incorrecto")
+        
         pass
