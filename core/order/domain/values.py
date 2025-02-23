@@ -25,7 +25,7 @@ class PaymentStatus(str, Enum):
     PAID = 'PAGADO'
 
 
-class PayementType(str, Enum):
+class PaymentType(str, Enum):
     '''Tipos de pago'''
     CASH = 'EFECTIVO'
     CARD = 'TARJETA'
@@ -35,7 +35,7 @@ class OrderStatusInfo(BaseModel):
     status: OrderStatus
     progress_status: Progresstatus
     payment_status: PaymentStatus
-    payment_type: PayementType
+    payment_type: PaymentType
 
     
 class Price(BaseModel):
@@ -56,13 +56,12 @@ class Price(BaseModel):
         AmountValue.validate(self.sale_price)
         AmountValue.validate(self.iva)
         AmountValue.validate(self.card_charge)
-        pass
     
     @classmethod
-    def calculate(cls, base_price: Decimal) -> 'Price':
-        cls._validate_data()
-        cls.sale_price = base_price + AppConfig.iva() + cls.card_charge
-        return cls
+    def calculate(cls, base_price: Decimal, card_charge: Decimal = Decimal(0)) -> 'Price':
+        sale_price = base_price*(1+AppConfig.iva()) + card_charge
+        return cls(base_price=base_price, sale_price=sale_price,
+                   iva=AppConfig.iva(), card_charge=card_charge)
 
 class Payment(BaseModel):
     employee_id: str
@@ -79,13 +78,16 @@ class Payment(BaseModel):
         ID.validate(self.employee_id)
         AmountValue.validate(self.percentage)
         AmountValue.validate(self.amount)
-        pass
     
     @classmethod
-    def calculate(cls, employee_id: str, percentage: Decimal) -> 'Payment':
-        cls._validate_data()
-        cls.amount = Price.base_price * percentage
-        return cls
+    def calculate(cls, employee_id: str, base_price: Decimal, percentage: Decimal) -> 'Payment':
+        amount = base_price * percentage
+        return cls(employee_id=employee_id, percentage=percentage, amount=amount)
+    
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, Payment):
+            return self.employee_id == value.employee_id
+        return False
 
 
 class DateInfo(BaseModel):
@@ -101,10 +103,12 @@ class DateInfo(BaseModel):
         return self
     
     def _validate_data(self) -> None:
+        if not self._is_in_time_range():
+            raise InvalidTimeRange.invalid_range(self.start_time, self.end_time)
         if(self.end_time < self.start_time):
             raise InvalidTimeRange.invalid_range(self.start_time, self.end_time)
-        
-        if(self.day < date.today().day):
-            raise Exception("Dia Incorrecto")
-        
-        pass
+    
+    def _is_in_time_range(self) -> bool:
+        is_valid_start = AppConfig.start_time() < self.start_time < AppConfig.end_time()
+        is_valid_end = AppConfig.start_time() < self.end_time < AppConfig.end_time()
+        return is_valid_start and is_valid_end

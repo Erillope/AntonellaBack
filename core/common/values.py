@@ -50,3 +50,8 @@ class AmountValue:
     def validate(cls, value: Decimal) -> None:
         if value < 0:
             raise InvalidAmount.invalid_amount(value)
+    
+    @classmethod
+    def validate_percentage(cls, value: Decimal) -> None:
+        if value < 0 or value > 1:
+            raise InvalidAmount.invalid_percentage(value)

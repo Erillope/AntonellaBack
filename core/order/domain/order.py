@@ -20,7 +20,6 @@ class Order(BaseModel):
     def _validate_data(self) -> None:
         ID.validate(self.id)
         ID.validate(self.client_id)
-        pass
     
     def total_payment(self) -> Decimal:
         return Decimal(0)

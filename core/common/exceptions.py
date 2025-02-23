@@ -1,4 +1,5 @@
 from decimal import Decimal
+from datetime import time
 
 class SystemException(Exception): ...
 
@@ -29,9 +30,17 @@ class InvalidAmount(SystemException):
     @classmethod
     def invalid_amount(cls, amount: Decimal) -> "InvalidAmount":
         return cls(f"El monto {amount} no es válido.")
+    
+    @classmethod
+    def invalid_percentage(cls, percentage: Decimal) -> "InvalidAmount":
+        return cls(f"El porcentaje {percentage} no es válido.")
 
 
 class InvalidTimeRange(SystemException):
     @classmethod
-    def invalid_range(cls, start_time: str, end_time: str) -> "InvalidTimeRange":
+    def invalid_range(cls, start_time: time, end_time: time) -> "InvalidTimeRange":
         return cls(f"El rango {start_time} - {end_time} no es válido.")
+    
+    @classmethod
+    def invalid_time(cls, time: time) -> "InvalidTimeRange":
+        return cls(f"La hora {time} no es válida.")
