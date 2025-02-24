@@ -54,12 +54,31 @@ class ServiceItem(BaseModel):
 class ServiceItemFactory:
     @classmethod
     def create(cls, service_id: str, order_id: str, payment_percentage: Decimal, day: date, start_time: time,
-               end_time: time) -> ServiceItem:
-       service_item: ServiceItem
-       return service_item
-   
+               end_time: time, price: Price) -> ServiceItem:
+        return ServiceItem(
+            id= ID.generate(),
+            service_id= service_id, 
+            order_id= order_id,
+            payment_percentage= payment_percentage,
+            date_info= DateInfo(day= day, start_time= start_time, end_time= end_time),
+            status= Progresstatus.PENDING,
+            price= price,
+            payments= [],
+            created_date= date.today()
+        )
+    
     @classmethod
     def load(cls, id: str, service_id: str, order_id: str, payment_percentage: Decimal, day: DateInfo, 
             status: Progresstatus, price: Price, payments: List[Payment], created_date: date) -> ServiceItem:
-        service_item: ServiceItem
-        return service_item
+        
+        return ServiceItem(
+            id= id,
+            service_id= service_id,
+            order_id= order_id,
+            payment_percentage= payment_percentage,
+            date_info= day,
+            status= status,
+            price= price,
+            payments= payments,
+            created_date= created_date
+        )
