@@ -2,15 +2,18 @@ import json
 from decimal import Decimal
 from datetime import time
 from typing import Dict, Any
+import os
 
-MEDIA = 'resources/media'
+resources_path = os.path.join(os.path.dirname(__file__), '../../resources/')
+
+MEDIA = resources_path + 'media/'
 
 class AppConfig:
     server_host = "http://127.0.0.1:8000/"
     client_host = "http://localhost:5173/"
     reset_password_url = client_host + "password/reset/"
     data = {}
-    with open('resources/config.json', encoding='utf-8') as file:
+    with open(resources_path + "config.json", encoding='utf-8') as file:
         data = json.load(file)
     
     @classmethod
