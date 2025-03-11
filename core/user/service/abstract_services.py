@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from .dto import UserDto, SignUpDto, UpdateUserDto, FilterUserDto, RoleDto
 from typing import List
+from core.token.tokens import Token
 
 class AbstractAuthService(ABC):
     @abstractmethod
@@ -8,6 +9,9 @@ class AbstractAuthService(ABC):
     
     @abstractmethod
     def sign_in(self, phone_number: str, password: str) -> UserDto: ...
+    
+    @abstractmethod
+    def create_change_password_token(self, email: str) -> Token: ...
 
 
 class AbstractUpdateUserService(ABC):
@@ -19,9 +23,15 @@ class AbstractUpdateUserService(ABC):
     
     @abstractmethod
     def remove_role(self, user_id: str, role: str) -> UserDto: ...
+    
+    @abstractmethod
+    def change_password_with_token(self, token_id: str, password: str) -> UserDto: ...
 
 
 class AbstractFilterUserService(ABC):
+    @abstractmethod
+    def get_user(self, user_id: str) -> UserDto: ...
+    
     @abstractmethod
     def filter_user(self, dto: FilterUserDto) -> List[UserDto]: ...
 

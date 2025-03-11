@@ -1,14 +1,17 @@
 from app.common.django_repository import DjangoSaveModel, DjangoDeleteModel, DjangoGetModel
 from core.user import UserAccount, Role
 from core.user.domain.values import UserEmail, UserPhoneNumber
-from core.common import EventSubscriber, Event, ID
+from core.common import EventSubscriber, Event, ID, SystemException
+from core.user.service.repository import GetUser
 from core.user.domain.events import (UserAccountSaved, RoleSaved, RoleAddedToUser,
-                                     RoleRemovedFromUser, RoleDeleted)
+                                     RoleRemovedFromUser, RoleDeleted, PhotoAddedToEmployee)
 from app.common.exceptions import ModelNotFoundException
-from .models import UserAccountTableData, RoleTableData, UserRoleTableData
+from .models import UserAccountTableData, RoleTableData, EmployeeAccountTableData, EmployeeRoleTableData
 from .mapper import UserTableMapper, RoleTableMapper
+from typing import Dict, Optional, List
+from core.common import OrdenDirection
 
-class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount]):
+class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount], GetUser):
     def __init__(self) -> None:
         super().__init__(UserAccountTableData, UserTableMapper())
         self.allowed_fields = ['name', 'email', 'status', 'gender', 'birthdate',
@@ -23,22 +26,38 @@ class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount]):
             return super().exists(unique)
         return False
     
+    def is_unique_user(self, user: UserAccount) -> bool:
+        if self.exists_by_email(user.email): return False
+        if self.exists_by_phone_number(user.phone_number): return False
+        if self.exists(user.id): return False
+        if isinstance(user, EmployeeAccountTableData) and self.exists_employee_by_dni(user.dni): return False
+        return True
+    
     def get(self, unique: str) -> UserAccount:
         if UserEmail.is_email(unique):
             return self.get_by_email(unique)
         if UserPhoneNumber.is_phone_number(unique):
             return self.get_by_phone_number(unique)
+        if self.exists_employee_by_id(unique):
+            table = EmployeeAccountTableData.objects.get(id=unique)
+            return self.mapper.to_model(table)
         return super().get(unique)
     
     def get_by_email(self, email: str) -> UserAccount:
         if not self.exists_by_email(email):
             raise ModelNotFoundException.not_found(email)
+        if self.exists_employee_by_email(email):
+            table = EmployeeAccountTableData.objects.get(email=email.lower())
+            return self.mapper.to_model(table)
         table = self.table.objects.get(email=email.lower())
         return self.mapper.to_model(table)
     
     def get_by_phone_number(self, phone_number: str) -> UserAccount:
         if not self.exists_by_phone_number(phone_number):
             raise ModelNotFoundException.not_found(phone_number)
+        if self.exists_employee_by_phone_number(phone_number):
+            table = EmployeeAccountTableData.objects.get(phone_number=phone_number)
+            return self.mapper.to_model(table)
         table = self.table.objects.get(phone_number=phone_number)
         return self.mapper.to_model(table)
         
@@ -48,15 +67,61 @@ class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount]):
     def exists_by_email(self, email: str) -> bool:
         return self.table.objects.filter(email=email.lower()).exists()
     
+    def exists_by_id(self, user_id: str) -> bool:
+        return super().exists(user_id)
+    
+    def exists_super_admin(self) -> bool:
+        return EmployeeRoleTableData.objects.filter(role__name=Role.SUPER_ADMIN).exists()
+    
+    def exists_employee_by_id(self, employee_id: str) -> bool:
+        if not ID.is_id(employee_id): return False
+        return EmployeeAccountTableData.objects.filter(id=employee_id).exists()
+    
+    def exists_employee_by_email(self, email: str) -> bool:
+        return EmployeeAccountTableData.objects.filter(email=email.lower()).exists()
+    
+    def exists_employee_by_phone_number(self, phone_number: str) -> bool:
+        return EmployeeAccountTableData.objects.filter(phone_number=phone_number).exists()
+    
+    def exists_employee_by_dni(self, dni: str) -> bool:
+        return EmployeeAccountTableData.objects.filter(dni=dni).exists()
+    
+    def filter(self, order_by: str, direction: OrdenDirection,
+               limit: Optional[int]=None, offset: Optional[int]=None,
+               fields: Dict[str, str]={}) -> List[UserAccount]:
+        return super().filter(order_by, direction, limit, offset, fields)
+    
+
 class DjangoSaveUser(DjangoSaveModel[UserAccountTableData, UserAccount], EventSubscriber):
     def __init__(self) -> None:
         super().__init__(UserTableMapper())
         EventSubscriber.__init__(self)
+        self.get_user = DjangoGetUser()
     
+    def save(self, user: UserAccount) -> None:
+        if not self.get_user.is_unique_user(user):
+            raise UserAlreadyExistsException.already_exists(user.id)
+        super().save(user)
+    
+    def update(self, user: UserAccount) -> None:
+        if not self.get_user.exists_by_id(user.id):
+            raise ModelNotFoundException.not_found(user.id)
+        old_user = self.get_user.get(user.id)
+        if old_user.phone_number != user.phone_number and self.get_user.exists_by_phone_number(user.phone_number):
+            raise UserAlreadyExistsException.already_exists(user.phone_number)
+        if old_user.email != user.email and self.get_user.exists_by_email(user.email):
+            raise UserAlreadyExistsException.already_exists(user.email)
+        super().save(user)
+        
+    def save_employee_photo(self, employee_id: str, photo: str) -> None:
+        EmployeeAccountTableData.objects.filter(id=employee_id).update(photo=photo)
+        
     def handle(self, event: Event) -> None:
         if isinstance(event, UserAccountSaved):
-            self.save(event.user)
-
+            if event.update: self.update(event.user)
+            else: self.save(event.user)
+        if isinstance(event, PhotoAddedToEmployee):
+            self.save_employee_photo(event.employee_id, event.photo.get_url())
 
 class DjangoGetRole(DjangoGetModel[RoleTableData, Role]):
     def __init__(self) -> None:
@@ -70,6 +135,7 @@ class DjangoGetRole(DjangoGetModel[RoleTableData, Role]):
             raise ModelNotFoundException.not_found(rolename)
         table = self.table.objects.get(name=rolename.lower())
         return self.mapper.to_model(table)
+    
     
 class DjangoSaveRole(DjangoSaveModel[RoleTableData, Role], EventSubscriber):    
     def __init__(self) -> None:
@@ -89,17 +155,18 @@ class DjangoDeleteRole(DjangoDeleteModel[RoleTableData, Role], EventSubscriber):
     def handle(self, event: Event) -> None:
         if isinstance(event, RoleDeleted):
             self.delete(event.rolename)
+     
             
 class RoleToUserSubscriber(EventSubscriber):
     def add_role(self, user_id: str, role: str) -> None:
-        user_table = UserAccountTableData.objects.get(id=user_id)
-        role_table = RoleTableData.objects.get(name=role)
-        UserRoleTableData.objects.create(user=user_table, role=role_table)
+        employee_table = EmployeeAccountTableData.objects.get(id=user_id)
+        role_table = RoleTableData.objects.get(name=role.lower())
+        EmployeeRoleTableData.objects.create(employee=employee_table, role=role_table)
     
     def remove_role(self, user_id: str, role: str) -> None:
-        user_table = UserAccountTableData.objects.get(id=user_id)
+        employee_table = EmployeeAccountTableData.objects.get(id=user_id)
         role_table = RoleTableData.objects.get(name=role)
-        UserRoleTableData.objects.get(user=user_table, role=role_table).delete()
+        EmployeeRoleTableData.objects.get(employee=employee_table, role=role_table).delete()
         
     def handle(self, event: Event) -> None:
         if isinstance(event, RoleAddedToUser):
@@ -107,3 +174,9 @@ class RoleToUserSubscriber(EventSubscriber):
         
         if isinstance(event, RoleRemovedFromUser):
             self.remove_role(event.user_id, event.rolename)
+
+
+class UserAlreadyExistsException(SystemException):
+    @classmethod
+    def already_exists(cls, unique: str) -> "UserAlreadyExistsException":
+        return cls(f'El usuario {unique} ya está registrado')

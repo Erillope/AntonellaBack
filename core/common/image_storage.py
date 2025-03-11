@@ -20,6 +20,10 @@ class Base64ImageStorage(BaseModel):
     def get_url(self) -> str:
         return self._url
     
+    @classmethod
+    def is_media_url(cls, path: str) -> bool:
+        return path.startswith(MEDIA)
+    
 
 class ImageSaved(Event):
     '''Evento para cuando una imagen es guardada'''

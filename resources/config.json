@@ -2,5 +2,21 @@
     "iva": 0.15,
     "payment_percentage": 0.5,
     "start_time": "08:00",
-    "end_time": "20:00"
+    "end_time": "20:00",
+    "default_super_admin": {
+        "phone_number": "0987654321",
+        "email": "ericklorenzolopez1@gmail.com",
+        "password": "Password-123",
+        "name": "SuperAdmin",
+        "birthdate": "1990-01-01",
+        "dni": "0987654321",
+        "gender": "MASCULINO",
+        "address": "Fake Street 123",
+        "photo": "resources/media/default/super_admin.png",
+        "roles": [
+            "super_admin"
+        ]
+    },
+    "reset_password_message": "Hola %s para cambiar tu contraseña ingresa al siguiente link:\n %s",
+    "email_password": "oggz choq avit mqeb"
 }

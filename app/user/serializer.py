@@ -1,11 +1,18 @@
 from rest_framework import serializers
 from core.user import AccountStatus, Gender
 from core.common import OrdenDirection
-from core.user.service.dto import SignUpDto, UpdateUserDto, FilterUserDto
+from core.user.service.dto import SignUpDto, UpdateUserDto, FilterUserDto, CreateEmployeeDto
 
 class SignInSerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length=250)
     password = serializers.CharField(max_length=250)
+    
+
+class EmployeeDataSerializer(serializers.Serializer):
+    dni = serializers.CharField(max_length=250)
+    address = serializers.CharField(max_length=250)
+    photo = serializers.CharField()
+    roles = serializers.ListField(child=serializers.CharField(max_length=250))
     
     
 class SignUpSerializer(serializers.Serializer):
@@ -15,9 +22,22 @@ class SignUpSerializer(serializers.Serializer):
     gender = serializers.ChoiceField(choices=[(g.value, g.value) for g in Gender])
     password = serializers.CharField(max_length=250)
     birthdate = serializers.DateField()
-    roles = serializers.ListField(child=serializers.CharField(max_length=250), required=False)
+    employee_data = EmployeeDataSerializer(required=False)
     
     def to_dto(self) -> SignUpDto:
+        if self.validated_data.get('employee_data'):
+            return CreateEmployeeDto(
+                phone_number=self.validated_data['phone_number'],
+                email=self.validated_data['email'],
+                name=self.validated_data['name'],
+                gender=Gender(self.validated_data['gender']),
+                password=self.validated_data['password'],
+                birthdate=self.validated_data['birthdate'],
+                dni=self.validated_data['employee_data']['dni'],
+                address=self.validated_data['employee_data']['address'],
+                photo=self.validated_data['employee_data']['photo'],
+                roles=self.validated_data['employee_data']['roles']
+            )
         return SignUpDto(
             phone_number=self.validated_data['phone_number'],
             email=self.validated_data['email'],
@@ -25,10 +45,9 @@ class SignUpSerializer(serializers.Serializer):
             gender=Gender(self.validated_data['gender']),
             password=self.validated_data['password'],
             birthdate=self.validated_data['birthdate'],
-            roles=self.validated_data['roles']
         )
 
-
+    
 class UpdateUserSerializer(serializers.Serializer):
     id = serializers.UUIDField()
     phone_number = serializers.CharField(max_length=250, required=False)
@@ -48,7 +67,7 @@ class UpdateUserSerializer(serializers.Serializer):
 
 
 class FilterUserSerializer(serializers.Serializer):
-    expresion = serializers.CharField(max_length=250, required=False)
+    fields = serializers.DictField(required=False)
     order_by = serializers.CharField(max_length=250)
     offset = serializers.IntegerField(required=False)
     limit = serializers.IntegerField(required=False)
@@ -57,7 +76,7 @@ class FilterUserSerializer(serializers.Serializer):
     def to_dto(self) -> FilterUserDto:
         order_direction = self.validated_data.get('order_direction')
         return FilterUserDto(
-            expresion=self.validated_data.get('expresion'),
+            fields=self.validated_data.get('fields', {}),
             order_by=self.validated_data['order_by'],
             offset=self.validated_data.get('offset'),
             limit=self.validated_data.get('limit'),
@@ -68,3 +87,8 @@ class FilterUserSerializer(serializers.Serializer):
 class AddRoleToUserSerializer(serializers.Serializer):
     user_id = serializers.UUIDField()
     role = serializers.CharField(max_length=250)
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    token_id = serializers.CharField(max_length=250)
+    password = serializers.CharField(max_length=250)

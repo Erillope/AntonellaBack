@@ -14,7 +14,7 @@ class AlreadyExistsRoleException(AuthServiceException):
         return cls(f'El rol {rolename} ya existe')
 
 
-class AlreadyExistsUserException(AuthServiceException):
+class AlreadyExistsSuperAdminException(AuthServiceException):
     @classmethod
-    def already_exists(cls, username: str) -> 'AlreadyExistsUserException':
-        return cls(f'El usuario {username} ya existe')
+    def already_exists(cls) -> 'AlreadyExistsSuperAdminException':
+        return cls('Ya existe un super administrador')

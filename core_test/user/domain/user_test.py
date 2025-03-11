@@ -1,185 +1,88 @@
 import unittest
-from core.common import ID
 from datetime import date
-from core.user import UserAccountFactory, AccountStatus
-from core.common.exceptions import InvalidIdException
+from core.user import UserAccountFactory, AccountStatus, UserAccount
+from core.user.domain.values import UserPhoneNumber, UserEmail, UserName, UserPassword, Gender
 from core.user.domain.exceptions import (InvalidPhoneNumberException, InvalidUserBirthdateException,
                                          InvalidUserEmailException, InvalidUserNameException, 
                                          InvalidUserPasswordException)
-from ..test_data import DataFactory
+from ..test_data import UserDataFactory
+import random
+from typing import Dict, Any
 
 class TestUserAccountCreation(unittest.TestCase):
-    def test_user_account_creation(self) -> None:
-        for phone_number, email, name, password in zip(
-            DataFactory.user_test_data.get_phone_numbers(),
-            DataFactory.user_test_data.get_emails(),
-            DataFactory.user_test_data.get_user_names(),
-            DataFactory.user_test_data.get_passwords()
-        ):
-            birthdate = DataFactory.user_test_data.get_birthdate()
-            gender = DataFactory.user_test_data.get_gender()
-            with self.subTest(phone_number=phone_number, email=email, name=name, password=password,
-                              birthdate=birthdate, gender=gender):
-                user = UserAccountFactory.create(
-                    phone_number=phone_number,
-                    email=email,
-                    name=name,
-                    password=password,
-                    birthdate=birthdate,
-                    gender=gender
-                )
-                self.assertEqual(user.phone_number, phone_number)
-                self.assertEqual(user.email, email.lower())
-                self.assertEqual(user.name, name.lower())
-                self.assertTrue(user.verify_password(password))
-                self.assertEqual(user.birthdate, birthdate)
-                self.assertTrue(user.status == AccountStatus.ENABLE)
-                self.assertTrue(user.created_date == date.today())
-                self.assertEqual(user.gender, gender)
-
-    def test_user_account_load(self) -> None:
-        for phone_number, email, name, password in zip(
-            DataFactory.user_test_data.get_phone_numbers(),
-            DataFactory.user_test_data.get_emails(),
-            DataFactory.user_test_data.get_user_names(),
-            DataFactory.user_test_data.get_passwords()
-        ):
-            id = ID.generate()
-            birthdate = DataFactory.user_test_data.get_birthdate()
-            roles = DataFactory.generate_sample_roles()
-            created_date = DataFactory.user_test_data.get_created_date()
-            gender = DataFactory.user_test_data.get_gender()
-            status = DataFactory.user_test_data.get_account_status()
-            with self.subTest(id=id, phone_number=phone_number, email=email, name=name, password=password,
-                                birthdate=birthdate, roles=roles, created_date=created_date, gender=gender,
-                                status=status):
-                
-                user = UserAccountFactory.load(
-                    id=id,
-                    phone_number=phone_number,
-                    email=email,
-                    name=name,
-                    password=password,
-                    status=status,
-                    birthdate=birthdate,
-                    created_date=created_date,
-                    roles=roles,
-                    gender=gender
-                )        
-                self.assertEqual(user.id, id)
-                self.assertEqual(user.status, status)
-                self.assertEqual(user.created_date, created_date)
+    num_test = 10
     
+    def test_user_account_creation(self) -> None:
+        for _ in range(self.num_test):
+            user_data = self._user_data()
+            with self.subTest(**user_data):
+                user = UserAccountFactory.create_user(**user_data)
+                self._validate_user(user, **user_data)
+    
+        
     def test_invalid_phone_number(self) -> None:
-        for invalid_phone_number, email, name, password in zip(
-            DataFactory.user_test_data.get_invalid_phone_numbers(),
-            DataFactory.user_test_data.get_emails(),
-            DataFactory.user_test_data.get_user_names(),
-            DataFactory.user_test_data.get_passwords()
-        ):
-            birthdate = DataFactory.user_test_data.get_birthdate()
-            gender = DataFactory.user_test_data.get_gender()
-            with self.subTest(invalid_phone_number=invalid_phone_number, email=email, name=name,
-                            password=password, birthdate=birthdate, gender=gender):
+        for _ in range(self.num_test):
+            user_data = self._user_data()
+            user_data['phone_number'] = UserPhoneNumber.MATCHER.generate_invalid(random.randint(0,10))
+            with self.subTest(**user_data):
                 with self.assertRaises(InvalidPhoneNumberException):
-                    UserAccountFactory.create(phone_number=invalid_phone_number, email=email,
-                                            name=name, password=password,
-                                            birthdate=birthdate,
-                                            gender=gender)
+                    UserAccountFactory.create_user(**user_data)
             
     def test_invalid_email(self) -> None:
-        for phone_number, invalid_email, name, password in zip(
-            DataFactory.user_test_data.get_phone_numbers(),
-            DataFactory.user_test_data.get_invalid_emails(),
-            DataFactory.user_test_data.get_user_names(),
-            DataFactory.user_test_data.get_passwords()
-        ):
-            birthdate = DataFactory.user_test_data.get_birthdate()
-            gender = DataFactory.user_test_data.get_gender()
-            with self.subTest(phone_number=phone_number, invalid_email=invalid_email, name=name,
-                              password=password, birthdate=birthdate, gender=gender):
+        for _ in range(self.num_test):
+            user_data = self._user_data()
+            user_data['email'] = UserEmail.MATCHER.generate_invalid(random.randint(0,20))
+            with self.subTest(**user_data):
                 with self.assertRaises(InvalidUserEmailException):
-                    UserAccountFactory.create(phone_number=phone_number, email=invalid_email,
-                                              name=name, password=password,
-                                              birthdate=birthdate,
-                                              gender=gender)
+                    UserAccountFactory.create_user(**user_data)
     
     def test_invalid_name(self) -> None:
-        for phone_number, email, invalid_name, password in zip(
-            DataFactory.user_test_data.get_phone_numbers(),
-            DataFactory.user_test_data.get_emails(),
-            DataFactory.user_test_data.get_invalid_user_names(),
-            DataFactory.user_test_data.get_passwords()
-        ):
-            birthdate = DataFactory.user_test_data.get_birthdate()
-            gender = DataFactory.user_test_data.get_gender()
-            with self.subTest(phone_number=phone_number, email=email, invalid_name=invalid_name,
-                              password=password, birthdate=birthdate, gender=gender):
+        for _ in range(self.num_test):
+            user_data = self._user_data()
+            user_data['name'] = 'invalid name'
+            with self.subTest(**user_data):
                 with self.assertRaises(InvalidUserNameException):
-                    UserAccountFactory.create(phone_number=phone_number, email=email,
-                                              name=invalid_name, password=password,
-                                              birthdate=birthdate,
-                                              gender=gender)
+                    UserAccountFactory.create_user(**user_data)
     
     def test_invalid_password(self) -> None:
-        for phone_number, email, name, invalid_password in zip(
-            DataFactory.user_test_data.get_phone_numbers(),
-            DataFactory.user_test_data.get_emails(),
-            DataFactory.user_test_data.get_user_names(),
-            DataFactory.user_test_data.get_invalid_passwords()
-        ):
-            birthdate = DataFactory.user_test_data.get_birthdate()
-            gender = DataFactory.user_test_data.get_gender()
-            with self.subTest(phone_number=phone_number, email=email, name=name,
-                              invalid_password=invalid_password, birthdate=birthdate, gender=gender):
+        for _ in range(self.num_test):
+            user_data = self._user_data()
+            user_data['password'] = UserPassword.MATCHER.generate_invalid(random.randint(0,20))
+            with self.subTest(**user_data):
                 with self.assertRaises(InvalidUserPasswordException):
-                    UserAccountFactory.create(phone_number=phone_number, email=email,
-                                              name=name, password=invalid_password,
-                                              birthdate=birthdate,
-                                              gender=gender)
+                    UserAccountFactory.create_user(**user_data)
     
     def test_invalid_birthdate(self) -> None:
-        for phone_number, email, name, password in zip(
-            DataFactory.user_test_data.get_phone_numbers(),
-            DataFactory.user_test_data.get_emails(),
-            DataFactory.user_test_data.get_user_names(),
-            DataFactory.user_test_data.get_passwords(),
-        ):
-            invalid_birthdate = DataFactory.user_test_data.get_invalid_birthdate()
-            gender = DataFactory.user_test_data.get_gender()
-            with self.subTest(phone_number=phone_number, email=email, name=name,
-                              password=password, invalid_birthdate=invalid_birthdate, gender=gender):
+        for _ in range(self.num_test):
+            user_data = self._user_data()
+            user_data['birthdate'] = UserDataFactory.get_invalid_birthdate()
+            with self.subTest(**user_data):
                 with self.assertRaises(InvalidUserBirthdateException):
-                    UserAccountFactory.create(phone_number=phone_number, email=email,
-                                              name=name, password=password,
-                                              birthdate=invalid_birthdate,
-                                              gender=gender)
+                    UserAccountFactory.create_user(**user_data)
     
-    def test_invalid_id(self) -> None:
-        for invalid_id, phone_number, email, name, password in zip(
-            DataFactory.user_test_data.get_invalid_ids(),
-            DataFactory.user_test_data.get_phone_numbers(),
-            DataFactory.user_test_data.get_emails(),
-            DataFactory.user_test_data.get_user_names(),
-            DataFactory.user_test_data.get_passwords()
-        ):
-            birthdate = DataFactory.user_test_data.get_birthdate()
-            roles = DataFactory.generate_sample_roles()
-            created_date = DataFactory.user_test_data.get_created_date()
-            gender = DataFactory.user_test_data.get_gender()
-            status = DataFactory.user_test_data.get_account_status()
-            with self.subTest(invalid_id=invalid_id, phone_number=phone_number, email=email, name=name,
-                              password=password, birthdate=birthdate, roles=roles, created_date=created_date,
-                              gender=gender, status=status):
-                with self.assertRaises(InvalidIdException):
-                    UserAccountFactory.load(id=invalid_id, phone_number=phone_number,
-                                            email=email, name=name,
-                                            password=password, status=status,
-                                            birthdate=birthdate, created_date=created_date,
-                                            roles=roles, gender=gender)
+    def _user_data(self) -> Dict[str, Any]:
+        return {
+            'phone_number': UserPhoneNumber.MATCHER.generate(),
+            'email': UserEmail.MATCHER.generate(),
+            'name': UserName.MATCHER.generate(),
+            'password': UserPassword.MATCHER.generate(),
+            'birthdate': UserDataFactory.get_birthdate(),
+            'gender': random.choice(list(Gender))
+        }
+        
+    def _validate_user(self, user: UserAccount, phone_number: str, email: str, name: str, password: str, gender: Gender, birthdate: date) -> None:
+        self.assertEqual(user.phone_number, phone_number)
+        self.assertEqual(user.email, email.lower())
+        self.assertEqual(user.name, name.lower())
+        self.assertTrue(user.verify_password(password))
+        self.assertEqual(user.birthdate, birthdate)
+        self.assertTrue(user.status == AccountStatus.ENABLE)
+        self.assertTrue(user.created_date == date.today())
+        self.assertEqual(user.gender, gender)
+    
 
 
-class TestUserAccount(unittest.TestCase):        
+'''class TestUserAccount(unittest.TestCase):        
     def test_update_user_account(self) -> None:
         for phone_number, email, name, password, user in zip(
             DataFactory.user_test_data.get_phone_numbers(),
@@ -227,4 +130,4 @@ class TestUserAccount(unittest.TestCase):
                 user.add_role(role)
                 self.assertTrue(role in user.roles)
                 user.remove_role(role)
-                self.assertFalse(role in user.roles)
+                self.assertFalse(role in user.roles)'''

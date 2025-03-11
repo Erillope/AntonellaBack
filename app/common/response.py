@@ -2,9 +2,12 @@ from core.common.exceptions import SystemException
 from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework import status
-from typing import Any, Dict, List, Callable, Type
+from typing import Any, Dict, List, Callable, Type, Optional
 
-def success_response(data: Dict[str, Any]|List[Dict[str, Any]]) -> Response:
+Data = Dict[str, Any]|List[Dict[str, Any]]
+
+def success_response(data: Optional[Data]=None) -> Response:
+    if not data: data = {}
     return Response({
         'status': 'success',
         'code': 200,

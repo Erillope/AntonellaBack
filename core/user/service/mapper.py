@@ -1,11 +1,23 @@
-from core.user import UserAccount, Role, UserAccountFactory, RoleFactory
-from .dto import SignUpDto, UserDto, RoleDto
+from core.user import UserAccount, Role, UserAccountFactory, RoleFactory, EmployeeAccount
+from .dto import SignUpDto, UserDto, RoleDto, CreateEmployeeDto
 
 class UserMapper:
     '''Mapeador entre usuarios y dtos'''
     @classmethod
     def to_user(cls, dto: SignUpDto) -> UserAccount:
-        return UserAccountFactory.create(
+        if isinstance(dto, CreateEmployeeDto):
+            return cls._to_employee_user(dto)
+        return cls._to_client_user(dto)
+
+    @classmethod
+    def to_dto(cls, user: UserAccount) -> UserDto:
+        if isinstance(user, EmployeeAccount):
+            return cls._from_employee_user(user)
+        return cls._from_client_user(user)
+    
+    @classmethod
+    def _to_client_user(cls, dto: SignUpDto) -> UserAccount:
+        return UserAccountFactory.create_user(
             phone_number=dto.phone_number,
             email=dto.email,
             password=dto.password,
@@ -13,9 +25,26 @@ class UserMapper:
             birthdate=dto.birthdate,
             gender=dto.gender
         )
-
+    
     @classmethod
-    def to_dto(cls, user: UserAccount) -> UserDto:
+    def _to_employee_user(cls, dto: CreateEmployeeDto) -> EmployeeAccount:
+        employee = UserAccountFactory.create_employee(
+            phone_number=dto.phone_number,
+            email=dto.email,
+            password=dto.password,
+            name=dto.name,
+            birthdate=dto.birthdate,
+            gender=dto.gender,
+            dni=dto.dni,
+            address=dto.address,
+            photo=dto.photo
+        )
+        for role in dto.roles:
+            employee.add_role(role)
+        return employee
+    
+    @classmethod
+    def _from_client_user(cls, user: UserAccount) -> UserDto:
         return UserDto(
             id=user.id,
             phone_number=user.phone_number,
@@ -24,8 +53,24 @@ class UserMapper:
             birthdate=user.birthdate,
             status=user.status,
             gender=user.gender,
-            roles=[RoleMapper.to_dto(role) for role in user.roles],
-            created_date=user.created_date,
+            created_date=user.created_date
+        )
+    
+    @classmethod
+    def _from_employee_user(cls, employee: EmployeeAccount) -> UserDto:
+        return UserDto(
+            id=employee.id,
+            dni=employee.dni,
+            address=employee.address,
+            photo=employee.photo,
+            phone_number=employee.phone_number,
+            email=employee.email,
+            name=employee.name,
+            birthdate=employee.birthdate,
+            status=employee.status,
+            gender=employee.gender,
+            created_date=employee.created_date,
+            roles=[role for role in employee.roles]
         )
 
 

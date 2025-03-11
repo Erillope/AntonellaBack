@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from datetime import date
 from core.user import AccountStatus, Gender
 from core.common import OrdenDirection
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 class SignUpDto(BaseModel):
     phone_number: str
@@ -11,7 +11,13 @@ class SignUpDto(BaseModel):
     gender: Gender
     password: str
     birthdate: date
-    roles: List[str] = []
+
+
+class CreateEmployeeDto(SignUpDto):
+    dni: str
+    address: str
+    photo: str
+    roles: List[str]
 
 
 class UpdateUserDto(BaseModel):
@@ -21,10 +27,12 @@ class UpdateUserDto(BaseModel):
     name: Optional[str] = None
     password: Optional[str] = None
     status: Optional[AccountStatus] = None
+    address: Optional[str] = None
+    photo: Optional[str] = None
 
 
 class FilterUserDto(BaseModel):
-    expresion: Optional[str] = None
+    fields : Dict[str, str] = {}
     order_by: str
     offset: Optional[int] = None
     limit: Optional[int] = None
@@ -39,6 +47,9 @@ class RoleDto(BaseModel):
     
 class UserDto(BaseModel):
     id: str
+    dni: Optional[str] = None
+    address: Optional[str] = None
+    photo: Optional[str] = None
     phone_number: str
     email: str
     name: str
@@ -46,4 +57,10 @@ class UserDto(BaseModel):
     gender: Gender
     birthdate: date
     created_date: date
-    roles: List[RoleDto]
+    roles: List[str] = []
+    
+    def user_dump(self) -> Dict[str, Any]:
+        data = self.model_dump(exclude_none=True)
+        if not self.roles:
+            data.pop('roles')
+        return data

@@ -74,7 +74,7 @@ class UserName:
 
 class UserEmail:
     '''Validador de correos electrónicos de usuario'''
-    REGREX = r"^[a-zA-Z0-9._%+-]+@gmail\.com$"
+    REGREX = r'^[a-zA-Z0-9_%+-]+(?!\.\.)@gmail\.com$'
     MATCHER = PatternMatcher(pattern=REGREX)
     
     @classmethod
@@ -94,7 +94,15 @@ class UserBirthdate:
     
     @classmethod
     def validate(cls, value: date) -> None:
-        #TODO
         edad = date.today().year - value.year
         if edad >= cls.MAX_AGE or edad <= cls.MIN_AGE:
             raise InvalidUserBirthdateException.invalid_birthdate(value)
+
+
+class DniValue:
+    MATCHER = PatternMatcher(pattern=r'^\d{10}$')
+    
+    @classmethod
+    def validate(cls, value: str) -> None:
+        if not cls.MATCHER.match(value):
+            raise InvalidDniException.invalid_dni(value)

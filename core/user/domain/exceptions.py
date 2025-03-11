@@ -37,3 +37,9 @@ class InvalidUserBirthdateException(UserException):
     @classmethod
     def invalid_birthdate(cls, birthdate: date) -> "InvalidUserBirthdateException":
         return cls(f"La fecha de nacimiento {birthdate} es inválida")
+
+
+class InvalidDniException(UserException):
+    @classmethod
+    def invalid_dni(cls, dni: str) -> "InvalidDniException":
+        return cls(f"El dni '{dni}' es inválido.")

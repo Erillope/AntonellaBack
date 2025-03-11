@@ -1,5 +1,5 @@
 from .role import Role, RoleFactory
-from .user import UserAccount, UserAccountFactory
+from .user import UserAccount, UserAccountFactory, EmployeeAccount
 from .events import *
 from .values import AccountStatus, UserBirthdate, UserEmail, UserName, UserPassword, UserPhoneNumber, Gender
 
@@ -14,5 +14,6 @@ __all__ = [
     'UserName',
     'UserPassword',
     'UserPhoneNumber',
-    'Gender'
+    'Gender',
+    'EmployeeAccount',
 ]

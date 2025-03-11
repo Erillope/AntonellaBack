@@ -1,5 +1,6 @@
 from __future__ import annotations
 from core.common import Event
+from core.common.image_storage import ImageSaved, ImageDeleted, Base64ImageStorage
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .user import UserAccount
@@ -7,8 +8,9 @@ if TYPE_CHECKING:
 
 class UserAccountSaved(Event):
     '''Evento para cuando un usuario es actualizado'''
-    def __init__(self, user: UserAccount):
+    def __init__(self, user: UserAccount, update: bool=False):
         self.user = user
+        self.update = update
 
 class RoleSaved(Event):
     '''Evento para cuando un rol es actualizado'''
@@ -31,3 +33,11 @@ class RoleRemovedFromUser(Event):
     def __init__(self, rolename: str, user_id: str):
         self.rolename = rolename
         self.user_id = user_id
+
+
+class PhotoAddedToEmployee(ImageSaved):
+    '''Evento para cuando una foto es añadida a un empleado'''
+    def __init__(self, employee_id: str, photo: Base64ImageStorage):
+        super().__init__([photo])
+        self.photo = photo
+        self.employee_id = employee_id

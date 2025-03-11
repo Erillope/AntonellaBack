@@ -1,4 +1,4 @@
-from .domain import Role, RoleFactory, UserAccount, UserAccountFactory, AccountStatus, Gender
+from .domain import Role, RoleFactory, UserAccount, UserAccountFactory, AccountStatus, Gender, EmployeeAccount
 from .service import (AbstractAuthService, AbstractUpdateUserService, AbstractFilterUserService, 
                       AbstractRoleService, AuthService, UpdateUserService, FilterUserService, RoleService)
 
@@ -16,5 +16,6 @@ __all__ = [
     'UpdateUserService',
     'FilterUserService',
     'RoleService',
-    'Gender'
+    'Gender',
+    'EmployeeAccount',
 ]

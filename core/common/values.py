@@ -2,8 +2,13 @@ from pydantic import BaseModel
 from enum import Enum
 import uuid
 import re
+import rstr
+import string
+import random
 from .exceptions import InvalidOrderDirectionException, InvalidIdException, InvalidAmount
 from decimal import Decimal
+import pytz
+from datetime import datetime
 
 class ID:
     '''Validador y generador de UUIDs'''
@@ -31,6 +36,21 @@ class PatternMatcher(BaseModel):
     
     def match(self, value: str) -> bool:
         return bool(re.match(self.pattern, value.encode('utf-8').decode('utf-8')))
+    
+    def generate(self) -> str:
+        while True:
+            generated = rstr.xeger(self.pattern)
+            if re.fullmatch(self.pattern, generated):
+                return generated
+    
+    def random(self, long: int) -> str:
+        return ''.join(random.choices(string.ascii_letters + string.digits, k=long))
+    
+    def generate_invalid(self, long: int) -> str:
+        while True:
+            s = ''.join(random.choices(string.ascii_letters + string.digits, k=long))
+            if not re.fullmatch(self.pattern, s):
+                return s
 
 
 class OrdenDirection(Enum):
@@ -55,3 +75,17 @@ class AmountValue:
     def validate_percentage(cls, value: Decimal) -> None:
         if value < 0 or value > 1:
             raise InvalidAmount.invalid_percentage(value)
+
+
+class GuayaquilDatetime:
+    timezone = pytz.timezone("America/Guayaquil")
+    
+    @classmethod
+    def now(cls) -> datetime:
+        return cls.timezone.localize(datetime.now())
+    
+    @classmethod
+    def localize(cls, datetime: datetime) -> datetime:
+        if datetime.tzinfo is None:
+            return cls.timezone.localize(datetime)
+        return datetime.astimezone(cls.timezone)

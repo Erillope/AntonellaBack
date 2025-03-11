@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Generic, List, Optional, TypeVar
+from typing import Generic, List, Optional, TypeVar, Dict
 from .values import OrdenDirection
 
 Model = TypeVar('Model')
@@ -15,8 +15,8 @@ class GetModel(ABC, Generic[Model]):
     def get(self, id: str) -> Model: ...
     
     @abstractmethod
-    def filter(self, expresion: Optional[str], order_by: str, direction: OrdenDirection,
-               limit: Optional[int]=None, offset: Optional[int]=None) -> List[Model]: ...
+    def filter(self, order_by: str, direction: OrdenDirection,
+               limit: Optional[int]=None, offset: Optional[int]=None, fields: Dict[str, str]={}) -> List[Model]: ...
 
 
 class SaveModel(ABC, Generic[Model]):
