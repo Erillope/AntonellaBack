@@ -74,7 +74,7 @@ class UserName:
 
 class UserEmail:
     '''Validador de correos electrónicos de usuario'''
-    REGREX = r'^[a-zA-Z0-9_%+-]+(?!\.\.)@gmail\.com$'
+    REGREX = r'^[a-zA-Z0-9._%+-]+@gmail\.com$'
     MATCHER = PatternMatcher(pattern=REGREX)
     
     @classmethod
