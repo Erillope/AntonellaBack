@@ -35,7 +35,9 @@ class AppConfig:
     
     @classmethod
     def default_super_admin(cls) -> Dict[str, Any]:
-        return cls.data.get('default_super_admin', {})
+        super_admin_data =  cls.data.get('default_super_admin', {})
+        super_admin_data['photo'] = os.path.join(MEDIA, super_admin_data['photo'])
+        return super_admin_data 
 
     @classmethod
     def reset_password_message(cls, user_name: str, token_id: str) -> str:

@@ -12,7 +12,7 @@
         "dni": "0987654321",
         "gender": "MASCULINO",
         "address": "Fake Street 123",
-        "photo": "resources/media/default/super_admin.png",
+        "photo": "default/super_admin.png",
         "roles": [
             "super_admin"
         ]
