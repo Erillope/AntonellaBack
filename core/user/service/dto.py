@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from datetime import date
 from core.user import AccountStatus, Gender
+from core.user.domain.values import RoleAccess
 from core.common import OrdenDirection
 from typing import List, Optional, Dict, Any
 
@@ -42,8 +43,15 @@ class FilterUserDto(BaseModel):
 class RoleDto(BaseModel):
     id: str
     name: str
+    accesses: List[RoleAccess]
     created_date: date
     
+    def role_dump(self) -> Dict[str, Any]:
+        data = self.model_dump(exclude_none=True)
+        for access in data['accesses']:
+            value = access.pop('access_type')
+            access['access'] = value
+        return data
     
 class UserDto(BaseModel):
     id: str

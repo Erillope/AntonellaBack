@@ -1,5 +1,7 @@
 from core.user import UserAccount, Role, UserAccountFactory, RoleFactory, EmployeeAccount
 from .dto import SignUpDto, UserDto, RoleDto, CreateEmployeeDto
+from core.user.domain.values import RoleAccess
+from typing import Set
 
 class UserMapper:
     '''Mapeador entre usuarios y dtos'''
@@ -77,13 +79,14 @@ class UserMapper:
 class RoleMapper:
     '''Mapeador entre roles y dtos'''
     @classmethod
-    def to_role(cls, rolename: str) -> Role:
-        return RoleFactory.create(name=rolename)
+    def to_role(cls, rolename: str, accesses: Set[RoleAccess]) -> Role:
+        return RoleFactory.create(name=rolename, accesses=accesses)
     
     @classmethod
     def to_dto(cls, role: Role) -> RoleDto:
         return RoleDto(
             id=role.id,
             name=role.name,
+            accesses=list(role.accesses),
             created_date=role.created_date
         )

@@ -1,6 +1,7 @@
 from app.common.table_mapper import TableMapper
-from .models import UserAccountTableData, RoleTableData, EmployeeRoleTableData, EmployeeAccountTableData
+from .models import UserAccountTableData, RoleTableData, EmployeeRoleTableData, EmployeeAccountTableData, RolPermissionTableData
 from core.user import UserAccount, Role, UserAccountFactory, RoleFactory, AccountStatus, Gender, EmployeeAccount
+from core.user.domain.values import AccessType, PermissionType
 
 class UserTableMapper(TableMapper[UserAccountTableData, UserAccount]):
     def __init__(self) -> None:
@@ -80,11 +81,18 @@ class UserTableMapper(TableMapper[UserAccountTableData, UserAccount]):
 
 class RoleTableMapper(TableMapper[RoleTableData, Role]):
     def to_model(self, role_table: RoleTableData) -> Role:
-        return RoleFactory.load(
+        role =  RoleFactory.load(
             id=str(role_table.id),
             name=role_table.name,
+            accesses=set(),
             created_date=role_table.created_date
         )
+        for role_access in RolPermissionTableData.get_permissions_from_role(role_table.id):
+            role.add_access(
+                access_type=AccessType(role_access.access.upper()),
+                permission=PermissionType(role_access.permission.upper())
+            )
+        return role
     
     def to_table(self, role: Role) -> RoleTableData:
         return RoleTableData(

@@ -98,17 +98,15 @@ class EmployeeAccount(UserAccount):
         
     def add_role(self, rolename: str) -> None:
         '''Añade un rol a la cuenta de usuario'''
-        role = RoleFactory.create(rolename).name
-        if role in self.roles: return
-        self.roles.append(role)
-        self._events.append(RoleAddedToUser(rolename=role, user_id=self.id))
+        if rolename in self.roles: return
+        self.roles.append(rolename)
+        self._events.append(RoleAddedToUser(rolename=rolename, user_id=self.id))
     
     def remove_role(self, rolename: str) -> None:
         '''Remueve un rol de la cuenta de usuario'''
-        role = RoleFactory.create(rolename).name
-        if role not in self.roles: return
-        self.roles.remove(role)
-        self._events.append(RoleRemovedFromUser(rolename=role, user_id=self.id))
+        if rolename not in self.roles: return
+        self.roles.remove(rolename)
+        self._events.append(RoleRemovedFromUser(rolename=rolename, user_id=self.id))
 
     def set_photo(self, photo: str) -> None:
         '''Establece la foto de perfil de la cuenta de usuario'''

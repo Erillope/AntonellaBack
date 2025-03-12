@@ -22,7 +22,9 @@ class UserAPITest(TestCase):
         cls.client = cls.client_class()
         cls.roles = [Role.MATCHER.generate() for _ in range(10)]
         for role in cls.roles:
-            cls.client.post(f'/api/role/?name={role}')
+            request = UserDataFactory.generate_create_role_request()
+            request['name'] = role
+            cls.client.post(f'/api/role/', json.dumps(request), content_type='application/json')
         cls.users = []
         for _ in range(10):
             user = UserDataFactory.generate_user_sign_up_user_request()
@@ -31,9 +33,8 @@ class UserAPITest(TestCase):
     
     @classmethod
     def tearDownClass(cls) -> None:
-        return
         shutil.rmtree('resources/media')
-    '''
+    
     def test_sign_up(self) -> None:
         for _ in range(self.num_test):
             user_data = UserDataFactory.generate_employee_sign_up_employee_request(self.roles)
@@ -163,7 +164,7 @@ class UserAPITest(TestCase):
             response = self.client.get(self.route, data={'user_id': user.id})
             self.assertEqual(response.status_code, 400)
             self.assertEqual(response.json()['error'], 'ModelNotFoundException')
-    '''
+    
     def test_filter_users(self) -> None:
         request = {
                 'order_by': 'name',
@@ -193,7 +194,6 @@ class UserAPITest(TestCase):
                 self.assertEqual(data['email'], user_data.email)
                 self.assertEqual(data['name'], user_data.name)
                    
-        
     def _verify_user_data(self, data: Dict[str, Any], user_data: Dict[str, Any]) -> None:
         self.assertEqual(data['status'], AccountStatus.ENABLE.value)
         self.assertEqual(data['created_date'], date.today().isoformat())
@@ -208,8 +208,7 @@ class UserAPITest(TestCase):
         self.assertEqual(data['dni'], user_data['employee_data']['dni'])
         self.assertEqual(data['address'], user_data['employee_data']['address'])
         self.assertIn(data['photo'].split('/')[-1], os.listdir(MEDIA+'/employee'))
-        self.assertEqual(data['roles'], [role.lower() for role in user_data['employee_data']['roles']])
-    
+        self.assertEqual(data['roles'], user_data['employee_data']['roles'])
     
 
 '''class UserAPITest(TestCase):

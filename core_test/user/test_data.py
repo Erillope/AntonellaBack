@@ -1,7 +1,7 @@
 from core_test.images_data import get_base64_string
 from core.common import ID
 from core.user import AccountStatus, Gender, UserAccount, UserAccountFactory, RoleFactory, Role, EmployeeAccount
-from core.user.domain.values import UserName, UserEmail, UserPassword, UserPhoneNumber, UserBirthdate, DniValue
+from core.user.domain.values import UserName, UserEmail, UserPassword, UserPhoneNumber, UserBirthdate, DniValue, RoleAccess, AccessType, PermissionType
 import random
 from datetime import date, timedelta
 
@@ -43,7 +43,15 @@ class UserDataFactory:
         return RoleFactory.load(
             id=ID.generate(),
             name=Role.MATCHER.generate(),
+            accesses={cls.generate_role_access() for _ in range(random.randint(1, 5))},
             created_date=cls.get_created_date(),
+        )
+    
+    @classmethod
+    def generate_role_access(cls) -> RoleAccess:
+        return RoleAccess(
+            access_type=random.choice(list(AccessType)),
+            permissions=set(random.sample(list(PermissionType), random.randint(1, 4))),
         )
     
     

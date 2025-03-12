@@ -35,6 +35,22 @@ class RoleTableData(models.Model):
         db_table = "role"
 
 
+class RolPermissionTableData(models.Model):
+    role = models.ForeignKey(RoleTableData, on_delete=models.CASCADE)
+    access = models.CharField(max_length=250, blank=False)
+    permission = models.CharField(max_length=250, blank=False)
+    
+    class Meta:
+        db_table = "role_permission"
+        constraints = [
+            models.UniqueConstraint(fields=['role', 'permission', 'access'], name='unique_role_permission')
+        ]
+    
+    @classmethod
+    def get_permissions_from_role(cls, role_id: str) -> List['RolPermissionTableData']:
+        return [table for table in cls.objects.filter(role__id=role_id)]
+
+
 class EmployeeRoleTableData(models.Model):
     employee = models.ForeignKey(EmployeeAccountTableData, on_delete=models.CASCADE)
     role = models.ForeignKey(RoleTableData, on_delete=models.CASCADE)

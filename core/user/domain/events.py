@@ -14,8 +14,9 @@ class UserAccountSaved(Event):
 
 class RoleSaved(Event):
     '''Evento para cuando un rol es actualizado'''
-    def __init__(self, role: Role):
+    def __init__(self, role: Role, update: bool=False):
         self.role = role
+        self.update = update
 
 class RoleDeleted(Event):
     '''Evento para cuando un rol es eliminado'''

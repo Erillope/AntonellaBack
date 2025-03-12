@@ -6,7 +6,7 @@ from core.user.service.repository import GetUser
 from core.user.domain.events import (UserAccountSaved, RoleSaved, RoleAddedToUser,
                                      RoleRemovedFromUser, RoleDeleted, PhotoAddedToEmployee)
 from app.common.exceptions import ModelNotFoundException
-from .models import UserAccountTableData, RoleTableData, EmployeeAccountTableData, EmployeeRoleTableData
+from .models import UserAccountTableData, RoleTableData, EmployeeAccountTableData, EmployeeRoleTableData, RolPermissionTableData
 from .mapper import UserTableMapper, RoleTableMapper
 from typing import Dict, Optional, List
 from core.common import OrdenDirection
@@ -128,23 +128,67 @@ class DjangoGetRole(DjangoGetModel[RoleTableData, Role]):
         super().__init__(RoleTableData, RoleTableMapper())
         
     def exists(self, rolename: str) -> bool:
+        if ID.is_id(rolename):
+            return super().exists(rolename)
+        return self.exists_by_name(rolename)
+    
+    def is_unique_role(self, role: Role) -> bool:
+        if self.exists(role.id): return False
+        if self.exists_by_name(role.name): return False
+        return True
+    
+    def exists_by_name(self, rolename: str) -> bool:
         return self.table.objects.filter(name=rolename.lower()).exists()
     
-    def get(self, rolename: str) -> Role:
-        if not self.exists(rolename):
+    def get(self, unique: str) -> Role:
+        if ID.is_id(unique):
+            return super().get(unique)
+        return self.get_by_name(unique)
+    
+    def get_by_name(self, rolename: str) -> Role:
+        if not self.exists_by_name(rolename):
             raise ModelNotFoundException.not_found(rolename)
         table = self.table.objects.get(name=rolename.lower())
         return self.mapper.to_model(table)
-    
     
 class DjangoSaveRole(DjangoSaveModel[RoleTableData, Role], EventSubscriber):    
     def __init__(self) -> None:
         super().__init__(RoleTableMapper())
         EventSubscriber.__init__(self)
+        self.get_role = DjangoGetRole()
     
+    def save(self, role: Role) -> None:
+        if not self.get_role.is_unique_role(role):
+            raise RoleAlreadyExistsException.already_exists(role.name)
+        super().save(role)
+        self.save_accesses(role)
+    
+    def update(self, role: Role) -> None:
+        if not self.get_role.exists(role.id):
+            raise ModelNotFoundException.not_found(role.id)
+        old_role = self.get_role.get(role.id)
+        if old_role.name != role.name and self.get_role.exists_by_name(role.name):
+            raise RoleAlreadyExistsException.already_exists(role.name)
+        super().save(role)
+        self.update_accesses(role)
+    
+    def save_accesses(self, role: Role) -> None:
+        for access in role.accesses:
+            for permission in access.permissions:
+                RolPermissionTableData.objects.create(
+                    role = RoleTableData.objects.get(name=role.name),
+                    access = access.access_type.value,
+                    permission = permission.value
+                )
+    
+    def update_accesses(self, role: Role) -> None:
+        RolPermissionTableData.objects.filter(role=role.id).delete()
+        self.save_accesses(role)
+        
     def handle(self, event: Event) -> None:
         if isinstance(event, RoleSaved):
-            self.save(event.role)
+            if event.update: self.update(event.role)
+            else: self.save(event.role)
 
 
 class DjangoDeleteRole(DjangoDeleteModel[RoleTableData, Role], EventSubscriber):
@@ -180,3 +224,9 @@ class UserAlreadyExistsException(SystemException):
     @classmethod
     def already_exists(cls, unique: str) -> "UserAlreadyExistsException":
         return cls(f'El usuario {unique} ya está registrado')
+
+
+class RoleAlreadyExistsException(SystemException):
+    @classmethod
+    def already_exists(cls, rolename: str) -> "RoleAlreadyExistsException":
+        return cls(f'El rol {rolename} ya está registrado')

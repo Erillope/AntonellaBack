@@ -8,12 +8,6 @@ class IncorrectPasswordException(AuthServiceException):
         return cls('Contraseña incorrecta')
 
 
-class AlreadyExistsRoleException(AuthServiceException):
-    @classmethod
-    def already_exists(cls, rolename: str) -> 'AlreadyExistsRoleException':
-        return cls(f'El rol {rolename} ya existe')
-
-
 class AlreadyExistsSuperAdminException(AuthServiceException):
     @classmethod
     def already_exists(cls) -> 'AlreadyExistsSuperAdminException':

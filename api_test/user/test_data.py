@@ -40,3 +40,17 @@ class UserDataFactory(CoreUserDataFactory):
             'phone_number': user.phone_number,
             'password': user.password,
         }
+    
+    @classmethod
+    def generate_create_role_request(cls) -> Dict[str, Any]:
+        role = cls.generate_role()
+        return {
+            'name': role.name,
+            'accesses': [
+                {
+                    'access': access.access_type.value,
+                    'permissions': [permission.value for permission in access.permissions],
+                }
+                for access in role.accesses
+            ]
+        }

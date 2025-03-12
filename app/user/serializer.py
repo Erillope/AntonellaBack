@@ -2,6 +2,8 @@ from rest_framework import serializers
 from core.user import AccountStatus, Gender
 from core.common import OrdenDirection
 from core.user.service.dto import SignUpDto, UpdateUserDto, FilterUserDto, CreateEmployeeDto
+from core.user.domain.values import AccessType, PermissionType, RoleAccess
+from typing import List, Optional
 
 class SignInSerializer(serializers.Serializer):
     phone_number = serializers.CharField(max_length=250)
@@ -82,7 +84,43 @@ class FilterUserSerializer(serializers.Serializer):
             limit=self.validated_data.get('limit'),
             order_direction=OrdenDirection(order_direction) if order_direction else OrdenDirection.DESC
         )
+        
 
+class AccessSerializer(serializers.Serializer):
+    access = serializers.ChoiceField(choices=[(a.value, a.value) for a in AccessType])
+    permissions = serializers.ListField(child=serializers.ChoiceField(
+        choices=[(p.value, p.value) for p in PermissionType]
+    ))
+
+
+class CreateRoleSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=250)
+    accesses = serializers.ListField(child=AccessSerializer())
+    
+    def get_accesses(self) -> List[RoleAccess]:
+        return [
+            RoleAccess(
+                access_type=AccessType(access['access']),
+                permissions={PermissionType(permission) for permission in access['permissions']}
+            )
+            for access in self.validated_data['accesses']
+        ]
+
+class UpdateRoleSerializer(serializers.Serializer):
+    role = serializers.CharField(max_length=250)
+    name = serializers.CharField(max_length=250, required=False)
+    accesses = serializers.ListField(child=AccessSerializer(), required=False)
+    
+    def get_accesses(self) -> Optional[List[RoleAccess]]:
+        if self.validated_data.get('accesses'):
+            return [
+                RoleAccess(
+                    access_type=AccessType(access['access']),
+                    permissions={PermissionType(permission) for permission in access['permissions']}
+                )
+                for access in self.validated_data['accesses']
+            ]
+        return None
 
 class AddRoleToUserSerializer(serializers.Serializer):
     user_id = serializers.UUIDField()

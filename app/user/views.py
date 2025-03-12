@@ -4,7 +4,8 @@ from rest_framework.response import Response
 from .config import ServiceConfig
 from app.common.response import validate, success_response, failure_response
 from .serializer import (SignInSerializer, SignUpSerializer, UpdateUserSerializer,
-                         AddRoleToUserSerializer, ResetPasswordSerializer, FilterUserSerializer)
+                         AddRoleToUserSerializer, ResetPasswordSerializer, FilterUserSerializer,
+                         CreateRoleSerializer, UpdateRoleSerializer)
 
 class AuthView(APIView):
     auth_service = ServiceConfig.auth_service
@@ -46,28 +47,32 @@ class FilterUserView(APIView):
         users = self.filter_user_service.filter_user(filter_serializer.to_dto())
         return success_response([user.user_dump() for user in users])
 
+
 class RoleView(APIView):
     role_service = ServiceConfig.role_service
     
     @validate()
     def get(self, request: Request) -> Response:
+        if request.GET.get('role'):
+            role = self.role_service.get(request.GET.get('role'))
+            return success_response(role.role_dump())
         roles = self.role_service.get_all()
-        return success_response([role.model_dump() for role in roles])
+        return success_response([role.role_dump() for role in roles])
     
-    @validate()
-    def post(self, request: Request) -> Response:
-        role = self.role_service.create(request.GET.get('name'))
-        return success_response(role.model_dump())
+    @validate(CreateRoleSerializer)
+    def post(self, request: CreateRoleSerializer) -> Response:
+        role = self.role_service.create(request.validated_data['name'], request.get_accesses())
+        return success_response(role.role_dump())
 
-    @validate()
-    def put(self, request: Request) -> Response:
-        role = self.role_service.rename(request.GET.get('role'), request.GET.get('name'))
-        return success_response(role.model_dump())
+    @validate(UpdateRoleSerializer)
+    def put(self, request: UpdateRoleSerializer) -> Response:
+        role = self.role_service.update(request.validated_data['role'], request.validated_data.get('name'), request.get_accesses())
+        return success_response(role.role_dump())
     
     @validate()
     def delete(self, request: Request) -> Response:
         role = self.role_service.delete(request.GET.get('role'))
-        return success_response(role.model_dump())
+        return success_response(role.role_dump())
 
 
 class UserRoleView(APIView):

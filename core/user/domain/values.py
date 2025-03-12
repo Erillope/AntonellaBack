@@ -3,6 +3,8 @@ from core.common import PatternMatcher
 from datetime import date
 from .exceptions import *
 import bcrypt
+from pydantic import BaseModel, model_validator
+from typing import List, Set
 
 class AccountStatus(str, Enum):
     '''Estados de la cuenta de usuario'''
@@ -16,6 +18,53 @@ class Gender(str, Enum):
     FEMALE = "FEMENINO"
 
 
+class AccessType(str, Enum):
+    CITAS = "CITAS"
+    USUARIOS = "USUARIOS"
+    SERVICIOS = "SERVICIOS"
+    PRODUCTOS = "PRODUCTOS"
+    NOTIFICACIONES = "NOTIFICACIONES"
+    ROLES = "ROLES"
+    CHATS = "CHATS"
+    PAGOS = "PAGOS"
+
+class PermissionType(str, Enum):
+    READ = "READ"
+    CREATE = "CREATE"
+    DELETE = "DELETE"
+    EDIT = "EDIT"
+
+
+class RoleAccess(BaseModel):
+    '''Acceso de un rol a un recurso'''
+    access_type: AccessType
+    permissions: Set[PermissionType]
+    
+    @model_validator(mode='after')
+    def init(self) -> 'RoleAccess':
+        if PermissionType.EDIT in self.permissions or PermissionType.DELETE in self.permissions:
+            self.permissions.add(PermissionType.READ)
+        return self
+        
+    @classmethod
+    def all(cls) -> List['RoleAccess']:
+        return [
+            RoleAccess(
+                access_type=access,
+                permissions={PermissionType.READ, PermissionType.CREATE, PermissionType.EDIT, PermissionType.DELETE}
+            )
+            for access in AccessType
+        ]
+    
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, RoleAccess):
+            return self.access_type == value.access_type
+        return False
+
+    def __hash__(self) -> int:
+        return hash((self.access_type))
+    
+    
 class UserPhoneNumber:
     '''Validador de números de teléfono'''
     REGREX = r"^(0)?9\d{8}$"
