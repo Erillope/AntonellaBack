@@ -93,7 +93,7 @@ class UpdateUserService(AbstractUpdateUserService):
 
 
 class FilterUserService(AbstractFilterUserService):
-    def __init__(self, get_user: GetModel[UserAccount]):
+    def __init__(self, get_user: GetUser):
         self._get_user = get_user
     
     def get_user(self, user_id: str) -> UserDto:
@@ -102,4 +102,8 @@ class FilterUserService(AbstractFilterUserService):
     
     def filter_user(self, dto: FilterUserDto) -> List[UserDto]:
         users = self._get_user.filter(dto.order_by, dto.order_direction, dto.limit, dto.offset, dto.fields)
+        return [UserMapper.to_dto(user) for user in users]
+    
+    def get_by_role(self, role: str) -> List[UserDto]:
+        users = self._get_user.get_by_role(role)
         return [UserMapper.to_dto(user) for user in users]

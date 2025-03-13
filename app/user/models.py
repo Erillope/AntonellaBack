@@ -61,6 +61,11 @@ class EmployeeRoleTableData(models.Model):
         tables = cls.objects.filter(employee__id=employee_id)
         return [table.role for table in tables]
 
+    @classmethod
+    def get_employees_from_role(cls, rolename: str) -> List[EmployeeAccountTableData]:
+        tables = cls.objects.filter(role__name=rolename)
+        return [table.employee for table in tables]
+    
     class Meta:
         db_table = "employee_role"
         constraints = [

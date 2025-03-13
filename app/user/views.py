@@ -77,6 +77,12 @@ class RoleView(APIView):
 
 class UserRoleView(APIView):
     update_user_service = ServiceConfig.update_user_service
+    filter_user_service = ServiceConfig.filter_user_service
+    
+    @validate()
+    def get(self, request: Request) -> Response:
+        users = self.filter_user_service.get_by_role(request.GET.get('role'))
+        return success_response([user.user_dump() for user in users])
     
     @validate(AddRoleToUserSerializer)
     def post(self, request: AddRoleToUserSerializer) -> Response:

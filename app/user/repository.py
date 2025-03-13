@@ -91,6 +91,10 @@ class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount], GetUser):
                fields: Dict[str, str]={}) -> List[UserAccount]:
         return super().filter(order_by, direction, limit, offset, fields)
     
+    def get_by_role(self, role: str) -> List[UserAccount]:
+        tables = EmployeeRoleTableData.get_employees_from_role(role)
+        return [self.mapper.to_model(table) for table in tables]
+    
 
 class DjangoSaveUser(DjangoSaveModel[UserAccountTableData, UserAccount], EventSubscriber):
     def __init__(self) -> None:
@@ -211,7 +215,7 @@ class RoleToUserSubscriber(EventSubscriber):
         employee_table = EmployeeAccountTableData.objects.get(id=user_id)
         role_table = RoleTableData.objects.get(name=role)
         EmployeeRoleTableData.objects.get(employee=employee_table, role=role_table).delete()
-        
+    
     def handle(self, event: Event) -> None:
         if isinstance(event, RoleAddedToUser):
             self.add_role(event.user_id, event.rolename)

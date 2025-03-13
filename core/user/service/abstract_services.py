@@ -35,6 +35,9 @@ class AbstractFilterUserService(ABC):
     
     @abstractmethod
     def filter_user(self, dto: FilterUserDto) -> List[UserDto]: ...
+    
+    @abstractmethod
+    def get_by_role(self, role: str) -> List[UserDto]: ...
 
 
 class AbstractRoleService(ABC):
