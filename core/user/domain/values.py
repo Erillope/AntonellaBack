@@ -27,6 +27,7 @@ class AccessType(str, Enum):
     ROLES = "ROLES"
     CHATS = "CHATS"
     PAGOS = "PAGOS"
+    MOVIL = "MOVIL"
 
 class PermissionType(str, Enum):
     READ = "READ"
