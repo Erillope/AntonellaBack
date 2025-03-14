@@ -7,7 +7,7 @@ import os
 DIR = os.path.sep.join(os.path.join(os.path.dirname(__file__)).split(os.path.sep)[0:-2])
 resources_path = os.path.join(DIR, 'resources')
 
-MEDIA = os.path.join(resources_path, 'media')
+MEDIA = "resources/media/"
 
 class AppConfig:
     server_host = "http://127.0.0.1:8000/"

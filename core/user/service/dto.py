@@ -28,8 +28,12 @@ class UpdateUserDto(BaseModel):
     name: Optional[str] = None
     password: Optional[str] = None
     status: Optional[AccountStatus] = None
+    dni: Optional[str] = None
     address: Optional[str] = None
     photo: Optional[str] = None
+    roles: Optional[List[str]] = None
+    birthdate: Optional[date] = None
+    gender: Optional[Gender] = None
 
 
 class FilterUserDto(BaseModel):

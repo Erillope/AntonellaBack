@@ -1,5 +1,5 @@
 from core.user import AuthService, UpdateUserService, FilterUserService, RoleService
-from .repository import (DjangoSaveUser, DjangoSaveRole, RoleToUserSubscriber,
+from .repository import (DjangoSaveUser, DjangoSaveRole,
                          DjangoGetRole, DjangoGetUser, DjangoDeleteRole)
 from app.common.email import DjangoEmailHost
 from app.tokens.repository import DjangoGetToken
@@ -11,7 +11,6 @@ class ServiceConfig:
     get_role = DjangoGetRole()
     save_role = DjangoSaveRole()
     delete_role = DjangoDeleteRole()
-    role_to_user_subscriber = RoleToUserSubscriber()
     token_service = TokenService(get_token=DjangoGetToken())
     auth_service = AuthService(
         get_user=get_user,

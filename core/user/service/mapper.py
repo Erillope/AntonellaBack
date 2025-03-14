@@ -39,10 +39,9 @@ class UserMapper:
             gender=dto.gender,
             dni=dto.dni,
             address=dto.address,
-            photo=dto.photo
+            photo=dto.photo,
+            roles=dto.roles
         )
-        for role in dto.roles:
-            employee.add_role(role)
         return employee
     
     @classmethod

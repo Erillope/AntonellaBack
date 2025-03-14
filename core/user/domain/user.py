@@ -2,10 +2,9 @@ from pydantic import BaseModel, model_validator, PrivateAttr
 from datetime import date
 from typing import Optional, List, ClassVar
 from core.common import ID, Event
-from core.common.image_storage import Base64ImageStorage
+from core.common.image_storage import Base64ImageStorage, ImageSaved, ImageDeleted
 from .values import *
-from .role import Role, RoleFactory
-from .events import UserAccountSaved, RoleAddedToUser, RoleRemovedFromUser, PhotoAddedToEmployee
+from .events import UserAccountSaved
 
 class UserAccount(BaseModel):
     '''Cuenta de usuario'''
@@ -39,7 +38,8 @@ class UserAccount(BaseModel):
         
     def change_data(self, phone_number: Optional[str]=None, email: Optional[str]=None,
                     name: Optional[str]=None, password: Optional[str]=None,
-                    status: Optional[AccountStatus]=None) -> None:
+                    status: Optional[AccountStatus]=None, birthdate: Optional[date]=None,
+                    gender: Optional[Gender]=None) -> None:
         '''Cambia los datos de la cuenta de usuario'''
         if phone_number is not None:
             self.phone_number = phone_number
@@ -56,6 +56,9 @@ class UserAccount(BaseModel):
         if status is not None:
             self.status = status
         
+        if birthdate is not None:
+            self.birthdate = birthdate
+            
         self._validate_data()
     
     def verify_password(self, password: str) -> bool:
@@ -76,7 +79,7 @@ class UserAccount(BaseModel):
 class EmployeeAccount(UserAccount):
     dni: str
     address: str
-    roles: List[str] = []
+    roles: List[str]
     photo: str
     IMAGE_PATH: ClassVar[str] = f'employee'
     
@@ -87,26 +90,20 @@ class EmployeeAccount(UserAccount):
     
     def change_data(self, phone_number: Optional[str]=None, email: Optional[str]=None,
                     name: Optional[str]=None, password: Optional[str]=None,
-                    status: Optional[AccountStatus]=None, address: Optional[str]=None,
-                    photo: Optional[str]=None) -> None:
-        super().change_data(phone_number, email, name, password, status)
+                    status: Optional[AccountStatus]=None, birthdate: Optional[date]=None,
+                    gender: Optional[Gender]=None, address: Optional[str]=None, dni: Optional[str]=None,
+                    photo: Optional[str]=None, roles: Optional[List[str]]=None) -> None:
+        super().change_data(phone_number, email, name, password, status, birthdate, gender)
+        if dni is not None:
+            self.dni = dni
         if address is not None:
             self.address = address
         if photo is not None:
+            self._events.append(ImageDeleted(image_urls=[self.photo]))
             self.photo = photo
+        if roles is not None:
+            self.roles = roles
         self._validate_data()
-        
-    def add_role(self, rolename: str) -> None:
-        '''Añade un rol a la cuenta de usuario'''
-        if rolename in self.roles: return
-        self.roles.append(rolename)
-        self._events.append(RoleAddedToUser(rolename=rolename, user_id=self.id))
-    
-    def remove_role(self, rolename: str) -> None:
-        '''Remueve un rol de la cuenta de usuario'''
-        if rolename not in self.roles: return
-        self.roles.remove(rolename)
-        self._events.append(RoleRemovedFromUser(rolename=rolename, user_id=self.id))
 
     def set_photo(self, photo: str) -> None:
         '''Establece la foto de perfil de la cuenta de usuario'''
@@ -115,7 +112,7 @@ class EmployeeAccount(UserAccount):
             return
         image = Base64ImageStorage(folder=self.IMAGE_PATH, base64_image=photo)
         self.photo = image.get_url()
-        PhotoAddedToEmployee(employee_id=self.id, photo=image).publish()
+        self._events.append(ImageSaved(images=[image]))
         
         
 class UserAccountFactory:
@@ -151,7 +148,7 @@ class UserAccountFactory:
     
     @staticmethod
     def create_employee(phone_number: str, email: str, name: str, password: str, birthdate: date,
-                        gender: Gender, dni: str, address: str, photo: str) -> EmployeeAccount:
+                        gender: Gender, dni: str, address: str, photo: str, roles: List[str]) -> EmployeeAccount:
         return EmployeeAccount(
             id = ID.generate(),
             phone_number = phone_number,
@@ -164,7 +161,8 @@ class UserAccountFactory:
             gender=gender,
             dni=dni,
             address=address,
-            photo=photo
+            photo=photo,
+            roles=roles
         )
     
     @staticmethod

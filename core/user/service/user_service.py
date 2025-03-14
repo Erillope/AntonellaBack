@@ -5,7 +5,7 @@ from .exceptions import IncorrectPasswordException, AlreadyExistsSuperAdminExcep
 from .mapper import UserMapper
 from core.common.abstract_repository import GetModel
 from .repository import GetUser
-from core.user import UserAccount, Role
+from core.user import UserAccount, Role, EmployeeAccount
 from typing import List
 from core.common.config import AppConfig
 from core.common.email import EmailHost, EmailMessage
@@ -65,7 +65,11 @@ class UpdateUserService(AbstractUpdateUserService):
     
     def update_user(self, dto: UpdateUserDto) -> UserDto:
         user = self.get_user.get(dto.id)
-        user.change_data(dto.phone_number, dto.email, dto.name, dto.password, dto.status)
+        if isinstance(user, EmployeeAccount):
+            user.change_data(dto.phone_number, dto.email, dto.name, dto.password, dto.status,
+                             dto.birthdate, dto.gender, dto.address, dto.dni, dto.photo, dto.roles)
+        else:
+            user.change_data(dto.phone_number, dto.email, dto.name, dto.password, dto.status)
         user.save(update=True)
         return UserMapper.to_dto(self.get_user.get(user.id))
 
@@ -76,20 +80,6 @@ class UpdateUserService(AbstractUpdateUserService):
         user.save(update=True)
         token.delete()
         return UserMapper.to_dto(user)
-        
-    def add_role(self, user_id: str, role: str) -> UserDto:
-        user = self.get_user.get(user_id)
-        role_model = self.get_role.get(role)
-        user.add_role(role_model)
-        user.save()
-        return UserMapper.to_dto(self.get_user.get(user.id))
-
-    def remove_role(self, user_id: str, role: str) -> UserDto:
-        user = self.get_user.get(user_id)
-        role_model = self.get_role.get(role)
-        user.remove_role(role_model)
-        user.save()
-        return UserMapper.to_dto(self.get_user.get(user.id))
 
 
 class FilterUserService(AbstractFilterUserService):

@@ -56,6 +56,12 @@ class UpdateUserSerializer(serializers.Serializer):
     email = serializers.CharField(max_length=250, required=False)
     name = serializers.CharField(max_length=250, required=False)
     status = serializers.ChoiceField(choices=[(s.name, s.name) for s in AccountStatus], required=False)
+    dni = serializers.CharField(max_length=250, required=False)
+    address = serializers.CharField(max_length=250, required=False)
+    photo = serializers.CharField(required=False)
+    roles = serializers.ListField(child=serializers.CharField(max_length=250), required=False)
+    birthdate = serializers.DateField(required=False)
+    gender = serializers.ChoiceField(choices=[(g.value, g.value) for g in Gender], required=False)
     
     def to_dto(self) -> UpdateUserDto:
         status = self.validated_data.get('status')
@@ -64,7 +70,13 @@ class UpdateUserSerializer(serializers.Serializer):
             phone_number=self.validated_data.get('phone_number'),
             email=self.validated_data.get('email'),
             name=self.validated_data.get('name'),
-            status=AccountStatus(status) if status else None
+            status=AccountStatus(status) if status else None,
+            dni=self.validated_data.get('dni'),
+            address=self.validated_data.get('address'),
+            photo=self.validated_data.get('photo'),
+            roles=self.validated_data.get('roles'),
+            birthdate=self.validated_data.get('birthdate'),
+            gender=self.validated_data.get('gender')
         )
 
 
@@ -121,11 +133,6 @@ class UpdateRoleSerializer(serializers.Serializer):
                 for access in self.validated_data['accesses']
             ]
         return None
-
-class AddRoleToUserSerializer(serializers.Serializer):
-    user_id = serializers.UUIDField()
-    role = serializers.CharField(max_length=250)
-
 
 class ResetPasswordSerializer(serializers.Serializer):
     token_id = serializers.CharField(max_length=250)

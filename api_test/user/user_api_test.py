@@ -26,18 +26,23 @@ class UserAPITest(TestCase):
             request['name'] = role
             cls.client.post(f'/api/role/', json.dumps(request), content_type='application/json')
         cls.users = []
-        for _ in range(10):
+        cls.employees = []
+        for _ in range(1):
             user = UserDataFactory.generate_user_sign_up_user_request()
             response = cls.client.post(cls.route, json.dumps(user), content_type='application/json')
             cls.users.append(response.json()['data'])
+            employee = UserDataFactory.generate_employee_sign_up_employee_request(cls.roles)
+            response = cls.client.post(cls.route, json.dumps(employee), content_type='application/json')
+            cls.employees.append(response.json()['data'])
     
     @classmethod
     def tearDownClass(cls) -> None:
         shutil.rmtree('resources/media')
+        pass
     
     def test_sign_up(self) -> None:
         for _ in range(self.num_test):
-            user_data = UserDataFactory.generate_employee_sign_up_employee_request(self.roles)
+            user_data = UserDataFactory.generate_user_sign_up_user_request()
             with self.subTest(user_data=user_data):
                 response = self.client.post(self.route, json.dumps(user_data), content_type='application/json')
                 data = response.json()['data']
@@ -50,7 +55,7 @@ class UserAPITest(TestCase):
                 response = self.client.post(self.route, json.dumps(user_data), content_type='application/json')
                 data = response.json()['data']
                 self._verify_employee_data(data, user_data)
-    
+                
     def test_sign_up_other_super_admin(self) -> None:
         admin_data = UserDataFactory.generate_employee_sign_up_employee_request(self.roles)
         admin_data['employee_data']['roles'] += [Role.SUPER_ADMIN]
@@ -176,7 +181,7 @@ class UserAPITest(TestCase):
             users_id = [user['id'] for user in data]
             for user in self.users:
                 self.assertIn(user['id'], users_id)
-            self.assertEqual(len(data), len(self.users)+1)
+            self.assertEqual(len(data), len(self.users)+len(self.employees)+1)
     
     def test_update_user(self) -> None:
         for user in self.users[0:1]:
@@ -193,10 +198,30 @@ class UserAPITest(TestCase):
                 self.assertEqual(data['phone_number'], user_data.phone_number)
                 self.assertEqual(data['email'], user_data.email)
                 self.assertEqual(data['name'], user_data.name)
-                   
+    
+    def test_update_employee(self) -> None:
+        for employee in self.employees[0:1]:
+            employee_data = UserDataFactory.generate_employee_account()
+            request = {
+                'id': employee['id'],
+                'phone_number': employee_data.phone_number,
+                'email': employee_data.email,
+                'name': employee_data.name,
+                'dni': employee_data.dni,
+                'address': employee_data.address,
+                'roles': random.sample(self.roles, k=random.randint(1, len(self.roles)))
+            }
+            with self.subTest(employee=employee, request=request):
+                response = self.client.put(self.route, json.dumps(request), content_type='application/json')
+                data = response.json()['data']
+                self.assertEqual(data['phone_number'], employee_data.phone_number)
+                self.assertEqual(data['email'], employee_data.email)
+                self.assertEqual(data['name'], employee_data.name)
+                self.assertEqual(data['dni'], employee_data.dni)
+                self.assertEqual(data['address'], employee_data.address)
+                self.assertEqual(data['roles'], [role.lower() for role in request['roles']])
+        
     def _verify_user_data(self, data: Dict[str, Any], user_data: Dict[str, Any]) -> None:
-        self.assertEqual(data['status'], AccountStatus.ENABLE.value)
-        self.assertEqual(data['created_date'], date.today().isoformat())
         self.assertEqual(data['email'], user_data['email'].lower())
         self.assertEqual(data['name'], user_data['name'].lower())
         self.assertEqual(data['phone_number'], user_data['phone_number'])

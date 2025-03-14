@@ -1,10 +1,9 @@
 from app.common.django_repository import DjangoSaveModel, DjangoDeleteModel, DjangoGetModel
-from core.user import UserAccount, Role
+from core.user import UserAccount, Role, EmployeeAccount
 from core.user.domain.values import UserEmail, UserPhoneNumber
 from core.common import EventSubscriber, Event, ID, SystemException
 from core.user.service.repository import GetUser
-from core.user.domain.events import (UserAccountSaved, RoleSaved, RoleAddedToUser,
-                                     RoleRemovedFromUser, RoleDeleted, PhotoAddedToEmployee)
+from core.user.domain.events import (UserAccountSaved, RoleSaved, RoleDeleted)
 from app.common.exceptions import ModelNotFoundException
 from .models import UserAccountTableData, RoleTableData, EmployeeAccountTableData, EmployeeRoleTableData, RolPermissionTableData
 from .mapper import UserTableMapper, RoleTableMapper
@@ -106,6 +105,16 @@ class DjangoSaveUser(DjangoSaveModel[UserAccountTableData, UserAccount], EventSu
         if not self.get_user.is_unique_user(user):
             raise UserAlreadyExistsException.already_exists(user.id)
         super().save(user)
+        if isinstance(user, EmployeeAccount):
+            self.save_roles(user.id, user.roles)
+
+    def save_roles(self, employee_id: str, roles: List[str]) -> None:
+        employee = EmployeeAccountTableData.objects.get(id=employee_id)
+        EmployeeRoleTableData.objects.filter(employee=employee).delete()
+        for role in roles:
+            EmployeeRoleTableData.objects.create(employee=employee,
+                                                 role=RoleTableData.objects.get(name=role.lower())
+                                                 )
     
     def update(self, user: UserAccount) -> None:
         if not self.get_user.exists_by_id(user.id):
@@ -115,17 +124,19 @@ class DjangoSaveUser(DjangoSaveModel[UserAccountTableData, UserAccount], EventSu
             raise UserAlreadyExistsException.already_exists(user.phone_number)
         if old_user.email != user.email and self.get_user.exists_by_email(user.email):
             raise UserAlreadyExistsException.already_exists(user.email)
-        super().save(user)
-        
-    def save_employee_photo(self, employee_id: str, photo: str) -> None:
-        EmployeeAccountTableData.objects.filter(id=employee_id).update(photo=photo)
+        if isinstance(user, EmployeeAccount) and isinstance(old_user, EmployeeAccount):
+            if old_user.dni != user.dni and self.get_user.exists_employee_by_dni(user.dni):
+                raise UserAlreadyExistsException.already_exists(user.dni)
+            super().save(user)
+            self.save_roles(user.id, user.roles)
+        else:
+            super().save(user)
         
     def handle(self, event: Event) -> None:
         if isinstance(event, UserAccountSaved):
             if event.update: self.update(event.user)
             else: self.save(event.user)
-        if isinstance(event, PhotoAddedToEmployee):
-            self.save_employee_photo(event.employee_id, event.photo.get_url())
+
 
 class DjangoGetRole(DjangoGetModel[RoleTableData, Role]):
     def __init__(self) -> None:
@@ -203,25 +214,6 @@ class DjangoDeleteRole(DjangoDeleteModel[RoleTableData, Role], EventSubscriber):
     def handle(self, event: Event) -> None:
         if isinstance(event, RoleDeleted):
             self.delete(event.rolename)
-     
-            
-class RoleToUserSubscriber(EventSubscriber):
-    def add_role(self, user_id: str, role: str) -> None:
-        employee_table = EmployeeAccountTableData.objects.get(id=user_id)
-        role_table = RoleTableData.objects.get(name=role.lower())
-        EmployeeRoleTableData.objects.create(employee=employee_table, role=role_table)
-    
-    def remove_role(self, user_id: str, role: str) -> None:
-        employee_table = EmployeeAccountTableData.objects.get(id=user_id)
-        role_table = RoleTableData.objects.get(name=role)
-        EmployeeRoleTableData.objects.get(employee=employee_table, role=role_table).delete()
-    
-    def handle(self, event: Event) -> None:
-        if isinstance(event, RoleAddedToUser):
-            self.add_role(event.user_id, event.rolename)
-        
-        if isinstance(event, RoleRemovedFromUser):
-            self.remove_role(event.user_id, event.rolename)
 
 
 class UserAlreadyExistsException(SystemException):

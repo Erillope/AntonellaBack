@@ -3,9 +3,8 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from .config import ServiceConfig
 from app.common.response import validate, success_response, failure_response
-from .serializer import (SignInSerializer, SignUpSerializer, UpdateUserSerializer,
-                         AddRoleToUserSerializer, ResetPasswordSerializer, FilterUserSerializer,
-                         CreateRoleSerializer, UpdateRoleSerializer)
+from .serializer import (SignInSerializer, SignUpSerializer, UpdateUserSerializer, ResetPasswordSerializer, 
+                         FilterUserSerializer, CreateRoleSerializer, UpdateRoleSerializer)
 
 class AuthView(APIView):
     auth_service = ServiceConfig.auth_service
@@ -83,18 +82,6 @@ class UserRoleView(APIView):
     def get(self, request: Request) -> Response:
         users = self.filter_user_service.get_by_role(request.GET.get('role'))
         return success_response([user.user_dump() for user in users])
-    
-    @validate(AddRoleToUserSerializer)
-    def post(self, request: AddRoleToUserSerializer) -> Response:
-        data = request.validated_data
-        data['user_id'] = str(data['user_id'])
-        user = self.update_user_service.add_role(**data)
-        return success_response(user.user_dump())
-
-    @validate()
-    def delete(self, request: Request) -> Response:
-        user = self.update_user_service.remove_role(request.GET.get('user_id'), request.GET.get('role'))
-        return success_response(user.user_dump())
 
 
 class PasswordTokenApi(APIView):
