@@ -1,5 +1,5 @@
 from .exceptions import InvalidBase64FormatException, MediaNotFoundException
-from .config import MEDIA
+from .config import MEDIA, DIR
 from .events import Event, EventSubscriber
 import base64
 import os
@@ -41,8 +41,9 @@ class Base64SaveStorageImage(EventSubscriber):
     def save(self, image: Base64ImageStorage) -> None:
         """Guarda una imagen en un directorio y retorna la URL"""
         binary_image = self.decode(image.base64_image)
-        self.create_if_not_exists(image.get_url())
-        with open(image.get_url(), "wb") as file:
+        url = os.path.join(DIR, image.get_url())
+        self.create_if_not_exists(url)
+        with open(url, "wb") as file:
             file.write(binary_image)
     
     @classmethod
