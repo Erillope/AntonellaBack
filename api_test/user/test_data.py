@@ -1,6 +1,7 @@
 from core_test.user.test_data import UserDataFactory as CoreUserDataFactory
 from typing import Dict, Any, List
 import random
+from core_test.images_data import get_base64_string
 
 class UserDataFactory(CoreUserDataFactory):
     @classmethod
@@ -28,7 +29,7 @@ class UserDataFactory(CoreUserDataFactory):
             'employee_data': {
                 'dni': user.dni,
                 'address': user.address,
-                'photo': user.photo,
+                'photo': get_base64_string(),
                 'roles': random.sample(roles, k=random.randint(1, len(roles)))
             }
         }

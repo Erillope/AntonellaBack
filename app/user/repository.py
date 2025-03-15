@@ -29,7 +29,7 @@ class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount], GetUser):
         if self.exists_by_email(user.email): return False
         if self.exists_by_phone_number(user.phone_number): return False
         if self.exists(user.id): return False
-        if isinstance(user, EmployeeAccountTableData) and self.exists_employee_by_dni(user.dni): return False
+        if isinstance(user, EmployeeAccount) and self.exists_employee_by_dni(user.dni): return False
         return True
     
     def get(self, unique: str) -> UserAccount:

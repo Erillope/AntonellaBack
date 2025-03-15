@@ -9,5 +9,5 @@ DeleteStorageImage()
 __all__ = [
     'ID', 'PatternMatcher', 'OrdenDirection', 'SystemException',
     'Event', 'EventSubscriber', 'EventPublisher',
-    'Base64SaveStorageImage', 'DeleteStorageImage', GuayaquilDatetime
+    'Base64SaveStorageImage', 'DeleteStorageImage', 'GuayaquilDatetime'
 ]
