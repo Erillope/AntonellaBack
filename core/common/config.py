@@ -10,7 +10,7 @@ resources_path = os.path.join(DIR, 'resources')
 MEDIA = "resources/media/"
 
 class AppConfig:
-    server_host = "http://127.0.0.1:8000/"
+    server_host = "https://erillope.pythonanywhere.com/"
     client_host = "http://localhost:5173/"
     reset_password_url = client_host + "password/reset/"
     data = {}
