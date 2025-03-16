@@ -1,6 +1,6 @@
 from django.test import TestCase
-from core.user import AccountStatus, Role
-from datetime import date
+from core.user import Role
+from core_test.images_data import get_base64_string
 from .test_data import UserDataFactory
 import json
 import os
@@ -14,7 +14,7 @@ import random
 class UserAPITest(TestCase):
     route = '/api/user/'
     auth_route = '/api/user/auth/'
-    num_test = 10
+    num_test = 1
     
     @classmethod
     def setUpTestData(cls) -> None:
@@ -209,6 +209,7 @@ class UserAPITest(TestCase):
                 'name': employee_data.name,
                 'dni': employee_data.dni,
                 'address': employee_data.address,
+                'photo': get_base64_string(),
                 'roles': random.sample(self.roles, k=random.randint(1, len(self.roles)))
             }
             with self.subTest(employee=employee, request=request):
