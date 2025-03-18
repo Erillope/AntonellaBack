@@ -4,11 +4,24 @@ from .test_data import UserDataFactory
 import json
 from core.user import Role
 from typing import Dict, Any
+from core.common.config import MEDIA
+import shutil
 
 class RoleApiTest(TestCase):
     route = '/api/role/'
     num_test = 10
     
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        if MEDIA == 'resources/media/':
+            raise Exception('No se puede correr los test con MEDIA en resources')
+    
+    @classmethod
+    def tearDownClass(cls) -> None:
+        super().tearDownClass()
+        shutil.rmtree('resources_test/media')
+        
     def test_create(self) -> None:
         for _ in range(self.num_test):
             request = UserDataFactory.generate_create_role_request()

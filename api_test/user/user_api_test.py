@@ -7,7 +7,7 @@ import os
 from core.common.config import MEDIA
 import shutil
 from typing import Dict, Any
-from core.common.config import AppConfig
+from core.common.config import AppConfig, MEDIA
 from core.user.domain.values import UserPassword, UserPhoneNumber, UserEmail
 import random
 
@@ -19,6 +19,8 @@ class UserAPITest(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         super().setUpTestData()
+        if MEDIA == 'resources/media/':
+            raise Exception('No se puede correr los test con MEDIA en resources')
         cls.client = cls.client_class()
         cls.roles = [Role.MATCHER.generate() for _ in range(10)]
         for role in cls.roles:
@@ -37,7 +39,7 @@ class UserAPITest(TestCase):
     
     @classmethod
     def tearDownClass(cls) -> None:
-        shutil.rmtree('resources/media')
+        shutil.rmtree('resources_test/media')
     
     
     def test_sign_up(self) -> None:
