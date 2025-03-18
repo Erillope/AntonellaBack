@@ -102,6 +102,21 @@ class RoleApiTest(TestCase):
         data = response.json()['data']
         self.assertEqual(len(data), len(requests))
     
+    def test_delete_role_and_user_rol(self) -> None:
+        create_role_requests = [UserDataFactory.generate_create_role_request() for _ in range(self.num_test)]
+        for role_request in create_role_requests:
+            self.client.post(self.route, json.dumps(role_request), content_type='application/json')
+            user_request = UserDataFactory.generate_employee_sign_up_employee_request(
+                [role['name'] for role in create_role_requests]
+            )
+            user_request['employee_data']['roles'] = [role_request['name']]
+            user = self.client.post('/api/user/', json.dumps(user_request), content_type='application/json').json()['data']
+            with self.subTest():
+                self.client.delete(self.route+'?role='+role_request['name'])
+                self.assertIn(role_request['name'], user_request['employee_data']['roles'])
+                user = self.client.get('/api/user/', data={'user_id': user['id']}).json()['data']
+                self.assertNotIn(role_request['name'], user.get('roles', []))
+    
     def test_get(self) -> None:
         for _ in range(self.num_test):
             request = UserDataFactory.generate_create_role_request()
