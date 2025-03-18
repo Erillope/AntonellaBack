@@ -47,3 +47,7 @@ class AppConfig:
     @classmethod
     def email_password(cls) -> str:
         return cls.data.get('email_password', '')
+    
+    @classmethod
+    def app_email(cls) -> str:
+        return cls.data.get('app_email', '')

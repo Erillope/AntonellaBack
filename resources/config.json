@@ -12,11 +12,12 @@
         "dni": "0987654321",
         "gender": "MASCULINO",
         "address": "Fake Street 123",
-        "photo": "default/super_admin.png",
+        "photo": "employee/super_admin.png",
         "roles": [
             "super_admin"
         ]
     },
+    "app_email": "ericklorenzolopez1@gmail.com",
     "reset_password_message": "Hola %s para cambiar tu contraseña ingresa al siguiente link:\n %s",
     "email_password": "oggz choq avit mqeb"
 }

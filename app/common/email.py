@@ -6,7 +6,7 @@ from core.user.domain.values import UserEmail
 
 class DjangoEmailHost(EmailHost):
     def __init__(self) -> None:
-        self.set_host(AppConfig.default_super_admin().get('email', ''), AppConfig.email_password())
+        self.set_host(AppConfig.app_email(), AppConfig.email_password())
     
     def send_email(self, message: EmailMessage) -> None:
         email = self._create_message(message)

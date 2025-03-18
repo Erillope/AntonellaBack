@@ -88,7 +88,8 @@ class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount], GetUser):
     def filter(self, order_by: str, direction: OrdenDirection,
                limit: Optional[int]=None, offset: Optional[int]=None,
                fields: Dict[str, str]={}) -> List[UserAccount]:
-        return super().filter(order_by, direction, limit, offset, fields)
+        users = super().filter(order_by, direction, limit, offset, fields)
+        return [self.get(user.id) for user in users]
     
     def get_by_role(self, role: str) -> List[UserAccount]:
         tables = EmployeeRoleTableData.get_employees_from_role(role)
