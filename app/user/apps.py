@@ -1,5 +1,6 @@
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
+import sys
 
 class UserConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
@@ -7,8 +8,5 @@ class UserConfig(AppConfig):
     
     def ready(self) -> None:
         from app.user.config import ServiceConfig
-        from django.dispatch import receiver
-        
-        @receiver(post_migrate)
-        def init(sender, **kwargs) -> None:
+        if 'runserver' in sys.argv:
             ServiceConfig.init()
