@@ -14,7 +14,7 @@ import random
 class UserAPITest(TestCase):
     route = '/api/user/'
     auth_route = '/api/user/auth/'
-    num_test = 1
+    num_test = 10
     
     @classmethod
     def setUpTestData(cls) -> None:
@@ -29,7 +29,7 @@ class UserAPITest(TestCase):
             cls.client.post(f'/api/role/', json.dumps(request), content_type='application/json')
         cls.users = []
         cls.employees = []
-        for _ in range(1):
+        for _ in range(10):
             user = UserDataFactory.generate_user_sign_up_user_request()
             response = cls.client.post(cls.route, json.dumps(user), content_type='application/json')
             cls.users.append(response.json()['data'])
@@ -193,7 +193,8 @@ class UserAPITest(TestCase):
                 'dni': employee_data.dni,
                 'address': employee_data.address,
                 'photo': get_base64_string(),
-                'roles': random.sample(self.roles, k=random.randint(1, len(self.roles)))
+                'roles': random.sample(self.roles, k=random.randint(1, len(self.roles))),
+                'categories': [category.value for category in employee_data.categories]
             }
             with self.subTest(employee=employee, request=request):
                 response = self.client.put(self.route, json.dumps(request), content_type='application/json')
@@ -204,6 +205,7 @@ class UserAPITest(TestCase):
                 self.assertEqual(data['dni'], employee_data.dni)
                 self.assertEqual(data['address'], employee_data.address)
                 self.assertEqual(data['roles'], [role.lower() for role in request['roles']])
+                self.assertEqual(data['categories'], request['categories'])
     
     def test_create_employee_already_exists_dni(self) -> None:
         for _ in range(self.num_test):

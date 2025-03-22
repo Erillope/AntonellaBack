@@ -137,6 +137,7 @@ class DjangoSaveUser(DjangoSaveModel[UserAccountTableData, UserAccount], EventSu
                 raise UserAlreadyExistsException.already_exists(user.dni)
             super().save(user)
             self.save_roles(user.id, user.roles)
+            self.save_categories(user.id, user.categories)
         else:
             super().save(user)
         

@@ -35,6 +35,7 @@ class UpdateUserDto(BaseModel):
     roles: Optional[List[str]] = None
     birthdate: Optional[date] = None
     gender: Optional[Gender] = None
+    categories: Optional[List[EmployeeCategories]] = None
 
 
 class FilterUserDto(BaseModel):

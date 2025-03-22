@@ -80,3 +80,9 @@ class EmployeeCategoriesTableData(models.Model):
     @classmethod
     def get_categories_from_employee(cls, employee_id: str) -> List[str]:
         return [table.category for table in cls.objects.filter(employee__id=employee_id)]
+    
+    class Meta:
+        db_table = "employee_categories"
+        constraints = [
+            models.UniqueConstraint(fields=['employee', 'category'], name='unique_employee_category')
+        ]

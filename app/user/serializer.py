@@ -68,6 +68,8 @@ class UpdateUserSerializer(serializers.Serializer):
     roles = serializers.ListField(child=serializers.CharField(max_length=250), required=False)
     birthdate = serializers.DateField(required=False)
     gender = serializers.ChoiceField(choices=[(g.value, g.value) for g in Gender], required=False)
+    categories = serializers.ListField(
+        child=serializers.ChoiceField(choices=[(c.value, c.value) for c in EmployeeCategories]),required=False)
     
     def to_dto(self) -> UpdateUserDto:
         status = self.validated_data.get('status')
@@ -82,7 +84,8 @@ class UpdateUserSerializer(serializers.Serializer):
             photo=self.validated_data.get('photo'),
             roles=self.validated_data.get('roles'),
             birthdate=self.validated_data.get('birthdate'),
-            gender=self.validated_data.get('gender')
+            gender=self.validated_data.get('gender'),
+            categories=self.validated_data.get('categories')
         )
 
 
