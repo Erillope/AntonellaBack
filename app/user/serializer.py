@@ -2,7 +2,7 @@ from rest_framework import serializers
 from core.user import AccountStatus, Gender
 from core.common import OrdenDirection
 from core.user.service.dto import SignUpDto, UpdateUserDto, FilterUserDto, CreateEmployeeDto
-from core.user.domain.values import AccessType, PermissionType, RoleAccess
+from core.user.domain.values import AccessType, PermissionType, RoleAccess, EmployeeCategories
 from typing import List, Optional
 
 class SignInSerializer(serializers.Serializer):
@@ -15,6 +15,8 @@ class EmployeeDataSerializer(serializers.Serializer):
     address = serializers.CharField(max_length=250)
     photo = serializers.CharField()
     roles = serializers.ListField(child=serializers.CharField(max_length=250))
+    categories = serializers.ListField(
+        child=serializers.ChoiceField(choices=[(c.value, c.value) for c in EmployeeCategories]),required=False)
     
     
 class SignUpSerializer(serializers.Serializer):
@@ -38,7 +40,11 @@ class SignUpSerializer(serializers.Serializer):
                 dni=self.validated_data['employee_data']['dni'],
                 address=self.validated_data['employee_data']['address'],
                 photo=self.validated_data['employee_data']['photo'],
-                roles=self.validated_data['employee_data']['roles']
+                roles=self.validated_data['employee_data']['roles'],
+                categories=[
+                    EmployeeCategories(category)
+                    for category in self.validated_data['employee_data']['categories']
+                ]
             )
         return SignUpDto(
             phone_number=self.validated_data['phone_number'],

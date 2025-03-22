@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from datetime import date
 from core.user import AccountStatus, Gender
-from core.user.domain.values import RoleAccess
+from core.user.domain.values import RoleAccess, EmployeeCategories
 from core.common import OrdenDirection
 from typing import List, Optional, Dict, Any
 
@@ -19,6 +19,7 @@ class CreateEmployeeDto(SignUpDto):
     address: str
     photo: str
     roles: List[str]
+    categories: List[EmployeeCategories] = []
 
 
 class UpdateUserDto(BaseModel):
@@ -70,9 +71,12 @@ class UserDto(BaseModel):
     birthdate: date
     created_date: date
     roles: List[str] = []
+    categories: List[EmployeeCategories] = []
     
     def user_dump(self) -> Dict[str, Any]:
         data = self.model_dump(exclude_none=True)
         if not self.roles:
             data.pop('roles')
+        if not self.categories:
+            data.pop('categories')
         return data

@@ -36,6 +36,13 @@ class PermissionType(str, Enum):
     EDIT = "EDIT"
 
 
+class EmployeeCategories(str, Enum):
+    CABELLO = "CABELLO"
+    UNAS = "UÑAS"
+    SPA = "SPA"
+    MAQUILLAJE = "MAQUILLAJE"
+    
+    
 class RoleAccess(BaseModel):
     '''Acceso de un rol a un recurso'''
     access_type: AccessType

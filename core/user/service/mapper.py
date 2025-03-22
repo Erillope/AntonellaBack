@@ -40,7 +40,8 @@ class UserMapper:
             dni=dto.dni,
             address=dto.address,
             photo=dto.photo,
-            roles=dto.roles
+            roles=dto.roles,
+            categories=dto.categories
         )
         return employee
     
@@ -71,7 +72,8 @@ class UserMapper:
             status=employee.status,
             gender=employee.gender,
             created_date=employee.created_date,
-            roles=[role for role in employee.roles]
+            roles=[role for role in employee.roles],
+            categories=[category for category in employee.categories]
         )
 
 

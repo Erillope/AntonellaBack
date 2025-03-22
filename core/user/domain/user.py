@@ -81,6 +81,7 @@ class EmployeeAccount(UserAccount):
     address: str
     roles: List[str]
     photo: str
+    categories: List[EmployeeCategories]
     IMAGE_PATH: ClassVar[str] = f'employee'
     
     def _validate_data(self) -> None:
@@ -92,7 +93,8 @@ class EmployeeAccount(UserAccount):
                     name: Optional[str]=None, password: Optional[str]=None,
                     status: Optional[AccountStatus]=None, birthdate: Optional[date]=None,
                     gender: Optional[Gender]=None, address: Optional[str]=None, dni: Optional[str]=None,
-                    photo: Optional[str]=None, roles: Optional[List[str]]=None) -> None:
+                    photo: Optional[str]=None, roles: Optional[List[str]]=None,
+                    categories: Optional[List[EmployeeCategories]] = None) -> None:
         super().change_data(phone_number, email, name, password, status, birthdate, gender)
         if dni is not None:
             self.dni = dni
@@ -103,6 +105,8 @@ class EmployeeAccount(UserAccount):
             self.photo = photo
         if roles is not None:
             self.roles = roles
+        if categories is not None:
+            self.categories = categories
         self._validate_data()
 
     def set_photo(self, photo: str) -> None:
@@ -148,7 +152,8 @@ class UserAccountFactory:
     
     @staticmethod
     def create_employee(phone_number: str, email: str, name: str, password: str, birthdate: date,
-                        gender: Gender, dni: str, address: str, photo: str, roles: List[str]) -> EmployeeAccount:
+                        gender: Gender, dni: str, address: str, photo: str, roles: List[str],
+                        categories: List[EmployeeCategories]) -> EmployeeAccount:
         return EmployeeAccount(
             id = ID.generate(),
             phone_number = phone_number,
@@ -162,13 +167,15 @@ class UserAccountFactory:
             dni=dni,
             address=address,
             photo=photo,
-            roles=roles
+            roles=roles,
+            categories=categories
         )
     
     @staticmethod
     def load_employee(id: str, phone_number: str, email: str, name: str, password: str,
                       status: AccountStatus, birthdate: date, created_date: date, gender: Gender,
-                      dni: str, address: str, photo: str, roles: List[str]) -> EmployeeAccount:
+                      dni: str, address: str, photo: str, roles: List[str],
+                      categories: List[EmployeeCategories]) -> EmployeeAccount:
         return EmployeeAccount(
             id = id,
             phone_number = phone_number,
@@ -182,5 +189,6 @@ class UserAccountFactory:
             dni=dni,
             address=address,
             roles=roles,
-            photo=photo
+            photo=photo,
+            categories=categories
         )

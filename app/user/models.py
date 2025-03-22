@@ -71,3 +71,12 @@ class EmployeeRoleTableData(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['employee', 'role'], name='unique_employee_role')
         ]
+
+
+class EmployeeCategoriesTableData(models.Model):
+    employee = models.ForeignKey(EmployeeAccountTableData, on_delete=models.CASCADE)
+    category = models.CharField(max_length=250, blank=False)
+    
+    @classmethod
+    def get_categories_from_employee(cls, employee_id: str) -> List[str]:
+        return [table.category for table in cls.objects.filter(employee__id=employee_id)]

@@ -1,11 +1,11 @@
 from app.common.django_repository import DjangoSaveModel, DjangoDeleteModel, DjangoGetModel
 from core.user import UserAccount, Role, EmployeeAccount
-from core.user.domain.values import UserEmail, UserPhoneNumber
+from core.user.domain.values import UserEmail, UserPhoneNumber, EmployeeCategories
 from core.common import EventSubscriber, Event, ID, SystemException
 from core.user.service.repository import GetUser
 from core.user.domain.events import (UserAccountSaved, RoleSaved, RoleDeleted)
 from app.common.exceptions import ModelNotFoundException
-from .models import UserAccountTableData, RoleTableData, EmployeeAccountTableData, EmployeeRoleTableData, RolPermissionTableData
+from .models import UserAccountTableData, RoleTableData, EmployeeAccountTableData, EmployeeRoleTableData, RolPermissionTableData, EmployeeCategoriesTableData
 from .mapper import UserTableMapper, RoleTableMapper
 from typing import Dict, Optional, List
 from core.common import OrdenDirection
@@ -108,6 +108,7 @@ class DjangoSaveUser(DjangoSaveModel[UserAccountTableData, UserAccount], EventSu
         super().save(user)
         if isinstance(user, EmployeeAccount):
             self.save_roles(user.id, user.roles)
+            self.save_categories(user.id, user.categories)
 
     def save_roles(self, employee_id: str, roles: List[str]) -> None:
         employee = EmployeeAccountTableData.objects.get(id=employee_id)
@@ -117,6 +118,12 @@ class DjangoSaveUser(DjangoSaveModel[UserAccountTableData, UserAccount], EventSu
                                                  role=RoleTableData.objects.get(name=role.lower())
                                                  )
     
+    def save_categories(self, employee_id: str, categories: List[EmployeeCategories]) -> None:
+        employee = EmployeeAccountTableData.objects.get(id=employee_id)
+        EmployeeCategoriesTableData.objects.filter(employee=employee).delete()
+        for category in categories:
+            EmployeeCategoriesTableData.objects.create(employee=employee, category=category.value)
+        
     def update(self, user: UserAccount) -> None:
         if not self.get_user.exists_by_id(user.id):
             raise ModelNotFoundException.not_found(user.id)

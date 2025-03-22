@@ -1,7 +1,7 @@
 import unittest
 from datetime import date
 from core.user import UserAccountFactory, AccountStatus, UserAccount, Role, EmployeeAccount
-from core.user.domain.values import UserPhoneNumber, UserEmail, UserName, UserPassword, Gender, DniValue
+from core.user.domain.values import UserPhoneNumber, UserEmail, UserName, UserPassword, Gender, DniValue, EmployeeCategories
 from core.user.domain.exceptions import (InvalidPhoneNumberException, InvalidUserBirthdateException,
                                          InvalidUserEmailException, InvalidUserNameException, 
                                          InvalidUserPasswordException)
@@ -101,7 +101,8 @@ class TestUserAccountCreation(unittest.TestCase):
             'dni': DniValue.MATCHER.generate(),
             'address': ''.join(random.choices(string.ascii_letters + string.digits, k=20)),
             'roles': [Role.MATCHER.generate() for _ in range(random.randint(1,5))],
-            'photo': get_base64_string()
+            'photo': get_base64_string(),
+            'categories': random.sample(list(EmployeeCategories), random.randint(1,3))
         }
         
     def _validate_user(self, user: UserAccount, phone_number: str, email: str, name: str, password: str, gender: Gender, birthdate: date) -> None:
@@ -114,59 +115,10 @@ class TestUserAccountCreation(unittest.TestCase):
         self.assertTrue(user.created_date == date.today())
         self.assertEqual(user.gender, gender)
     
-    def _validate_employee(self, user: EmployeeAccount, phone_number: str, email: str, name: str, password: str, gender: Gender, birthdate: date, dni: str, address: str, roles: List[str]) -> None:
+    def _validate_employee(self, user: EmployeeAccount, phone_number: str, email: str, name: str, password: str, gender: Gender, birthdate: date, dni: str, address: str, roles: List[str], categories: List[EmployeeCategories]) -> None:
         self._validate_user(user, phone_number, email, name, password, gender, birthdate)
         self.assertEqual(user.dni, dni)
         self.assertEqual(user.address, address)
         self.assertIsNotNone(user.photo)
         self.assertEqual(user.roles, roles)
-
-'''class TestUserAccount(unittest.TestCase):        
-    def test_update_user_account(self) -> None:
-        for phone_number, email, name, password, user in zip(
-            DataFactory.user_test_data.get_phone_numbers(),
-            DataFactory.user_test_data.get_emails(),
-            DataFactory.user_test_data.get_user_names(),
-            DataFactory.user_test_data.get_passwords(),
-            DataFactory.generate_user_accounts()
-        ):
-            status = DataFactory.user_test_data.get_account_status()
-            with self.subTest(phone_number=phone_number, email=email, name=name, password=password, status=status):
-                user.change_data(phone_number=phone_number, email=email, name=name, password=password, status=status)
-                self.assertEqual(user.phone_number, phone_number)
-                self.assertEqual(user.email, email.lower())
-                self.assertEqual(user.name, name.lower())
-                self.assertTrue(user.verify_password(password))
-                self.assertEqual(user.status, status)
-    
-    def test_false_update_user_account(self) -> None:
-        for user in DataFactory.generate_user_accounts():
-            with self.subTest(user=user):
-                user.change_data()
-    
-    def test_verify_password(self) -> None:
-        for user, phone_number, password in DataFactory.generate_user_with_info():
-            with self.subTest(user=user, phone_number=phone_number, password=password):
-                self.assertTrue(user.verify_password(password))
-    
-    def test_verify_account(self) -> None:
-        for user, phone_number, password in DataFactory.generate_user_with_info():
-            with self.subTest(user=user, phone_number=phone_number, password=password):
-                self.assertTrue(user.verify_account(phone_number, password))
-                self.assertFalse(user.verify_account(phone_number, password+'1'))
-                other_phone_number = phone_number[:3] + str((int(phone_number[3])+1)%10) + phone_number[4:]
-                self.assertFalse(user.verify_account(other_phone_number, password))
-    
-    def test_add_role(self) -> None:
-        for user, role in zip(DataFactory.generate_user_accounts(), DataFactory.generate_sample_roles()):
-            with self.subTest(user=user, role=role):
-                user.add_role(role)
-                self.assertTrue(role in user.roles)
-    
-    def test_remove_role(self) -> None:
-        for user, role in zip(DataFactory.generate_user_accounts(), DataFactory.generate_sample_roles()):
-            with self.subTest(user=user, role=role):
-                user.add_role(role)
-                self.assertTrue(role in user.roles)
-                user.remove_role(role)
-                self.assertFalse(role in user.roles)'''
+        self.assertEqual(user.categories, categories)

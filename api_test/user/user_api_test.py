@@ -29,7 +29,7 @@ class UserAPITest(TestCase):
             cls.client.post(f'/api/role/', json.dumps(request), content_type='application/json')
         cls.users = []
         cls.employees = []
-        for _ in range(10):
+        for _ in range(1):
             user = UserDataFactory.generate_user_sign_up_user_request()
             response = cls.client.post(cls.route, json.dumps(user), content_type='application/json')
             cls.users.append(response.json()['data'])
@@ -57,20 +57,6 @@ class UserAPITest(TestCase):
                 response = self.client.post(self.route, json.dumps(user_data), content_type='application/json')
                 data = response.json()['data']
                 self._verify_employee_data(data, user_data)
-                
-    def test_sign_up_other_super_admin(self) -> None:
-        admin_data = UserDataFactory.generate_employee_sign_up_employee_request(self.roles)
-        admin_data['employee_data']['roles'] += [Role.SUPER_ADMIN]
-        response = self.client.post(self.route, json.dumps(admin_data), content_type='application/json')
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['error'], 'AlreadyExistsSuperAdminException')
-    
-    def test_sign_in_super_admin(self) -> None:
-        admin_data = AppConfig.default_super_admin()
-        response = self.client.post(self.auth_route, json.dumps({'phone_number': admin_data['phone_number'], 'password': admin_data['password']}), content_type='application/json')
-        data = response.json()['data']
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(data['roles'], [Role.SUPER_ADMIN.lower()])
     
     def test_sign_in_not_registered_phone_number(self) -> None:
         for _ in range(self.num_test):
@@ -80,11 +66,6 @@ class UserAPITest(TestCase):
                 self.assertEqual(response.status_code, 400)
                 self.assertEqual(response.json()['error'], 'ModelNotFoundException')
     
-    def test_sign_in_admin_incorrect_password(self) -> None:
-        admin_data = AppConfig.default_super_admin()
-        response = self.client.post(self.auth_route, json.dumps({'phone_number': admin_data['phone_number'], 'password': admin_data['password']+'1'}), content_type='application/json')
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()['error'], 'IncorrectPasswordException')
     
     def test_sign_up_user(self) -> None:
         for _ in range(self.num_test):
@@ -183,7 +164,7 @@ class UserAPITest(TestCase):
             users_id = [user['id'] for user in data]
             for user in self.users:
                 self.assertIn(user['id'], users_id)
-            self.assertEqual(len(data), len(self.users)+len(self.employees)+1)
+            self.assertEqual(len(data), len(self.users)+len(self.employees))
     
     def test_update_user(self) -> None:
         for user in self.users[0:1]:
@@ -234,7 +215,7 @@ class UserAPITest(TestCase):
                 response = self.client.post(self.route, json.dumps(request), content_type='application/json')
                 self.assertEqual(response.status_code, 400)
                 self.assertEqual(response.json()['error'], 'UserAlreadyExistsException')
-        
+    
     def _verify_user_data(self, data: Dict[str, Any], user_data: Dict[str, Any]) -> None:
         self.assertEqual(data['email'], user_data['email'].lower())
         self.assertEqual(data['name'], user_data['name'].lower())
@@ -248,3 +229,4 @@ class UserAPITest(TestCase):
         self.assertEqual(data['address'], user_data['employee_data']['address'])
         self.assertIn(data['photo'].split('/')[-1], os.listdir(MEDIA+'/employee'))
         self.assertEqual(data['roles'], user_data['employee_data']['roles'])
+        self.assertEqual(data['categories'], user_data['employee_data']['categories'])

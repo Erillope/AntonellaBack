@@ -1,7 +1,7 @@
 from app.common.table_mapper import TableMapper
-from .models import UserAccountTableData, RoleTableData, EmployeeRoleTableData, EmployeeAccountTableData, RolPermissionTableData
+from .models import UserAccountTableData, RoleTableData, EmployeeRoleTableData, EmployeeAccountTableData, RolPermissionTableData, EmployeeCategoriesTableData
 from core.user import UserAccount, Role, UserAccountFactory, RoleFactory, AccountStatus, Gender, EmployeeAccount
-from core.user.domain.values import AccessType, PermissionType
+from core.user.domain.values import AccessType, PermissionType, EmployeeCategories
 
 class UserTableMapper(TableMapper[UserAccountTableData, UserAccount]):
     def __init__(self) -> None:
@@ -46,6 +46,9 @@ class UserTableMapper(TableMapper[UserAccountTableData, UserAccount]):
             photo=user_table.photo,
             roles=[
                 role.name for role in EmployeeRoleTableData.get_roles_from_employee(user_table.id)
+            ],
+            categories= [
+                EmployeeCategories(category) for category in EmployeeCategoriesTableData.get_categories_from_employee(user_table.id)
             ]
         )
     

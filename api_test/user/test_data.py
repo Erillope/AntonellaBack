@@ -30,7 +30,8 @@ class UserDataFactory(CoreUserDataFactory):
                 'dni': user.dni,
                 'address': user.address,
                 'photo': get_base64_string(),
-                'roles': random.sample(roles, k=random.randint(1, len(roles)))
+                'roles': random.sample(roles, k=random.randint(1, len(roles))),
+                'categories': [category.value for category in user.categories],
             }
         }
 
