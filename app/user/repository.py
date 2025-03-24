@@ -95,6 +95,10 @@ class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount], GetUser):
         tables = EmployeeRoleTableData.get_employees_from_role(role)
         return [self.mapper.to_model(table) for table in tables]
     
+    def get_all(self) -> List[UserAccount]:
+        tables = self.table.objects.all()
+        return [self.get(str(table.id)) for table in tables]
+    
 
 class DjangoSaveUser(DjangoSaveModel[UserAccountTableData, UserAccount], EventSubscriber):
     def __init__(self) -> None:
@@ -107,8 +111,8 @@ class DjangoSaveUser(DjangoSaveModel[UserAccountTableData, UserAccount], EventSu
             raise UserAlreadyExistsException.already_exists(user.id)
         super().save(user)
         if isinstance(user, EmployeeAccount):
-            self.save_roles(user.id, user.roles)
             self.save_categories(user.id, user.categories)
+            self.save_roles(user.id, user.roles)
 
     def save_roles(self, employee_id: str, roles: List[str]) -> None:
         employee = EmployeeAccountTableData.objects.get(id=employee_id)
@@ -117,6 +121,8 @@ class DjangoSaveUser(DjangoSaveModel[UserAccountTableData, UserAccount], EventSu
             EmployeeRoleTableData.objects.create(employee=employee,
                                                  role=RoleTableData.objects.get(name=role.lower())
                                                  )
+        if 'MOVIL' not in RolPermissionTableData.get_access_from_user(employee_id):
+            EmployeeCategoriesTableData.objects.filter(employee=employee).delete()
     
     def save_categories(self, employee_id: str, categories: List[EmployeeCategories]) -> None:
         employee = EmployeeAccountTableData.objects.get(id=employee_id)
@@ -136,8 +142,8 @@ class DjangoSaveUser(DjangoSaveModel[UserAccountTableData, UserAccount], EventSu
             if old_user.dni != user.dni and self.get_user.exists_employee_by_dni(user.dni):
                 raise UserAlreadyExistsException.already_exists(user.dni)
             super().save(user)
-            self.save_roles(user.id, user.roles)
             self.save_categories(user.id, user.categories)
+            self.save_roles(user.id, user.roles)
         else:
             super().save(user)
         
@@ -220,6 +226,15 @@ class DjangoDeleteRole(DjangoDeleteModel[RoleTableData, Role], EventSubscriber):
         super().__init__(RoleTableData, RoleTableMapper(), DjangoGetRole())
         EventSubscriber.__init__(self)
     
+    def delete(self, id: str) -> Role:
+        employee_tables = EmployeeRoleTableData.get_employees_from_role(id)
+        role = super().delete(id)
+        for employee in employee_tables:
+            employee_accesses = RolPermissionTableData.get_access_from_user(employee.id)
+            if 'MOVIL' not in employee_accesses:
+                EmployeeCategoriesTableData.objects.filter(employee=employee).delete()
+        return role
+        
     def handle(self, event: Event) -> None:
         if isinstance(event, RoleDeleted):
             self.delete(event.rolename)

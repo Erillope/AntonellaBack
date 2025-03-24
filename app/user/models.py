@@ -1,6 +1,6 @@
 from core.user import AccountStatus, Gender
 from django.db import models #type: ignore
-from typing import List
+from typing import List, Set
 
 class UserAccountTableData(models.Model):
     id = models.UUIDField(primary_key=True, editable=False)
@@ -49,6 +49,15 @@ class RolPermissionTableData(models.Model):
     @classmethod
     def get_permissions_from_role(cls, role_id: str) -> List['RolPermissionTableData']:
         return [table for table in cls.objects.filter(role__id=role_id)]
+    
+    @classmethod
+    def get_access_from_user(cls, user_id: str) -> Set[str]:
+        user_access: Set[str] = set()
+        roles = EmployeeRoleTableData.get_roles_from_employee(user_id)
+        for role in roles:
+            permissions = cls.get_permissions_from_role(role.id)
+            user_access.update({permission.access for permission in permissions})
+        return user_access
 
 
 class EmployeeRoleTableData(models.Model):
