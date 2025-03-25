@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'app.tokens',
     'app.user',
     'app.store_service',
+    'app.product',
     'rest_framework',
     "corsheaders"
 ]

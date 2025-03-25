@@ -1,8 +1,9 @@
 from pydantic import BaseModel
 from core.store_service import ServiceType, ServiceStatus
+from core.store_service.domain.values import Price
 from core.common import OrdenDirection
 from typing import List, Optional, Dict, Any
-from datetime import date
+from datetime import date, time
 from enum import Enum
 
 class QuestionInputType(str, Enum):
@@ -33,6 +34,8 @@ class CreateStoreServiceDto(BaseModel):
     name: str
     description: str
     type: ServiceType
+    duration: time
+    prices: List[Price]
     images: List[str] = []
     questions: List[CreateQuestionDto]
 
@@ -42,11 +45,13 @@ class UpdateStoreServiceDto(BaseModel):
     name: Optional[str]=None
     description: Optional[str]=None
     type: Optional[ServiceType]=None
+    duration: Optional[time]=None
+    prices: Optional[List[Price]]=None
+    images: Optional[List[str]]=None
     status: Optional[ServiceStatus]=None
 
 
 class FilterStoreServiceDto(BaseModel):
-    expresion: Optional[str] = None
     order_by: str
     offset: Optional[int] = None
     limit: Optional[int] = None
@@ -75,6 +80,8 @@ class StoreServiceDto(BaseModel):
     description: str
     status: ServiceStatus
     type: ServiceType
+    duration: time
+    prices: List[Price]
     images: List[str] = []
     questions: Optional[List[QuestionDto]] = None
     created_date: date

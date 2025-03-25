@@ -1,0 +1,98 @@
+from pydantic import BaseModel, model_validator, PrivateAttr
+from datetime import date
+from decimal import Decimal
+from core.common import ID, Event
+from typing import Optional, List, ClassVar
+from core.common.image_storage import Base64ImageStorage, ImageSaved, ImageDeleted
+from core.store_service.domain.values import ServiceType
+from .values import ProductName
+from .events import ProductSaved, ProductDeleted
+
+class Product(BaseModel):
+    id: str
+    name: str
+    service_type: ServiceType
+    description: str
+    price: Decimal
+    stock: int
+    images: List[str]
+    created_date: date
+    IMAGE_PATH: ClassVar[str] = f'product'
+    _events: List[Event] = PrivateAttr(default=[])
+    
+    @model_validator(mode='after')
+    def validate_data(self) -> 'Product':
+        self._validate_data()
+        return self
+    
+    def _validate_data(self) -> None:
+        self.name = self.name.lower().strip()
+        self.description = self.description.lower()
+        ID.validate(self.id)
+        ProductName.validate(self.name)
+        self.set_images(self.images)
+    
+    def change_data(self, name: Optional[str]=None, service_type: Optional[ServiceType]=None,
+                    description: Optional[str]=None, price: Optional[Decimal]=None,
+                    additional_stock: int = 0, images: Optional[List[str]]=None) -> None:
+        if name is not None:
+            self.name = name
+        if service_type is not None:
+            self.service_type = service_type
+        if description is not None:
+            self.description = description
+        if price is not None:
+            self.price = price
+        if additional_stock > 0:
+            self.stock += additional_stock
+        if images is not None:
+            self._events.append(ImageDeleted(image_urls=self.images))
+            self.images = images
+        
+    def set_images(self, images: List[str]) -> None:
+        self.images = []
+        for image in images:
+            if Base64ImageStorage.is_media_url(image):
+                self.images.append(image)
+            else:
+                img = Base64ImageStorage(folder=self.IMAGE_PATH, base64_image=image)
+                self.images.append(img.get_url())
+                self._events.append(ImageSaved(images=[img]))
+
+    def save(self) -> None:
+        ProductSaved(product=self).publish()
+        for event in self._events:
+            event.publish()
+    
+    def delete(self) -> None:
+        ProductDeleted(product=self).publish()
+
+
+class ProductFactory:
+    @classmethod
+    def create(cls, name: str, service_type: ServiceType, description: str, price: Decimal,
+               stock: int, images: List[str]) -> Product:
+        return Product(
+            id=ID.generate(),
+            name=name,
+            service_type=service_type,
+            description=description,
+            price=price,
+            stock=stock,
+            images=images,
+            created_date=date.today()
+        )
+    
+    @classmethod
+    def load(cls, id: str, name: str, service_type: ServiceType, description: str, price: Decimal,
+             stock: int, images: List[str], created_date: date) -> Product:
+        return Product(
+            id=id,
+            name=name,
+            service_type=service_type,
+            description=description,
+            price=price,
+            stock=stock,
+            images=images,
+            created_date=created_date
+        )

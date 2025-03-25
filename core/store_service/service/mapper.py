@@ -1,5 +1,5 @@
 from core.store_service import (StoreService, StoreServiceFactory, Question, QuestionFactory, InputType,
-                                FormQuestion, TextChoiceQuestion, ImageChoiceQuestion)
+                                FormQuestion, TextChoiceQuestion, ImageChoiceQuestion, Choice)
 from .dto import (CreateStoreServiceDto, StoreServiceDto, CreateQuestionDto, QuestionInputType,
                   QuestionDto, ChoiceType, ChoiceDto)
 from typing import List, Optional
@@ -10,10 +10,11 @@ class StoreServiceMapper:
         store_service = StoreServiceFactory.create(
             name=dto.name,
             description=dto.description,
-            type=dto.type
+            type=dto.type,
+            duration=dto.duration,
+            prices=dto.prices,
+            images=dto.images
         )
-        for base64_image in dto.images:
-            store_service.add_image(base64_image)
         return store_service
     
     @classmethod
@@ -26,6 +27,8 @@ class StoreServiceMapper:
             type=service.type,
             images=service.images,
             questions=questions,
+            prices=service.prices,
+            duration=service.duration,
             created_date=service.created_date
         )
 
@@ -54,18 +57,16 @@ class QuestionMapper:
     def _to_text_choice(cls, dto: CreateQuestionDto) -> TextChoiceQuestion:
         question = QuestionFactory.create_text_choice_question(
                 title=dto.title,
+                choices=[choice.option for choice in dto.choices]
             )
-        for choice in dto.choices:
-            question.add_choice(choice.option)
         return question
     
     @classmethod
     def _to_image_choice(cls, dto: CreateQuestionDto) -> ImageChoiceQuestion:
         question = QuestionFactory.create_image_choice_question(
                 title=dto.title,
+                choices=[Choice(option=choice.option, image=choice.image) for choice in dto.choices]
             )
-        for choice in dto.choices:
-            question.add_choice(choice.option, choice.image)
         return question
     
     @classmethod
@@ -100,6 +101,6 @@ class QuestionMapper:
             title=question.title,
             input_type=QuestionInputType.CHOICE,
             choice_type=ChoiceType.IMAGE,
-            choices = [ChoiceDto(option=choice.option, image=choice.image_url)
+            choices = [ChoiceDto(option=choice.option, image=choice.image)
                        for choice in question.choices]
         )

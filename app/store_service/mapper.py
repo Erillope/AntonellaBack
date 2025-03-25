@@ -1,9 +1,11 @@
 from app.common.table_mapper import TableMapper
-from .models import StoreServiceTableData, StoreServiceImage, QuestionTableData, QuestionChoice, ChoiceImage
+from .models import (StoreServiceTableData, StoreServiceImage, QuestionTableData, QuestionChoice, ChoiceImage,
+StoreServicePrice)
 from core.store_service import (StoreService, StoreServiceFactory, QuestionFactory, TextChoiceQuestion,
                                 ServiceStatus, ServiceType, ImageChoiceQuestion, Question, FormQuestion,
                                 Choice)
 from core.store_service.service.dto import QuestionInputType
+from core.store_service.domain.values import Price
 
 class StoreServiceTableMapper(TableMapper[StoreServiceTableData, StoreService]):
     def to_table(self, store_service: StoreService) -> StoreServiceTableData:
@@ -13,6 +15,7 @@ class StoreServiceTableMapper(TableMapper[StoreServiceTableData, StoreService]):
             description=store_service.description,
             status=store_service.status.value,
             type=store_service.type.value,
+            duration=store_service.duration,
             created_date=store_service.created_date
         )
     
@@ -23,6 +26,14 @@ class StoreServiceTableMapper(TableMapper[StoreServiceTableData, StoreService]):
             description=store_service_table.description,
             status=ServiceStatus(store_service_table.status),
             type=ServiceType(store_service_table.type),
+            duration=store_service_table.duration,
+            prices = [
+                Price.build(
+                    name=price.name,
+                    min=price.min_price,
+                    max=price.max_price
+                ) for price in StoreServicePrice.service_prices(str(store_service_table.id))
+            ],
             created_date=store_service_table.created_date,
             images=StoreServiceImage.service_images(str(store_service_table.id))
         )

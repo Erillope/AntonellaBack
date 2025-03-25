@@ -4,8 +4,8 @@ from .dto import (StoreServiceDto, CreateStoreServiceDto, UpdateStoreServiceDto,
 from typing import List, Optional
 from .repository import GetQuestion
 from core.common.abstract_repository import GetModel
-from core.store_service import StoreService, TextChoiceQuestion, ImageChoiceQuestion
-from .exceptions import MissingImageException, QuestionAlreadyExistsException
+from core.store_service import StoreService
+from .exceptions import QuestionAlreadyExistsException
 from .mapper import StoreServiceMapper, QuestionMapper
 
 class QuestionService(AbstractQuestionService):
@@ -35,21 +35,6 @@ class QuestionService(AbstractQuestionService):
         question = self.get_question.get(id)
         return QuestionMapper.to_dto(question)
     
-    def add_choice(self, question_id: str, option: str, base64_image: Optional[str]=None) -> QuestionDto:
-        question = self.get_question.get(question_id)
-        if isinstance(question, TextChoiceQuestion):
-            question.add_choice(option)
-        if isinstance(question, ImageChoiceQuestion):
-            if not base64_image: raise MissingImageException.missing_image()
-            question.add_choice(option, base64_image)
-        return QuestionMapper.to_dto(question)
-    
-    def delete_choice(self, question_id: str, option: str) -> QuestionDto:
-        question = self.get_question.get(question_id)
-        if isinstance(question, TextChoiceQuestion) or isinstance(question, ImageChoiceQuestion):
-            question.remove_choice(option)
-        return QuestionMapper.to_dto(question)
-    
     def service_questions(self, service_id: str) -> List[QuestionDto]:
         questions = self.get_question.get_service_questions(service_id)
         return [QuestionMapper.to_dto(question) for question in questions]
@@ -77,7 +62,10 @@ class StoreServices(AbstractStoreServices):
             name=dto.name,
             description=dto.description,
             type=dto.type,
-            status=dto.status
+            status=dto.status,
+            duration=dto.duration,
+            images=dto.images,
+            prices=dto.prices
         )
         service.save()
         return StoreServiceMapper.to_dto(service)
@@ -95,22 +83,9 @@ class StoreServices(AbstractStoreServices):
     
     def filter(self, dto: FilterStoreServiceDto) -> List[StoreServiceDto]:
         services = self.get_service.filter(
-            expresion=dto.expresion,
             order_by=dto.order_by,
             offset=dto.offset,
             limit=dto.limit,
             direction=dto.order_direction
         )
         return [self.find(service.id) for service in services]
-    
-    def add_image(self, service_id: str, base64_image: str) -> StoreServiceDto:
-        service = self.get_service.get(service_id)
-        service.add_image(base64_image)
-        service.save()
-        return StoreServiceMapper.to_dto(service)
-    
-    def delete_image(self, service_id: str, image: str) -> StoreServiceDto:
-        service = self.get_service.get(service_id)
-        service.delete_image(image)
-        service.save()
-        return StoreServiceMapper.to_dto(service)

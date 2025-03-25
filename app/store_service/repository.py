@@ -1,10 +1,9 @@
 from app.common.django_repository import DjangoSaveModel, DjangoDeleteModel, DjangoGetModel
-from core.store_service import StoreService, Question, ImageChoiceQuestion
+from core.store_service import StoreService, Question
 from .models import StoreServiceTableData, StoreServiceImage, QuestionTableData, QuestionChoice, ChoiceImage
-from core.common import EventSubscriber, Event, EventPublisher
+from core.common import EventSubscriber, Event
 from app.common.exceptions import ModelNotFoundException
 from core.store_service.domain.events import (StoreServiceSaved, StoreServiceDeleted, ChoiceAdded,
-                                              StoreServiceImageAdded, StoreServiceImageDeleted, 
                                               ChoiceDeleted, QuestionSaved, QuestionDeleted, 
                                               ChoiceImageDeleted, ChoiceImageAdded)
 from .mapper import StoreServiceTableMapper, QuestionTableMapper
@@ -16,23 +15,20 @@ class DjangoSaveStoreService(DjangoSaveModel[StoreServiceTableData, StoreService
     def __init__(self) -> None:
         super().__init__(StoreServiceTableMapper())
         EventSubscriber.__init__(self)
-        
-    def add_image(self, store_service_id: str, image: str) -> None:
-        store_service = StoreServiceTableData.objects.get(id=store_service_id)
-        StoreServiceImage.objects.create(image=image, service=store_service)
     
-    def delete_image(self, store_service_id: str, image: str) -> None:
-        store_service = StoreServiceTableData.objects.get(id=store_service_id)
-        store_service_image = StoreServiceImage.objects.get(service=store_service, image=image)
-        store_service_image.delete()
+    def save(self, store_service: StoreService) -> None:
+        super().save(store_service)
+        self.save_images(store_service)
+        
+    def save_images(self, store_service: StoreService) -> None:
+        StoreServiceImage.objects.filter(service__id=store_service.id).delete()
+        for image in store_service.images:
+            StoreServiceImage.objects.create(image=image, service_id=store_service.id)
         
     def handle(self, event: Event) -> None:
         if isinstance(event, StoreServiceSaved):
             self.save(event.store_service)
-        if isinstance(event, StoreServiceImageAdded):
-            self.add_image(event.store_service_id, event.image.get_url())
-        if isinstance(event, StoreServiceImageDeleted):
-            self.delete_image(event.store_service_id, event.image_url)
+        
 
 
 class DjangoDeleteStoreService(DjangoDeleteModel[StoreServiceTableData, StoreService], EventSubscriber):

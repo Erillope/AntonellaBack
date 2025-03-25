@@ -1,9 +1,7 @@
 from rest_framework import serializers
 from core.store_service import ServiceType, ServiceStatus
-from core.common import OrdenDirection
 from core.store_service.service.dto import (CreateStoreServiceDto, UpdateStoreServiceDto,
-                                            FilterStoreServiceDto, QuestionInputType, ChoiceType,
-                                            CreateQuestionDto, ChoiceDto)
+                                            QuestionInputType, ChoiceType, CreateQuestionDto, ChoiceDto)
 from rest_framework.exceptions import ErrorDetail
 
 class UpdateStoreSerializer(serializers.Serializer):
@@ -22,29 +20,6 @@ class UpdateStoreSerializer(serializers.Serializer):
             status=ServiceStatus(status) if status else None,
             type=ServiceType(self.validated_data['type']) if self.validated_data.get('type') else None
         )
-
-
-class FilterStoreServiceSerializer(serializers.Serializer):
-    expresion = serializers.CharField(max_length=250, required=False)
-    order_by = serializers.CharField(max_length=250)
-    offset = serializers.IntegerField(required=False)
-    limit = serializers.IntegerField(required=False)
-    order_direction = serializers.ChoiceField(choices=[(o.name, o.name) for o in OrdenDirection], required=False)
-
-    def to_dto(self) -> FilterStoreServiceDto:
-        order_direction = self.validated_data.get('order_direction')
-        return FilterStoreServiceDto(
-            expresion=self.validated_data.get('expresion'),
-            order_by=self.validated_data['order_by'],
-            offset=self.validated_data.get('offset'),
-            limit=self.validated_data.get('limit'),
-            order_direction=OrdenDirection(order_direction) if order_direction else OrdenDirection.DESC
-        )
-
-
-class AddImageToStoreSerializer(serializers.Serializer):
-    service_id = serializers.UUIDField()
-    base64_image = serializers.CharField()
 
 
 class CreateQuestionSerializer(serializers.Serializer):
@@ -117,11 +92,19 @@ class ChoiceSerializer(serializers.Serializer):
     image = serializers.CharField(required=False)
 
 
+class PriceSerializar(serializers.Serializer):
+    name = serializers.CharField(max_length=250)
+    min_price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    max_price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    
+    
 class CreateStoreSerializer(serializers.Serializer):
     service_id = serializers.UUIDField(required=False)
     name = serializers.CharField(max_length=250)
     description = serializers.CharField()
     type = serializers.ChoiceField(choices=[(t.value, t.value) for t in ServiceType])
+    duration = serializers.TimeField()
+    prices = serializers.ListField(child=PriceSerializar())
     images = serializers.ListField(child=serializers.CharField())
     questions = serializers.ListField(child=CreateQuestionSerializer())
     
@@ -147,16 +130,12 @@ class CreateStoreSerializer(serializers.Serializer):
             description=self.validated_data['description'],
             type=ServiceType(self.validated_data['type']),
             images=self.validated_data['images'],
-            questions=question_dto
+            questions=question_dto,
+            duration=self.validated_data['duration'],
+            prices=self.validated_data['prices']
         )
 
 
 class UpdateQuestion(serializers.Serializer):
     id = serializers.UUIDField()
     title = serializers.CharField(max_length=250, required=False)
-    
-
-class AddChoiceSerializer(serializers.Serializer):
-    question_id = serializers.UUIDField()
-    option = serializers.CharField(max_length=250)
-    base64_image = serializers.CharField(required=False)

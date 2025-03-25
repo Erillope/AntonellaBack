@@ -1,11 +1,11 @@
 from pydantic import BaseModel, model_validator, PrivateAttr
 from core.common import ID, Event
-from .events import QuestionSaved, QuestionDeleted, ChoiceAdded, ChoiceDeleted, ChoiceImageAdded, ChoiceImageDeleted
+from .events import QuestionSaved, QuestionDeleted
 from .values import InputType, Choice
-from .exceptions import MissingStoreServiceException, OptionAlreadyExistsException
+from .exceptions import MissingStoreServiceException
 from typing import List, Optional, ClassVar
 from datetime import date
-from core.common.image_storage import Base64ImageStorage
+from core.common.image_storage import Base64ImageStorage, ImageSaved, ImageDeleted
 
 class Question(BaseModel):
     id: str
@@ -58,41 +58,39 @@ class FormQuestion(Question):
     
 
 class TextChoiceQuestion(Question):
-    choices: List[str] = []
+    choices: List[str]
     
-    def add_choice(self, option: str) -> None:
-        '''Agrega una opción a la pregunta de selección'''
-        if option in self.choices: raise OptionAlreadyExistsException.already_exists(option)
-        self.choices.append(option)
-        self._events.append(ChoiceAdded(question_id=self.id, option=option))
-    
-    def remove_choice(self, option: str) -> None:
-        '''Elimina una opción de la pregunta de selección'''
-        if option not in self.choices: return
-        self.choices.remove(option)
-        self._events.append(ChoiceDeleted(question_id=self.id, option=option))
+    def change_data(self, title: Optional[str]=None, choices: Optional[List[str]]=None) -> None:
+        super().change_data(title)
+        if choices is not None:
+            self.choices = choices
 
 
 class ImageChoiceQuestion(Question):
-    choices: List[Choice] = []
+    choices: List[Choice]
     IMAGE_PATH: ClassVar[str] = f'choices'
     
-    def add_choice(self, option: str, base64_image: str) -> None:
-        '''Agrega una opción a la pregunta de selección'''
-        image = Base64ImageStorage(folder=self.IMAGE_PATH, base64_image=base64_image)
-        choice = Choice(option=option, image_url=image.get_url())
-        if choice in self.choices: raise OptionAlreadyExistsException.already_exists(option)
-        self.choices.append(choice)
-        self._events.append(ChoiceImageAdded(question_id=self.id, option=choice.option, image=image))
+    def _validate_data(self) -> None:
+        super()._validate_data()
+        self.set_choices(self.choices)
     
-    def remove_choice(self, option: str) -> None:
-        '''Elimina una opción de la pregunta de selección'''
-        for choice in self.choices:
-            if choice.option == option:
-                self.choices.remove(choice)
-                self._events.append(ChoiceImageDeleted(question_id=self.id,
-                                                       option=choice.option, image_url=choice.image_url))
+    def change_data(self, title: Optional[str]=None, choices: Optional[List[Choice]]=None) -> None:
+        super().change_data(title)
+        if choices is not None:
+            self._events.append(ImageDeleted(image_urls=[choice.image for choice in self.choices]))
+            self.choices = choices
+        self._validate_data()
 
+    def set_choices(self, choices: List[Choice]) -> None:
+        self.choices = []
+        for choice in choices:
+            if Base64ImageStorage.is_media_url(choice.image):
+                self.choices.append(choice)
+            else:
+                img = Base64ImageStorage(folder=self.IMAGE_PATH, base64_image=choice.image)
+                self.choices.append(Choice(option=choice.option, image=img.get_url()))
+                self._events.append(ImageSaved(images=[img]))
+                
 
 class QuestionFactory:
     @staticmethod
@@ -105,18 +103,20 @@ class QuestionFactory:
         )
     
     @staticmethod
-    def create_text_choice_question(title: str) -> TextChoiceQuestion:
+    def create_text_choice_question(title: str, choices: List[str]) -> TextChoiceQuestion:
         return TextChoiceQuestion(
             id = ID.generate(),
             title = title,
+            choices = choices,
             created_date = date.today()
         )
     
     @staticmethod
-    def create_image_choice_question(title: str) -> ImageChoiceQuestion:
+    def create_image_choice_question(title: str, choices: List[Choice]) -> ImageChoiceQuestion:
         return ImageChoiceQuestion(
             id = ID.generate(),
             title = title,
+            choices = choices,
             created_date = date.today()
         )
     

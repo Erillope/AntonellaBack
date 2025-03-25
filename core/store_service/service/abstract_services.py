@@ -18,12 +18,6 @@ class AbstractStoreServices(ABC):
     
     @abstractmethod
     def filter(self, dto: FilterStoreServiceDto) -> List[StoreServiceDto]: ...
-    
-    @abstractmethod
-    def add_image(self, service_id: str, image: str) -> StoreServiceDto: ...
-    
-    @abstractmethod
-    def delete_image(self, service_id: str, image: str) -> StoreServiceDto: ...
 
 
 class AbstractQuestionService(ABC):
@@ -38,12 +32,6 @@ class AbstractQuestionService(ABC):
     
     @abstractmethod
     def find(self, id: str) -> QuestionDto: ...
-    
-    @abstractmethod
-    def add_choice(self, question_id: str, option: str, image: Optional[str]=None) -> QuestionDto: ...
-    
-    @abstractmethod
-    def delete_choice(self, question_id: str, option: str) -> QuestionDto: ...
     
     @abstractmethod
     def service_questions(self, service_id: str) -> List[QuestionDto]: ...

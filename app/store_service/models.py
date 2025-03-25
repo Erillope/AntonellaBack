@@ -9,6 +9,7 @@ class StoreServiceTableData(models.Model):
     description = models.TextField()
     status = models.CharField(max_length=50, choices=[(s.value, s.value) for s in ServiceStatus])
     type = models.CharField(max_length=50, choices=[(t.value, t.value) for t in ServiceType])
+    duration = models.TimeField()
     created_date = models.DateField(auto_now=True)
     
     class Meta:
@@ -27,6 +28,20 @@ class StoreServiceImage(models.Model):
         return [image.image for image in cls.objects.filter(service__id=service_id)]
     
 
+class StoreServicePrice(models.Model):
+    service = models.ForeignKey(StoreServiceTableData, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    min_price = models.DecimalField(max_digits=10, decimal_places=2)
+    max_price = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    class Meta:
+        db_table = 'store_service_price'
+    
+    @classmethod
+    def service_prices(cls, service_id: str) -> List['StoreServicePrice']:
+        return cls.objects.filter(service__id=service_id)
+        
+    
 class QuestionTableData(models.Model):
     id = models.UUIDField(primary_key=True, editable=False)
     title = models.TextField()

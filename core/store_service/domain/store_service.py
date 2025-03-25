@@ -1,19 +1,21 @@
 from pydantic import BaseModel, model_validator, PrivateAttr
-from datetime import date
-from .values import ServiceStatus, ServiceType, ServiceName
-from .events import StoreServiceDeleted, StoreServiceSaved, StoreServiceImageAdded, StoreServiceImageDeleted
+from datetime import date, time
+from .values import ServiceStatus, ServiceType, ServiceName, Price
+from .events import StoreServiceDeleted, StoreServiceSaved
 from core.common import ID, Event
 from typing import Optional, List, ClassVar
-from core.common.image_storage import Base64ImageStorage
+from core.common.image_storage import Base64ImageStorage, ImageSaved, ImageDeleted
 
 class StoreService(BaseModel):
     "Servicio de tienda"
     id: str
     name: str
+    duration: time
     description: str
+    prices: List[Price]
     status: ServiceStatus
     type: ServiceType
-    images: List[str] = []
+    images: List[str]
     created_date: date
     IMAGE_PATH: ClassVar[str] = f'store_service'
     _events: List[Event] = PrivateAttr(default=[])
@@ -29,9 +31,12 @@ class StoreService(BaseModel):
         self.description = self.description.lower()
         ID.validate(self.id)
         ServiceName.validate(self.name)
+        self.set_images(self.images)
     
     def change_data(self, name: Optional[str]=None, description: Optional[str]=None,
-                    status: Optional[ServiceStatus]=None, type: Optional[ServiceType]=None) -> None:
+                    status: Optional[ServiceStatus]=None, type: Optional[ServiceType]=None,
+                    duration: Optional[time]=None, images: Optional[List[str]]=None,
+                    prices: Optional[List[Price]]=None) -> None:
         '''Cambia los datos del servicio de tienda'''
         if name is not None:
             self.name = name
@@ -44,20 +49,29 @@ class StoreService(BaseModel):
 
         if type is not None:
             self.type = type
+            
+        if duration is not None:
+            self.duration = duration
         
+        if images is not None:
+            self._events.append(ImageDeleted(image_urls=self.images))
+            self.images = images
+        
+        if prices is not None:
+            self.prices = prices
+            
         self._validate_data()
     
-    def add_image(self, base64_image: str) -> None:
-        '''Agrega una imagen al servicio de tienda'''
-        image = Base64ImageStorage(folder=self.IMAGE_PATH, base64_image=base64_image)
-        self.images.append(image.get_url())
-        self._events.append(StoreServiceImageAdded(store_service_id=self.id, image=image))
-
-    def delete_image(self, image_url: str) -> None:
-        '''Elimina una imagen del servicio de tienda'''
-        self.images.remove(image_url)
-        self._events.append(StoreServiceImageDeleted(store_service_id=self.id, image_url=image_url))
-    
+    def set_images(self, images: List[str]) -> None:
+        self.images = []
+        for image in images:
+            if Base64ImageStorage.is_media_url(image):
+                self.images.append(image)
+            else:
+                img = Base64ImageStorage(folder=self.IMAGE_PATH, base64_image=image)
+                self.images.append(img.get_url())
+                self._events.append(ImageSaved(images=[img]))
+                
     def save(self) -> None:
         StoreServiceSaved(store_service= self).publish()
         for event in self._events:
@@ -67,26 +81,32 @@ class StoreService(BaseModel):
     def delete(self) -> None:
         StoreServiceDeleted(store_service = self).publish()
 
+
 class StoreServiceFactory:
     @staticmethod
-    def create(name: str, description: str, type: ServiceType) -> StoreService:
+    def create(name: str, description: str, type: ServiceType, duration: time, prices: List[Price], images: List[str]) -> StoreService:
         return StoreService(
             id = ID.generate(),
             name = name,
             description = description,
             status = ServiceStatus.ENABLE,
             type = type,
+            duration = duration,
+            prices = prices,
+            images= images,
             created_date = date.today(),
         )
     
     @staticmethod
-    def load(id: str, name: str, description: str, status: ServiceStatus, type: ServiceType, created_date: date, images: List[str]) -> StoreService:
+    def load(id: str, name: str, description: str, status: ServiceStatus, type: ServiceType, duration: time, prices: List[Price], created_date: date, images: List[str]) -> StoreService:
         return StoreService(
             id = id,
             name = name,
             description = description,
             status = status,
             type = type,
+            duration = duration,
+            prices = prices,
             images = images,
             created_date = created_date,
         )
