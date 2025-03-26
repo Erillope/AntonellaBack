@@ -1,7 +1,7 @@
 from core.store_service import (StoreService, StoreServiceFactory, Question, QuestionFactory, InputType,
                                 FormQuestion, TextChoiceQuestion, ImageChoiceQuestion, Choice)
 from .dto import (CreateStoreServiceDto, StoreServiceDto, CreateQuestionDto, QuestionInputType,
-                  QuestionDto, ChoiceType, ChoiceDto)
+                  QuestionDto, ChoiceType, ChoiceDto, PriceDto)
 from typing import List, Optional
 
 class StoreServiceMapper:
@@ -27,7 +27,14 @@ class StoreServiceMapper:
             type=service.type,
             images=service.images,
             questions=questions,
-            prices=service.prices,
+            prices=[
+                PriceDto(
+                    name=price.name,
+                    min_price=price.range.min,
+                    max_price=price.range.max
+                )
+                for price in service.prices
+                ],
             duration=service.duration,
             created_date=service.created_date
         )

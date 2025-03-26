@@ -1,11 +1,10 @@
 from app.common.django_repository import DjangoSaveModel, DjangoDeleteModel, DjangoGetModel
-from core.store_service import StoreService, Question
-from .models import StoreServiceTableData, StoreServiceImage, QuestionTableData, QuestionChoice, ChoiceImage
+from core.store_service import StoreService, Question, ImageChoiceQuestion, TextChoiceQuestion
+from .models import StoreServiceTableData, StoreServiceImage, QuestionTableData, QuestionChoice, ChoiceImage, StoreServicePrice
 from core.common import EventSubscriber, Event
 from app.common.exceptions import ModelNotFoundException
-from core.store_service.domain.events import (StoreServiceSaved, StoreServiceDeleted, ChoiceAdded,
-                                              ChoiceDeleted, QuestionSaved, QuestionDeleted, 
-                                              ChoiceImageDeleted, ChoiceImageAdded)
+from core.store_service.domain.events import (StoreServiceSaved, StoreServiceDeleted, QuestionSaved,
+                                              QuestionDeleted)
 from .mapper import StoreServiceTableMapper, QuestionTableMapper
 from typing import Optional, List
 from core.store_service.service.repository import GetQuestion
@@ -19,12 +18,21 @@ class DjangoSaveStoreService(DjangoSaveModel[StoreServiceTableData, StoreService
     def save(self, store_service: StoreService) -> None:
         super().save(store_service)
         self.save_images(store_service)
+        self.save_prices(store_service)
         
     def save_images(self, store_service: StoreService) -> None:
         StoreServiceImage.objects.filter(service__id=store_service.id).delete()
         for image in store_service.images:
             StoreServiceImage.objects.create(image=image, service_id=store_service.id)
-        
+    
+    def save_prices(self, store_service: StoreService) -> None:
+        StoreServicePrice.objects.filter(service__id=store_service.id).delete()
+        for price in store_service.prices:
+            StoreServicePrice.objects.create(name=price.name,
+                                             min_price=price.range.min,
+                                             max_price=price.range.max,
+                                             service_id=store_service.id)
+            
     def handle(self, event: Event) -> None:
         if isinstance(event, StoreServiceSaved):
             self.save(event.store_service)
@@ -47,26 +55,23 @@ class DjangoSaveQuestion(DjangoSaveModel[QuestionTableData, Question], EventSubs
         super().__init__(QuestionTableMapper())
         EventSubscriber.__init__(self)
     
-    def add_choice(self, question_id: str, option: str, image_url: Optional[str]=None) -> None:
-        question = QuestionTableData.objects.get(id=question_id)
-        choice = QuestionChoice.objects.create(option=option, question=question)
-        if image_url:
-            ChoiceImage.objects.create(image=image_url, choice=choice)
+    def save(self, question: Question) -> None:
+        super().save(question)
+        self.save_choices(question)
     
-    def delete_choice(self, question_id: str, option: str) -> None:
-        question = QuestionTableData.objects.get(id=question_id)
-        choice = QuestionChoice.objects.get(question=question, option=option)
-        choice.delete()
+    def save_choices(self, question: Question) -> None:
+        QuestionChoice.objects.filter(question__id=question.id).delete()
+        if isinstance(question, TextChoiceQuestion):
+            for option in question.choices:
+                QuestionChoice.objects.create(option=option, question_id=question.id)
+        elif isinstance(question, ImageChoiceQuestion):
+            for choice in question.choices:
+                choice_table = QuestionChoice.objects.create(option=choice.option, question_id=question.id)
+                ChoiceImage.objects.create(image=choice.image, choice=choice_table)
         
     def handle(self, event: Event) -> None:
         if isinstance(event, QuestionSaved):
             self.save(event.question)
-        if isinstance(event, ChoiceAdded):
-            self.add_choice(event.question_id, event.option)
-        if isinstance(event, ChoiceImageAdded):
-            self.add_choice(event.question_id, event.option, event.image.get_url())
-        if isinstance(event, ChoiceDeleted) or isinstance(event, ChoiceImageDeleted):
-            self.delete_choice(event.question_id, event.option)
 
 
 class DjangoGetQuestion(DjangoGetModel[QuestionTableData, Question], GetQuestion):

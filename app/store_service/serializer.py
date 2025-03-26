@@ -1,28 +1,12 @@
 from rest_framework import serializers
 from core.store_service import ServiceType, ServiceStatus
-from core.store_service.service.dto import (CreateStoreServiceDto, UpdateStoreServiceDto,
+from core.store_service.domain.values import Price
+from core.store_service.service.dto import (CreateStoreServiceDto, UpdateStoreServiceDto, UpdateQuestionDto,
                                             QuestionInputType, ChoiceType, CreateQuestionDto, ChoiceDto)
 from rest_framework.exceptions import ErrorDetail
 
-class UpdateStoreSerializer(serializers.Serializer):
-    id = serializers.UUIDField()
-    name = serializers.CharField(max_length=250, required=False)
-    description = serializers.CharField(required=False)
-    status = serializers.ChoiceField(choices=[(s.value, s.value) for s in ServiceStatus], required=False)
-    type = serializers.ChoiceField(choices=[(t.value, t.value) for t in ServiceType], required=False)
-    
-    def to_dto(self) -> UpdateStoreServiceDto:
-        status = self.validated_data.get('status')
-        return UpdateStoreServiceDto(
-            id=str(self.validated_data['id']),
-            name=self.validated_data.get('name'),
-            description=self.validated_data.get('description'),
-            status=ServiceStatus(status) if status else None,
-            type=ServiceType(self.validated_data['type']) if self.validated_data.get('type') else None
-        )
-
-
 class CreateQuestionSerializer(serializers.Serializer):
+    service_id = serializers.UUIDField(required=False)
     title = serializers.CharField(max_length=250)
     input_type = serializers.ChoiceField(choices=[(t.value, t.value) for t in QuestionInputType])
     
@@ -99,7 +83,6 @@ class PriceSerializar(serializers.Serializer):
     
     
 class CreateStoreSerializer(serializers.Serializer):
-    service_id = serializers.UUIDField(required=False)
     name = serializers.CharField(max_length=250)
     description = serializers.CharField()
     type = serializers.ChoiceField(choices=[(t.value, t.value) for t in ServiceType])
@@ -132,10 +115,56 @@ class CreateStoreSerializer(serializers.Serializer):
             images=self.validated_data['images'],
             questions=question_dto,
             duration=self.validated_data['duration'],
-            prices=self.validated_data['prices']
+            prices=[
+                Price.build(
+                    name=price['name'],
+                    min=price['min_price'],
+                    max=price['max_price']
+                )
+                for price in self.validated_data['prices']
+            ]
         )
 
 
 class UpdateQuestion(serializers.Serializer):
     id = serializers.UUIDField()
     title = serializers.CharField(max_length=250, required=False)
+    choices = serializers.ListField(child=ChoiceSerializer(), required=False)
+    
+    def to_dto(self) -> UpdateQuestionDto:
+        return UpdateQuestionDto(
+            id=str(self.validated_data['id']),
+            title=self.validated_data.get('title'),
+            choices=self.validated_data.get('choices')
+        )
+
+
+class UpdateStoreSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    name = serializers.CharField(max_length=250, required=False)
+    description = serializers.CharField(required=False)
+    status = serializers.ChoiceField(choices=[(s.value, s.value) for s in ServiceStatus], required=False)
+    type = serializers.ChoiceField(choices=[(t.value, t.value) for t in ServiceType], required=False)
+    duration = serializers.TimeField(required=False)
+    prices = serializers.ListField(child=PriceSerializar(), required=False)
+    images = serializers.ListField(child=serializers.CharField(), required=False)
+    
+    def to_dto(self) -> UpdateStoreServiceDto:
+        status = self.validated_data.get('status')
+        return UpdateStoreServiceDto(
+            id=str(self.validated_data['id']),
+            name=self.validated_data.get('name'),
+            description=self.validated_data.get('description'),
+            status=ServiceStatus(status) if status else None,
+            type=ServiceType(self.validated_data['type']) if self.validated_data.get('type') else None,
+            duration=self.validated_data.get('duration'),
+            prices=[
+                Price.build(
+                    name=price['name'],
+                    min=price['min_price'],
+                    max=price['max_price']
+                )
+                for price in self.validated_data.get('prices')
+            ] if self.validated_data.get('prices') else None,
+            images=self.validated_data.get('images')
+        )

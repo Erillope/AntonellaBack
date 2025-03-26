@@ -14,7 +14,7 @@ class Base64ImageStorage(BaseModel):
     
     @model_validator(mode='after')
     def init(self) -> 'Base64ImageStorage':
-        self._url = f'{MEDIA}/{self.folder}/{ID.generate()}.png'
+        self._url = f'{MEDIA}{self.folder}/{ID.generate()}.png'
         return self
     
     def get_url(self) -> str:

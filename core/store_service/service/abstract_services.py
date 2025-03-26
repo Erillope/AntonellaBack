@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from .dto import (StoreServiceDto, CreateStoreServiceDto, UpdateStoreServiceDto, FilterStoreServiceDto,
-                  CreateQuestionDto, QuestionDto)
+                  CreateQuestionDto, QuestionDto, UpdateQuestionDto)
 from typing import List, Optional
 
 class AbstractStoreServices(ABC):
@@ -25,7 +25,7 @@ class AbstractQuestionService(ABC):
     def create(self, service_id: str, dto: CreateQuestionDto) -> QuestionDto: ...
     
     @abstractmethod
-    def update(self, id: str, title: Optional[str]=None) -> QuestionDto: ...
+    def update(self, dto: UpdateQuestionDto) -> QuestionDto: ...
     
     @abstractmethod
     def delete(self, id: str) -> QuestionDto: ...

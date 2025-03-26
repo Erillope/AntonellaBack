@@ -5,7 +5,7 @@ from core.common import ID, Event
 from typing import Optional, List, ClassVar
 from core.common.image_storage import Base64ImageStorage, ImageSaved, ImageDeleted
 from core.store_service.domain.values import ServiceType
-from .values import ProductName
+from .values import ProductName, ProductStatus
 from .events import ProductSaved, ProductDeleted
 
 class Product(BaseModel):
@@ -17,6 +17,7 @@ class Product(BaseModel):
     stock: int
     images: List[str]
     created_date: date
+    status: ProductStatus
     IMAGE_PATH: ClassVar[str] = f'product'
     _events: List[Event] = PrivateAttr(default=[])
     
@@ -34,7 +35,8 @@ class Product(BaseModel):
     
     def change_data(self, name: Optional[str]=None, service_type: Optional[ServiceType]=None,
                     description: Optional[str]=None, price: Optional[Decimal]=None,
-                    additional_stock: int = 0, images: Optional[List[str]]=None) -> None:
+                    additional_stock: int = 0, images: Optional[List[str]]=None,
+                    status: Optional[ProductStatus]=None) -> None:
         if name is not None:
             self.name = name
         if service_type is not None:
@@ -48,6 +50,10 @@ class Product(BaseModel):
         if images is not None:
             self._events.append(ImageDeleted(image_urls=self.images))
             self.images = images
+        if status is not None:
+            self.status = status
+        
+        self._validate_data()
         
     def set_images(self, images: List[str]) -> None:
         self.images = []
@@ -80,12 +86,13 @@ class ProductFactory:
             price=price,
             stock=stock,
             images=images,
-            created_date=date.today()
+            created_date=date.today(),
+            status=ProductStatus.ENABLE
         )
     
     @classmethod
     def load(cls, id: str, name: str, service_type: ServiceType, description: str, price: Decimal,
-             stock: int, images: List[str], created_date: date) -> Product:
+             stock: int, images: List[str], created_date: date, status: ProductStatus) -> Product:
         return Product(
             id=id,
             name=name,
@@ -94,5 +101,6 @@ class ProductFactory:
             price=price,
             stock=stock,
             images=images,
-            created_date=created_date
+            created_date=created_date,
+            status=status
         )

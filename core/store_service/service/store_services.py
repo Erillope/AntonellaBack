@@ -1,11 +1,10 @@
 from .abstract_services import AbstractStoreServices, AbstractQuestionService
 from .dto import (StoreServiceDto, CreateStoreServiceDto, UpdateStoreServiceDto, FilterStoreServiceDto,
-                  CreateQuestionDto, QuestionDto)
+                  CreateQuestionDto, QuestionDto, UpdateQuestionDto)
 from typing import List, Optional
 from .repository import GetQuestion
 from core.common.abstract_repository import GetModel
-from core.store_service import StoreService
-from .exceptions import QuestionAlreadyExistsException
+from core.store_service import StoreService, ImageChoiceQuestion, TextChoiceQuestion, Choice
 from .mapper import StoreServiceMapper, QuestionMapper
 
 class QuestionService(AbstractQuestionService):
@@ -13,16 +12,18 @@ class QuestionService(AbstractQuestionService):
         self.get_question = get_question
         
     def create(self, service_id: str, dto: CreateQuestionDto) -> QuestionDto:
-        self._verify_already_exists_question(dto.title)
         question = QuestionMapper.to_question(dto)
         question.set_store_service(service_id)
         question.save()
         return QuestionMapper.to_dto(question)
 
-    def update(self, id: str, title: Optional[str]=None) -> QuestionDto:
-        if title: self._verify_already_exists_question(title)
-        question = self.get_question.get(id)
-        question.change_data(title)
+    def update(self, dto: UpdateQuestionDto) -> QuestionDto:
+        question = self.get_question.get(dto.id)
+        question.change_data(dto.title)
+        if isinstance(question, TextChoiceQuestion) and dto.choices:
+            question.change_data(choices=[choice.option for choice in dto.choices])
+        elif isinstance(question, ImageChoiceQuestion) and dto.choices:
+            question.change_data(choices=[Choice(option=choice.option, image=choice.image) for choice in dto.choices])
         question.save()
         return QuestionMapper.to_dto(question)
     
@@ -38,10 +39,6 @@ class QuestionService(AbstractQuestionService):
     def service_questions(self, service_id: str) -> List[QuestionDto]:
         questions = self.get_question.get_service_questions(service_id)
         return [QuestionMapper.to_dto(question) for question in questions]
-
-    def _verify_already_exists_question(self, title: str) -> None:
-        if self.get_question.exists(title):
-            raise QuestionAlreadyExistsException.already_exists(title)
 
 
 class StoreServices(AbstractStoreServices):

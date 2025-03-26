@@ -87,7 +87,7 @@ class QuestionTableMapper(TableMapper[QuestionTableData, Question]):
         return QuestionFactory.load_image_choice_question(
             id=str(question_table.id),
             title=question_table.title,
-            choices=[Choice(option=option, image_url=ChoiceImage.choice_images(str(question_table.id), option)) for option in choices],
+            choices=[Choice(option=option, image=ChoiceImage.choice_images(str(question_table.id), option)) for option in choices],
             created_date=question_table.created_date,
             store_service_id=str(question_table.service_id)
         )

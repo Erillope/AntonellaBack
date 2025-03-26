@@ -8,6 +8,7 @@ class ProductTableData(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.IntegerField()
+    status = models.CharField(max_length=255)
     created_date = models.DateField()
     
     class Meta:

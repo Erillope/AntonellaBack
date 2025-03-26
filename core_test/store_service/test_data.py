@@ -1,142 +1,82 @@
-import json
-from typing import List, Dict, Any, Optional
 import random
-from core.store_service import (StoreServiceFactory, StoreService, ServiceType, ServiceStatus, InputType,
-                                QuestionFactory, TextChoiceQuestion, ImageChoiceQuestion, FormQuestion)
-from core.store_service.service.dto import (CreateStoreServiceDto, CreateQuestionDto, QuestionInputType,
-                                            ChoiceType, ChoiceDto)
-from core_test.images_data import get_base64_strings
-from core.common.config import MEDIA
-from core.common import ID
-import lorem
+from core.store_service import (StoreServiceFactory, StoreService, ServiceType, InputType, Choice,
+                                QuestionFactory, TextChoiceQuestion, ImageChoiceQuestion, FormQuestion,
+                                ServiceStatus)
+from core.store_service.domain.values import ServiceName, Price
+from core_test.images_data import get_base64_string
+from datetime import time
+import lorem # type: ignore
+from decimal import Decimal
+from typing import Dict, Any
 
 class StoreTestData:
-    instance: Optional['StoreTestData'] = None
-    BASE64_IMAGES = get_base64_strings()
+    @classmethod
+    def generate_store_service(cls) -> StoreService:
+        return StoreServiceFactory.create(**cls.store_service_data())
     
-    def __init__(self) -> None:
-        self.data: Dict[str, List[Any]] = {}
-        with open('core_test/store_service/store_service_test_data.json', encoding='utf-8') as file:
-            self.data = json.load(file)
-        self.shuffle()
-    
-    def shuffle(self) -> None:
-        for key in self.data:
-            random.shuffle(self.data[key])
-    
-    @classmethod      
-    def get_instance(cls) -> 'StoreTestData':
-        if cls.instance is None:
-            cls.instance = StoreTestData()
-        return cls.instance
-    
-    def get_names(self) -> List[str]:
-        return self.data['names']
-    
-    def get_invalid_names(self) -> List[str]:
-        return self.data['invalid_names']
-    
-    def get_service_type(self) -> ServiceType:
-        return random.choice(list(ServiceType))
-    
-    def get_service_status(self) -> ServiceStatus:
-        return random.choice(list(ServiceStatus))
-    
-    def get_description(self) -> str:
-        text: str = lorem.sentence()
-        return text
-    
-    def get_sample_base64_images(self) -> List[str]:
-        return random.sample(self.BASE64_IMAGES, random.randint(1, len(self.BASE64_IMAGES)))
-    
-    def get_input_type(self) -> InputType:
-        return random.choice(list(InputType))
-
-    def get_question_input_type(self) -> QuestionInputType:
-        return random.choice(list(QuestionInputType))
-    
-    def generate_image_url(self) -> str:
-        return f'{MEDIA}/{ID.generate()}.png'
-
-
-class DataFactory:
-    store_test_data: StoreTestData = StoreTestData.get_instance()
     
     @classmethod
-    def generate_store_services(cls) -> List[StoreService]:
-        return [
-            StoreServiceFactory.create(
-                name=name,
-                description=cls.store_test_data.get_description(),
-                type=cls.store_test_data.get_service_type(),
-            )
-            for name in cls.store_test_data.get_names()
-        ]
-    
-    @classmethod
-    def generate_create_store_services_dto(cls) -> List[CreateStoreServiceDto]:
-        return [
-            CreateStoreServiceDto(
-                name=name,
-                description=cls.store_test_data.get_description(),
-                type=cls.store_test_data.get_service_type()
-                )
-            for name in cls.store_test_data.get_names()
-        ]
-    
-    @classmethod
-    def generate_form_questions(cls) -> List[FormQuestion]:
-        return [
-            QuestionFactory.create_form_question(title=cls.store_test_data.get_description(),
-                                                 input_type=cls.store_test_data.get_input_type())
-            for _ in range(10)
-        ]
+    def generate_form_question(cls) -> FormQuestion:
+        return QuestionFactory.create_form_question(
+            title=lorem.sentence(),
+            input_type=random.choice(list(InputType))
+        )
+        
         
     @classmethod
-    def generate_text_choice_questions(cls) -> List[TextChoiceQuestion]:
-        return [
-            QuestionFactory.create_text_choice_question(title=cls.store_test_data.get_description())
-            for _ in range(10)
-        ]
+    def generate_text_choice_question(cls) -> TextChoiceQuestion:
+        return QuestionFactory.create_text_choice_question(
+            title=lorem.sentence(),
+            choices=[lorem.sentence() for _ in range(3)]
+        )
     
     @classmethod
-    def generate_image_choice_questions(cls) -> List[ImageChoiceQuestion]:
-        return [
-            QuestionFactory.create_image_choice_question(title=cls.store_test_data.get_description())
-            for _ in range(10)
-        ]
+    def generate_image_choice_question(cls) -> ImageChoiceQuestion:
+        return QuestionFactory.create_image_choice_question(
+            title=lorem.sentence(),
+            choices=[
+                Choice(
+                    option=lorem.sentence(),
+                    image=get_base64_string()
+                ) for _ in range(3)
+            ]
+        )
     
     @classmethod
-    def generate_create_form_question_dto(cls) -> List[CreateQuestionDto]:
-        return [
-            CreateQuestionDto(
-                title=cls.store_test_data.get_description(),
-                input_type=random.choice([QuestionInputType.TEXT, QuestionInputType.IMAGE])
-            )
-            for _ in range(10)
-        ]
-    
+    def store_service_data(cls) -> Dict[str, Any]:
+        return {
+            'name': ServiceName.MATCHER.generate(),
+            'description': lorem.sentence(),
+            'type': random.choice(list(ServiceType)),
+            'duration': time(hour=random.randint(0, 23), minute=random.randint(0, 59)),
+            'prices': [
+                Price.build(
+                    name=lorem.sentence(),
+                    min=Decimal(random.randint(1, 100)),
+                    max=Decimal(random.randint(101, 200))
+                ) for _ in range(3)
+            ],
+            'images': [
+                get_base64_string() for _ in range(3)
+            ]
+        }
+        
     @classmethod
-    def generate_create_text_choice_question_dto(cls) -> List[CreateQuestionDto]:
-        return [
-            CreateQuestionDto(
-                title=cls.store_test_data.get_description(),
-                input_type=QuestionInputType.CHOICE,
-                choice_type=ChoiceType.TEXT,
-                choices=[ChoiceDto(option=cls.store_test_data.get_description()) for _ in range(3)]
-            )
-            for _ in range(10)
-        ]
-    
-    @classmethod
-    def generate_create_image_choice_question_dto(cls) -> List[CreateQuestionDto]:
-        return [
-            CreateQuestionDto(
-                title=cls.store_test_data.get_description(),
-                input_type=QuestionInputType.CHOICE,
-                choice_type=ChoiceType.IMAGE,
-                choices=[ChoiceDto(option=cls.store_test_data.get_description(), image=cls.store_test_data.generate_image_url())
-                         for _ in range(3)]
-            )
-            for _ in range(10)
-        ]
+    def store_service_update_data(cls) -> Dict[str, Any]:
+        return {
+            'name': ServiceName.MATCHER.generate(),
+            'description': lorem.sentence(),
+            'type': random.choice(list(ServiceType)),
+            'duration': time(hour=random.randint(0, 23), minute=random.randint(0, 59)),
+            'prices': [
+                Price.build(
+                    name=lorem.sentence(),
+                    min=Decimal(random.randint(1, 100)),
+                    max=Decimal(random.randint(101, 200))
+                ) for _ in range(3)
+            ],
+            'images': [
+                get_base64_string() for _ in range(3)
+            ],
+            'status': random.choice(list(ServiceStatus))
+        }

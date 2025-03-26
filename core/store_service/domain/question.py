@@ -90,7 +90,6 @@ class ImageChoiceQuestion(Question):
                 img = Base64ImageStorage(folder=self.IMAGE_PATH, base64_image=choice.image)
                 self.choices.append(Choice(option=choice.option, image=img.get_url()))
                 self._events.append(ImageSaved(images=[img]))
-                
 
 class QuestionFactory:
     @staticmethod

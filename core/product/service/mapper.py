@@ -22,5 +22,6 @@ class ProductMapper:
             description=product.description,
             price=product.price,
             stock=product.stock,
-            images=product.images
+            images=product.images,
+            status=product.status
         )

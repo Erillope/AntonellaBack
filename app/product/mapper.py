@@ -1,6 +1,7 @@
 from app.common.table_mapper import TableMapper
 from .models import ProductTableData, ProductImage
 from core.product import Product, ProductFactory
+from core.product.domain.values import ProductStatus
 
 class ProductTableMapper(TableMapper[ProductTableData, Product]):
     def to_model(self, table: ProductTableData) -> Product:
@@ -12,7 +13,8 @@ class ProductTableMapper(TableMapper[ProductTableData, Product]):
             price=table.price,
             stock=table.stock,
             created_date=table.created_date,
-            images=ProductImage.get_product_images(str(table.id))
+            images=ProductImage.get_product_images(str(table.id)),
+            status=ProductStatus(table.status.upper())
         )
     
     def to_table(self, product: Product) -> ProductTableData:
@@ -23,5 +25,6 @@ class ProductTableMapper(TableMapper[ProductTableData, Product]):
             description=product.description,
             price=product.price,
             stock=product.stock,
-            created_date=product.created_date
+            created_date=product.created_date,
+            status=product.status.value.lower()
         )

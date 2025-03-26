@@ -1,7 +1,8 @@
 from pydantic import BaseModel
 from core.store_service.domain.values import ServiceType
+from core.product.domain.values import ProductStatus
 from decimal import Decimal
-from typing import Optional
+from typing import Optional, List
 
 class CreateProductDto(BaseModel):
     name: str
@@ -20,6 +21,7 @@ class UpdateProductDto(BaseModel):
     price: Optional[Decimal] = None
     additional_stock: int = 0
     images: Optional[list[str]] = None
+    status: Optional[ProductStatus] = None
 
 
 class ProductDto(BaseModel):
@@ -29,4 +31,5 @@ class ProductDto(BaseModel):
     description: str
     price: Decimal
     stock: int
-    images: list[str]
+    images: List[str]
+    status: ProductStatus

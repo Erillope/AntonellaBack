@@ -7,7 +7,7 @@ import os
 DIR = os.path.sep.join(os.path.join(os.path.dirname(__file__)).split(os.path.sep)[0:-2])
 resources_path = os.path.join(DIR, 'resources')
 
-MEDIA = "resources/media/"
+MEDIA = "resources_test/media/"
 
 class AppConfig:
     server_host = "https://erillope.pythonanywhere.com/"

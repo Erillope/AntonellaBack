@@ -40,8 +40,7 @@ class QuestionView(APIView):
     
     @validate(UpdateQuestion)
     def put(self, request: UpdateQuestion) -> Response:
-        request.validated_data['id'] = str(request.validated_data['id'])
-        question = question_service.update(**request.validated_data)
+        question = question_service.update(request.to_dto())
         return success_response(question.question_dump())
     
     @validate()

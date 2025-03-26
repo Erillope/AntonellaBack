@@ -5,6 +5,7 @@ from core.common import OrdenDirection
 from typing import List, Optional, Dict, Any
 from datetime import date, time
 from enum import Enum
+from decimal import Decimal
 
 class QuestionInputType(str, Enum):
     TEXT = 'TEXT'
@@ -28,6 +29,12 @@ class CreateQuestionDto(BaseModel):
     input_type: QuestionInputType
     choice_type: ChoiceType = ChoiceType.VOID
     choices: List[ChoiceDto] = []
+
+
+class UpdateQuestionDto(BaseModel):
+    id: str
+    title: Optional[str]=None
+    choices: Optional[List[ChoiceDto]]=None
 
 
 class CreateStoreServiceDto(BaseModel):
@@ -73,7 +80,13 @@ class QuestionDto(BaseModel):
         if self.choice_type == ChoiceType.TEXT:
             data['choices'] = [choice.option for choice in self.choices]
         return data
-       
+
+
+class PriceDto(BaseModel):
+    name: str
+    min_price: Decimal
+    max_price: Decimal
+    
 class StoreServiceDto(BaseModel):
     id: str
     name: str
@@ -81,7 +94,7 @@ class StoreServiceDto(BaseModel):
     status: ServiceStatus
     type: ServiceType
     duration: time
-    prices: List[Price]
+    prices: List[PriceDto]
     images: List[str] = []
     questions: Optional[List[QuestionDto]] = None
     created_date: date
