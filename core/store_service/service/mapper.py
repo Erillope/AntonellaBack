@@ -11,6 +11,7 @@ class StoreServiceMapper:
             name=dto.name,
             description=dto.description,
             type=dto.type,
+            subtype=dto.subtype,
             duration=dto.duration,
             prices=dto.prices,
             images=dto.images
@@ -25,6 +26,7 @@ class StoreServiceMapper:
             description=service.description,
             status=service.status,
             type=service.type,
+            subtype=service.subtype,
             images=service.images,
             questions=questions,
             prices=[

@@ -8,8 +8,12 @@ from .serializer import (CreateStoreSerializer, UpdateStoreSerializer, CreateQue
 class StoreServiceView(APIView):
     @validate()
     def get(self, request: Request) -> Response:
-        store_service = store_services.find(request.GET.get('id'))
-        return success_response(store_service.service_dump())
+        if request.GET.get('id'):
+            store_service = store_services.find(request.GET.get('id'))
+            return success_response(store_service.service_dump())
+        else:
+            services = store_services.get_all()
+            return success_response([service.service_dump() for service in services])
     
     @validate(CreateStoreSerializer)
     def post(self, request: CreateStoreSerializer) -> Response:

@@ -4,6 +4,7 @@ from core.store_service.domain.values import Price
 from core.store_service.service.dto import (CreateStoreServiceDto, UpdateStoreServiceDto, UpdateQuestionDto,
                                             QuestionInputType, ChoiceType, CreateQuestionDto, ChoiceDto)
 from rest_framework.exceptions import ErrorDetail
+from datetime import datetime
 
 class CreateQuestionSerializer(serializers.Serializer):
     service_id = serializers.UUIDField(required=False)
@@ -86,6 +87,7 @@ class CreateStoreSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=250)
     description = serializers.CharField()
     type = serializers.ChoiceField(choices=[(t.value, t.value) for t in ServiceType])
+    subtype = serializers.CharField()
     duration = serializers.TimeField()
     prices = serializers.ListField(child=PriceSerializar())
     images = serializers.ListField(child=serializers.CharField())
@@ -112,9 +114,10 @@ class CreateStoreSerializer(serializers.Serializer):
             name=self.validated_data['name'],
             description=self.validated_data['description'],
             type=ServiceType(self.validated_data['type']),
+            subtype=self.validated_data['subtype'],
             images=self.validated_data['images'],
             questions=question_dto,
-            duration=self.validated_data['duration'],
+            duration=datetime.strptime(self.validated_data['duration'], "%H:%M").time(),
             prices=[
                 Price.build(
                     name=price['name'],
@@ -145,19 +148,22 @@ class UpdateStoreSerializer(serializers.Serializer):
     description = serializers.CharField(required=False)
     status = serializers.ChoiceField(choices=[(s.value, s.value) for s in ServiceStatus], required=False)
     type = serializers.ChoiceField(choices=[(t.value, t.value) for t in ServiceType], required=False)
+    subtype = serializers.CharField(required=False)
     duration = serializers.TimeField(required=False)
     prices = serializers.ListField(child=PriceSerializar(), required=False)
     images = serializers.ListField(child=serializers.CharField(), required=False)
     
     def to_dto(self) -> UpdateStoreServiceDto:
         status = self.validated_data.get('status')
+        duration = self.validated_data.get('duration')
         return UpdateStoreServiceDto(
             id=str(self.validated_data['id']),
             name=self.validated_data.get('name'),
             description=self.validated_data.get('description'),
             status=ServiceStatus(status) if status else None,
             type=ServiceType(self.validated_data['type']) if self.validated_data.get('type') else None,
-            duration=self.validated_data.get('duration'),
+            subtype=self.validated_data.get('subtype'),
+            duration=duration,
             prices=[
                 Price.build(
                     name=price['name'],

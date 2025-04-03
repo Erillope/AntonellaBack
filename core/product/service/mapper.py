@@ -10,7 +10,10 @@ class ProductMapper:
             description=dto.description,
             price=dto.price,
             stock=dto.stock,
-            images=dto.images
+            images=dto.images,
+            service_subtype=dto.service_subtype,
+            product_type=dto.product_type,
+            volume=dto.volume
         )
     
     @classmethod
@@ -23,5 +26,10 @@ class ProductMapper:
             price=product.price,
             stock=product.stock,
             images=product.images,
-            status=product.status
+            status=product.status,
+            service_subtype=product.service_subtype,
+            product_type=product.product_type,
+            volume=product.volume,
+            stock_modified_date=product.stock_modified_date,
+            created_date=product.created_date,
         )

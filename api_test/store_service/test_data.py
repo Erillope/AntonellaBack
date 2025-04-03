@@ -52,6 +52,7 @@ class StoreTestData(CoreStoreTestData):
             'name': service.name,
             'description': service.description,
             'type': service.type.value,
+            'subtype': service.subtype,
             'duration': service.duration.isoformat(),
             'prices': [
                 {
@@ -72,6 +73,7 @@ class StoreTestData(CoreStoreTestData):
             'name': service.name,
             'description': service.description,
             'type': service.type.value,
+            'subtype': service.subtype,
             'duration': service.duration.isoformat(),
             'prices': [
                 {

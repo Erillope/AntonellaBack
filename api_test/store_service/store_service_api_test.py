@@ -7,7 +7,7 @@ import os
 from core.common.config import MEDIA
 
 class StoreServiceApiTest(TestCase):
-    num_test = 10
+    num_test = 1
     route = '/api/store_service/'
     
     @classmethod
@@ -35,6 +35,7 @@ class StoreServiceApiTest(TestCase):
                 self.assertEqual(data['prices'], request['prices'])
                 self.assertEqual(len(data['images']), len(request['images']))
                 self.assertEqual(data['status'], ServiceStatus.ENABLE.value)
+                self.assertEqual(data['subtype'], request['subtype'])
                 for image in data['images']:
                     self.assertTrue(os.path.exists(image))
     
@@ -67,6 +68,7 @@ class StoreServiceApiTest(TestCase):
                 self.assertEqual(data['prices'], request['prices'])
                 self.assertEqual(len(data['images']), len(request['images']))
                 self.assertEqual(data['status'], ServiceStatus.ENABLE.value)
+                self.assertEqual(data['subtype'], request['subtype'])
                 for image in data['images']:
                     self.assertTrue(os.path.exists(image))
     

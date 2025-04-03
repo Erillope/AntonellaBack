@@ -25,4 +25,5 @@ urlpatterns = [
     path('api/store_service/', include('app.store_service.urls')),
     path('api/token/', include('app.tokens.urls')),
     path('api/product/', include('app.product.urls')),
+    path('api/config/', include('app.config.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

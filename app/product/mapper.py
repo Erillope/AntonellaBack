@@ -14,7 +14,11 @@ class ProductTableMapper(TableMapper[ProductTableData, Product]):
             stock=table.stock,
             created_date=table.created_date,
             images=ProductImage.get_product_images(str(table.id)),
-            status=ProductStatus(table.status.upper())
+            status=ProductStatus(table.status.upper()),
+            service_subtype=table.service_subtype,
+            product_type=table.product_type,
+            stock_modified_date=table.stock_modified_date,
+            volume=table.volume
         )
     
     def to_table(self, product: Product) -> ProductTableData:
@@ -26,5 +30,9 @@ class ProductTableMapper(TableMapper[ProductTableData, Product]):
             price=product.price,
             stock=product.stock,
             created_date=product.created_date,
-            status=product.status.value.lower()
+            status=product.status.value.lower(),
+            service_subtype=product.service_subtype,
+            product_type=product.product_type,
+            volume=product.volume,
+            stock_modified_date=product.stock_modified_date,
         )

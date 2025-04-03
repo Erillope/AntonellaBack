@@ -8,8 +8,12 @@ from .serializer import CreateProductSerializer, UpdateProductSerializer
 class ProductApiView(APIView):
     @validate()
     def get(self, request: Request) -> Response:
-        product = product_service.get(request.GET.get('id'))
-        return success_response(product.model_dump())
+        if request.GET.get('id'):
+            product = product_service.get(request.GET.get('id'))
+            return success_response(product.model_dump())
+        else:
+            products = product_service.get_all()
+            return success_response([product.model_dump() for product in products])
     
     @validate(CreateProductSerializer)
     def post(self, request: CreateProductSerializer) -> Response:

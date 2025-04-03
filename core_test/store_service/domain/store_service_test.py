@@ -41,3 +41,4 @@ class StoreServiceCreationTest(unittest.TestCase):
                 self.assertEqual(store_service.prices, new_data['prices'])
                 self.assertEqual(len(store_service.images), len(new_data['images']))
                 self.assertEqual(store_service.status, new_data['status'])
+                self.assertEqual(store_service.subtype, new_data['subtype'])

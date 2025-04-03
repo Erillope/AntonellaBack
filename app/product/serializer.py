@@ -9,6 +9,9 @@ class CreateProductSerializer(serializers.Serializer):
     description = serializers.CharField()
     stock = serializers.IntegerField()
     service_type = serializers.ChoiceField(choices=[(tag.value, tag.value) for tag in ServiceType])
+    service_subtype = serializers.CharField()
+    product_type = serializers.CharField()
+    volume = serializers.IntegerField()
     images = serializers.ListField(child=serializers.CharField())
 
     def to_dto(self) -> CreateProductDto:
@@ -18,6 +21,9 @@ class CreateProductSerializer(serializers.Serializer):
             description=self.validated_data['description'],
             stock=self.validated_data['stock'],
             service_type=self.validated_data['service_type'],
+            service_subtype=self.validated_data['service_subtype'],
+            product_type=self.validated_data['product_type'],
+            volume=self.validated_data['volume'],
             images=self.validated_data['images']
         )
 
@@ -30,6 +36,9 @@ class UpdateProductSerializer(serializers.Serializer):
     additional_stock = serializers.IntegerField(default=0)
     images = serializers.ListField(child=serializers.CharField(), required=False)
     service_type = serializers.ChoiceField(choices=[(tag.value, tag.value) for tag in ServiceType], required=False)
+    service_subtype = serializers.CharField(required=False)
+    product_type = serializers.CharField(required=False)
+    volume = serializers.IntegerField(required=False)
     status = serializers.ChoiceField(choices=[(tag.value, tag.value) for tag in ProductStatus], required=False)
     
     def to_dto(self) -> UpdateProductDto:
@@ -41,5 +50,8 @@ class UpdateProductSerializer(serializers.Serializer):
             additional_stock=self.validated_data.get('additional_stock'),
             images=self.validated_data.get('images'),
             service_type=self.validated_data.get('service_type'),
+            service_subtype=self.validated_data.get('service_subtype'),
+            product_type=self.validated_data.get('product_type'),
+            volume=self.validated_data.get('volume'),
             status=self.validated_data.get('status')
         )

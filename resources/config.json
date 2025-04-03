@@ -19,5 +19,36 @@
     },
     "app_email": "ericklorenzolopez1@gmail.com",
     "reset_password_message": "Hola %s para cambiar tu contraseña ingresa al siguiente link:\n %s",
-    "email_password": "oggz choq avit mqeb"
+    "email_password": "oggz choq avit mqeb",
+    "categories_subtypes": {
+        "CABELLO": [
+            "CORTES",
+            "PEINADOS",
+            "COLOR",
+            "TRATAMIENTOS"
+        ],
+        "UÑAS": [
+            "MANICURA",
+            "PEDICURA",
+            "ESMALTADO",
+            "EXTENSIONES"
+        ],
+        "MAQUILLAJE": [
+            "DIA",
+            "NOCHE",
+            "NOVIA",
+            "FANTASIA"
+        ],
+        "SPA": [
+            "FACIAL",
+            "CORPORAL",
+            "DEPILACION",
+            "MASAJE"
+        ]
+    },
+    "product_types": [
+        "CREMA",
+        "ACEITE",
+        "SHAMPOO"
+    ]
 }

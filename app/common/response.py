@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from typing import Any, Dict, List, Callable, Type, Optional
 
-Data = Dict[str, Any]|List[Dict[str, Any]]
+Data = Dict[str, Any]|List[Dict[str, Any]]|List[Any]
 
 def success_response(data: Optional[Data]=None) -> Response:
     if not data: data = {}

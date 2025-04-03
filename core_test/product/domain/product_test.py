@@ -21,6 +21,9 @@ class ProductTest(unittest.TestCase):
                 self.assertEqual(len(product.images), len(data['images']))
                 self.assertEqual(product.status, ProductStatus.ENABLE)
                 self.assertEqual(product.created_date, date.today())
+                self.assertEqual(product.service_subtype, data['service_subtype'])
+                self.assertEqual(product.product_type, data['product_type'])
+                self.assertEqual(product.volume, data['volume'])
     
     def test_create_product_with_invalid_name(self) -> None:
         for _ in range(self.num_tests):
@@ -44,3 +47,6 @@ class ProductTest(unittest.TestCase):
             self.assertEqual(product.stock, new_data['additional_stock'] + stock)
             self.assertEqual(len(product.images), len(new_data['images']))
             self.assertEqual(product.status, new_data['status'])
+            self.assertEqual(product.service_subtype, new_data['service_subtype'])
+            self.assertEqual(product.product_type, new_data['product_type'])
+            self.assertEqual(product.volume, new_data['volume'])

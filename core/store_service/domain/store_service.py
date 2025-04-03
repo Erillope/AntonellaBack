@@ -15,6 +15,7 @@ class StoreService(BaseModel):
     prices: List[Price]
     status: ServiceStatus
     type: ServiceType
+    subtype: str
     images: List[str]
     created_date: date
     IMAGE_PATH: ClassVar[str] = f'store_service'
@@ -36,7 +37,7 @@ class StoreService(BaseModel):
     def change_data(self, name: Optional[str]=None, description: Optional[str]=None,
                     status: Optional[ServiceStatus]=None, type: Optional[ServiceType]=None,
                     duration: Optional[time]=None, images: Optional[List[str]]=None,
-                    prices: Optional[List[Price]]=None) -> None:
+                    prices: Optional[List[Price]]=None, subtype: Optional[str]=None) -> None:
         '''Cambia los datos del servicio de tienda'''
         if name is not None:
             self.name = name
@@ -54,11 +55,14 @@ class StoreService(BaseModel):
             self.duration = duration
         
         if images is not None:
-            self._events.append(ImageDeleted(image_urls=self.images))
+            self._events.append(ImageDeleted(image_urls=[img for img in self.images if img not in images]))
             self.images = images
         
         if prices is not None:
             self.prices = prices
+        
+        if subtype is not None:
+            self.subtype = subtype
             
         self._validate_data()
     
@@ -84,7 +88,7 @@ class StoreService(BaseModel):
 
 class StoreServiceFactory:
     @staticmethod
-    def create(name: str, description: str, type: ServiceType, duration: time, prices: List[Price], images: List[str]) -> StoreService:
+    def create(name: str, description: str, type: ServiceType, duration: time, prices: List[Price], images: List[str], subtype: str) -> StoreService:
         return StoreService(
             id = ID.generate(),
             name = name,
@@ -94,11 +98,12 @@ class StoreServiceFactory:
             duration = duration,
             prices = prices,
             images= images,
+            subtype= subtype,
             created_date = date.today(),
         )
     
     @staticmethod
-    def load(id: str, name: str, description: str, status: ServiceStatus, type: ServiceType, duration: time, prices: List[Price], created_date: date, images: List[str]) -> StoreService:
+    def load(id: str, name: str, description: str, status: ServiceStatus, type: ServiceType, duration: time, prices: List[Price], created_date: date, images: List[str], subtype: str) -> StoreService:
         return StoreService(
             id = id,
             name = name,
@@ -108,5 +113,6 @@ class StoreServiceFactory:
             duration = duration,
             prices = prices,
             images = images,
+            subtype=subtype,
             created_date = created_date,
         )

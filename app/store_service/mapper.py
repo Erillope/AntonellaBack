@@ -16,6 +16,7 @@ class StoreServiceTableMapper(TableMapper[StoreServiceTableData, StoreService]):
             status=store_service.status.value,
             type=store_service.type.value,
             duration=store_service.duration,
+            subtype=store_service.subtype,
             created_date=store_service.created_date
         )
     
@@ -26,6 +27,7 @@ class StoreServiceTableMapper(TableMapper[StoreServiceTableData, StoreService]):
             description=store_service_table.description,
             status=ServiceStatus(store_service_table.status),
             type=ServiceType(store_service_table.type),
+            subtype=store_service_table.subtype,
             duration=store_service_table.duration,
             prices = [
                 Price.build(

@@ -17,6 +17,7 @@ class DjangoSaveProduct(DjangoSaveModel[ProductTableData, Product], EventSubscri
     
     def save(self, product: Product) -> None:
         super().save(product)
+        self.save_images(product)
     
     def save_images(self, product: Product) -> None:
         ProductImage.objects.filter(product_id=product.id).delete()

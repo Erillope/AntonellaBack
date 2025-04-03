@@ -5,10 +5,14 @@ class ProductTableData(models.Model):
     id = models.UUIDField(primary_key=True, editable=False)
     name = models.CharField(max_length=255)
     service_type = models.CharField(max_length=255)
+    service_subtype = models.CharField(max_length=255)
+    product_type = models.CharField(max_length=255)
+    volume = models.IntegerField()
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.IntegerField()
     status = models.CharField(max_length=255)
+    stock_modified_date = models.DateField()
     created_date = models.DateField()
     
     class Meta:

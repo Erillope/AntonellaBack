@@ -77,7 +77,8 @@ class ImageChoiceQuestion(Question):
     def change_data(self, title: Optional[str]=None, choices: Optional[List[Choice]]=None) -> None:
         super().change_data(title)
         if choices is not None:
-            self._events.append(ImageDeleted(image_urls=[choice.image for choice in self.choices]))
+            images = [choice.image for choice in choices]
+            self._events.append(ImageDeleted(image_urls=[choice.image for choice in self.choices if choice.image not in images]))
             self.choices = choices
         self._validate_data()
 

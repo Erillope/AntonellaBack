@@ -1,13 +1,13 @@
 import json
 from decimal import Decimal
 from datetime import time
-from typing import Dict, Any
+from typing import Dict, Any, List
 import os
 
 DIR = os.path.sep.join(os.path.join(os.path.dirname(__file__)).split(os.path.sep)[0:-2])
 resources_path = os.path.join(DIR, 'resources')
 
-MEDIA = "resources_test/media/"
+MEDIA = "resources/media/"
 
 class AppConfig:
     server_host = "https://erillope.pythonanywhere.com/"
@@ -51,3 +51,11 @@ class AppConfig:
     @classmethod
     def app_email(cls) -> str:
         return cls.data.get('app_email', '')
+    
+    @classmethod
+    def categories_subtypes(cls) -> Dict[str, Any]:
+        return cls.data.get('categories_subtypes', {})
+    
+    @classmethod
+    def producy_types(cls) -> List[str]:
+        return cls.data.get('product_types', [])

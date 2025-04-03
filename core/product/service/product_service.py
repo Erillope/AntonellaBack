@@ -22,7 +22,11 @@ class ProductService(AbstractProductService):
             description=dto.description,
             price=dto.price,
             additional_stock=dto.additional_stock,
-            images=dto.images
+            images=dto.images,
+            status=dto.status,
+            service_subtype=dto.service_subtype,
+            product_type=dto.product_type,
+            volume=dto.volume,
         )
         product.save()
         return ProductMapper.to_dto(product)

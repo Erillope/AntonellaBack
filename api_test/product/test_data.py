@@ -13,7 +13,10 @@ class ProductTestData(CoreProductTestData):
             'price': float(product.price),
             'images': [get_base64_string() for _ in range(3)],
             'stock': product.stock,
-            'service_type': product.service_type.value
+            'service_type': product.service_type.value,
+            'service_subtype': product.service_subtype,
+            'product_type': product.product_type,
+            'volume': product.volume,
         }
     
     @classmethod
@@ -27,5 +30,8 @@ class ProductTestData(CoreProductTestData):
             'images': [get_base64_string() for _ in range(3)],
             'additional_stock': random.randint(1, 10),
             'service_type': product.service_type.value,
-            'status': product.status.value
+            'status': product.status.value,
+            'service_subtype': product.service_subtype,
+            'product_type': product.product_type,
+            'volume': product.volume,
         }

@@ -8,6 +8,7 @@ from datetime import time
 import lorem # type: ignore
 from decimal import Decimal
 from typing import Dict, Any
+from core.common.config import AppConfig
 
 class StoreTestData:
     @classmethod
@@ -48,6 +49,7 @@ class StoreTestData:
             'name': ServiceName.MATCHER.generate(),
             'description': lorem.sentence(),
             'type': random.choice(list(ServiceType)),
+            'subtype': random.choice(list(AppConfig.categories_subtypes().values())[random.randint(0, 3)]),
             'duration': time(hour=random.randint(0, 23), minute=random.randint(0, 59)),
             'prices': [
                 Price.build(
@@ -67,6 +69,7 @@ class StoreTestData:
             'name': ServiceName.MATCHER.generate(),
             'description': lorem.sentence(),
             'type': random.choice(list(ServiceType)),
+            'subtype': random.choice(list(AppConfig.categories_subtypes().values())[random.randint(0, 3)]),
             'duration': time(hour=random.randint(0, 23), minute=random.randint(0, 59)),
             'prices': [
                 Price.build(

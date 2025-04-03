@@ -1,6 +1,5 @@
 from django.test import TestCase
 from .test_data import ProductTestData
-from core.store_service import ServiceStatus
 import json
 import shutil
 import os
@@ -33,6 +32,9 @@ class ProductApiTest(TestCase):
                 self.assertEqual(data['stock'], request['stock'])
                 self.assertEqual(data['service_type'], request['service_type'])
                 self.assertEqual(len(data['images']), len(request['images']))
+                self.assertEqual(data['service_subtype'], request['service_subtype'])
+                self.assertEqual(data['product_type'], request['product_type'])
+                self.assertEqual(data['volume'], request['volume'])
                 for image in data['images']:
                     self.assertTrue(os.path.exists(image))
     
@@ -52,6 +54,9 @@ class ProductApiTest(TestCase):
                 self.assertEqual(data['stock'], request['additional_stock'] + stock)
                 self.assertEqual(data['service_type'], request['service_type'])
                 self.assertEqual(len(data['images']), len(request['images']))
+                self.assertEqual(data['service_subtype'], request['service_subtype'])
+                self.assertEqual(data['product_type'], request['product_type'])
+                self.assertEqual(data['volume'], request['volume'])
                 for image in data['images']:
                     self.assertTrue(os.path.exists(image))
     

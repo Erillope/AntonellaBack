@@ -12,6 +12,7 @@ from core.common.email import EmailHost, EmailMessage
 from core.token import AbstractTokenService
 from core.token import Token
 from datetime import timedelta
+from core.common import ID
 
 class AuthService(AbstractAuthService):    
     def __init__(self, get_user: GetUser, get_role: GetModel[Role], email_host: EmailHost,
@@ -30,6 +31,7 @@ class AuthService(AbstractAuthService):
         self._validate_unique_super_admin(dto)
         user = UserMapper.to_user(dto)
         user.save()
+        if ID.is_id(dto.password): self.create_change_password_token(user.email)
         return UserMapper.to_dto(user)
 
     def sign_in(self, phone_number: str, password: str) -> UserDto:

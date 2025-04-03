@@ -62,10 +62,11 @@ class StoreServices(AbstractStoreServices):
             status=dto.status,
             duration=dto.duration,
             images=dto.images,
-            prices=dto.prices
+            prices=dto.prices,
+            subtype=dto.subtype
         )
         service.save()
-        return StoreServiceMapper.to_dto(service)
+        return self.find(service.id)
     
     def delete(self, id: str) -> StoreServiceDto:
         service = self.get_service.get(id)
@@ -85,4 +86,8 @@ class StoreServices(AbstractStoreServices):
             limit=dto.limit,
             direction=dto.order_direction
         )
+        return [self.find(service.id) for service in services]
+    
+    def get_all(self) -> List[StoreServiceDto]:
+        services = self.get_service.get_all()
         return [self.find(service.id) for service in services]

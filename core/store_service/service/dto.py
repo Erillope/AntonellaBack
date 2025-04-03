@@ -41,6 +41,7 @@ class CreateStoreServiceDto(BaseModel):
     name: str
     description: str
     type: ServiceType
+    subtype: str
     duration: time
     prices: List[Price]
     images: List[str] = []
@@ -52,6 +53,7 @@ class UpdateStoreServiceDto(BaseModel):
     name: Optional[str]=None
     description: Optional[str]=None
     type: Optional[ServiceType]=None
+    subtype: Optional[str]=None
     duration: Optional[time]=None
     prices: Optional[List[Price]]=None
     images: Optional[List[str]]=None
@@ -93,6 +95,7 @@ class StoreServiceDto(BaseModel):
     description: str
     status: ServiceStatus
     type: ServiceType
+    subtype: str
     duration: time
     prices: List[PriceDto]
     images: List[str] = []

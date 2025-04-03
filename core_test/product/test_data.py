@@ -6,6 +6,7 @@ import random
 from core_test.images_data import get_base64_string
 from decimal import Decimal
 from typing import Dict, Any
+from core.common.config import AppConfig
 
 class ProductTestData:
     @classmethod
@@ -22,7 +23,10 @@ class ProductTestData:
             'stock': random.randint(1, 100),
             'images': [
                 get_base64_string() for _ in range(3)
-            ]
+            ],
+            'service_subtype': random.choice(list(ServiceType)),
+            'product_type': random.choice(AppConfig.producy_types()),
+            'volume': random.randint(1, 100),
         }
     
     @classmethod
@@ -36,5 +40,8 @@ class ProductTestData:
             'images': [
                 get_base64_string() for _ in range(3)
             ],
-            'status': random.choice(list(ProductStatus))
+            'status': random.choice(list(ProductStatus)),
+            'service_subtype': random.choice(list(ServiceType)),
+            'product_type': random.choice(AppConfig.producy_types()),
+            'volume': random.randint(1, 100),
         }

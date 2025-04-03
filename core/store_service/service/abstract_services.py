@@ -17,6 +17,9 @@ class AbstractStoreServices(ABC):
     def find(self, id: str) -> StoreServiceDto: ...
     
     @abstractmethod
+    def get_all(self) -> List[StoreServiceDto]: ...
+    
+    @abstractmethod
     def filter(self, dto: FilterStoreServiceDto) -> List[StoreServiceDto]: ...
 
 
