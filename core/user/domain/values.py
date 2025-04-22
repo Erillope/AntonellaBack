@@ -61,7 +61,7 @@ class RoleAccess(BaseModel):
                 access_type=access,
                 permissions={PermissionType.READ, PermissionType.CREATE, PermissionType.EDIT, PermissionType.DELETE}
             )
-            for access in AccessType
+            for access in [acc for acc in AccessType if acc != AccessType.MOVIL]
         ]
     
     def __eq__(self, value: object) -> bool:

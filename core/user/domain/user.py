@@ -58,6 +58,9 @@ class UserAccount(BaseModel):
         
         if birthdate is not None:
             self.birthdate = birthdate
+
+        if gender is not None:
+            self.gender = gender
             
         self._validate_data()
     
@@ -101,7 +104,8 @@ class EmployeeAccount(UserAccount):
         if address is not None:
             self.address = address
         if photo is not None:
-            self._events.append(ImageDeleted(image_urls=[self.photo]))
+            if (photo != self.photo):
+                self._events.append(ImageDeleted(image_urls=[self.photo]))
             self.photo = photo
         if roles is not None:
             self.roles = roles
