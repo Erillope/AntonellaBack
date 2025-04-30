@@ -1,5 +1,5 @@
 {
-    "iva": 0.15,
+    "iva": 15.00,
     "payment_percentage": 0.5,
     "start_time": "08:00",
     "end_time": "20:00",

@@ -31,7 +31,7 @@ class AppConfig:
     
     @classmethod
     def iva(cls) -> Decimal:
-        return Decimal(cls.data.get('IVA', 0.15))
+        return Decimal(cls.data.get('iva', 15.00))
     
     @classmethod
     def default_super_admin(cls) -> Dict[str, Any]:
