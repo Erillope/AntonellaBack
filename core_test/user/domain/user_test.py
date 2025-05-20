@@ -1,7 +1,7 @@
 import unittest
 from datetime import date
 from core.user import UserAccountFactory, AccountStatus, UserAccount, Role, EmployeeAccount
-from core.user.domain.values import UserPhoneNumber, UserEmail, UserName, UserPassword, Gender, DniValue, EmployeeCategories
+from core.user.domain.values import UserPhoneNumber, UserEmail, UserName, UserPassword, Gender, DniValue, EmployeeCategories, PaymentType
 from core.user.domain.exceptions import (InvalidPhoneNumberException, InvalidUserBirthdateException,
                                          InvalidUserEmailException, InvalidUserNameException, 
                                          InvalidUserPasswordException)
@@ -102,7 +102,8 @@ class TestUserAccountCreation(unittest.TestCase):
             'address': ''.join(random.choices(string.ascii_letters + string.digits, k=20)),
             'roles': [Role.MATCHER.generate() for _ in range(random.randint(1,5))],
             'photo': get_base64_string(),
-            'categories': random.sample(list(EmployeeCategories), random.randint(1,3))
+            'categories': random.sample(list(EmployeeCategories), random.randint(1,3)),
+            'payment_type': random.choice(list(PaymentType))
         }
         
     def _validate_user(self, user: UserAccount, phone_number: str, email: str, name: str, password: str, gender: Gender, birthdate: date) -> None:
@@ -115,10 +116,11 @@ class TestUserAccountCreation(unittest.TestCase):
         self.assertTrue(user.created_date == date.today())
         self.assertEqual(user.gender, gender)
     
-    def _validate_employee(self, user: EmployeeAccount, phone_number: str, email: str, name: str, password: str, gender: Gender, birthdate: date, dni: str, address: str, roles: List[str], categories: List[EmployeeCategories]) -> None:
+    def _validate_employee(self, user: EmployeeAccount, phone_number: str, email: str, name: str, password: str, gender: Gender, birthdate: date, dni: str, address: str, roles: List[str], categories: List[EmployeeCategories], payment_type: PaymentType) -> None:
         self._validate_user(user, phone_number, email, name, password, gender, birthdate)
         self.assertEqual(user.dni, dni)
         self.assertEqual(user.address, address)
         self.assertIsNotNone(user.photo)
         self.assertEqual(user.roles, roles)
         self.assertEqual(user.categories, categories)
+        self.assertEqual(user.payment_type, payment_type)

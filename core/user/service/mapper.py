@@ -41,7 +41,8 @@ class UserMapper:
             address=dto.address,
             photo=dto.photo,
             roles=dto.roles,
-            categories=dto.categories
+            categories=dto.categories,
+            payment_type=dto.payment_type
         )
         return employee
     
@@ -73,7 +74,8 @@ class UserMapper:
             gender=employee.gender,
             created_date=employee.created_date,
             roles=[role for role in employee.roles],
-            categories=[category for category in employee.categories]
+            categories=[category for category in employee.categories],
+            payment_type=employee.payment_type
         )
 
 

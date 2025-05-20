@@ -70,7 +70,7 @@ class UpdateUserService(AbstractUpdateUserService):
         if isinstance(user, EmployeeAccount):
             user.change_data(dto.phone_number, dto.email, dto.name, dto.password, dto.status,
                              dto.birthdate, dto.gender, dto.address, dto.dni, dto.photo, dto.roles,
-                             dto.categories)
+                             dto.categories, dto.payment_type)
         else:
             user.change_data(dto.phone_number, dto.email, dto.name, dto.password, dto.status)
         user.save(update=True)

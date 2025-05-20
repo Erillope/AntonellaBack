@@ -85,6 +85,7 @@ class EmployeeAccount(UserAccount):
     roles: List[str]
     photo: str
     categories: List[EmployeeCategories]
+    payment_type: PaymentType
     IMAGE_PATH: ClassVar[str] = f'employee'
     
     def _validate_data(self) -> None:
@@ -97,7 +98,7 @@ class EmployeeAccount(UserAccount):
                     status: Optional[AccountStatus]=None, birthdate: Optional[date]=None,
                     gender: Optional[Gender]=None, address: Optional[str]=None, dni: Optional[str]=None,
                     photo: Optional[str]=None, roles: Optional[List[str]]=None,
-                    categories: Optional[List[EmployeeCategories]] = None) -> None:
+                    categories: Optional[List[EmployeeCategories]] = None, payment_type: Optional[PaymentType] = None) -> None:
         super().change_data(phone_number, email, name, password, status, birthdate, gender)
         if dni is not None:
             self.dni = dni
@@ -111,6 +112,8 @@ class EmployeeAccount(UserAccount):
             self.roles = roles
         if categories is not None:
             self.categories = categories
+        if payment_type is not None:
+            self.payment_type = payment_type
         self._validate_data()
 
     def set_photo(self, photo: str) -> None:
@@ -157,7 +160,7 @@ class UserAccountFactory:
     @staticmethod
     def create_employee(phone_number: str, email: str, name: str, password: str, birthdate: date,
                         gender: Gender, dni: str, address: str, photo: str, roles: List[str],
-                        categories: List[EmployeeCategories]) -> EmployeeAccount:
+                        categories: List[EmployeeCategories], payment_type: PaymentType) -> EmployeeAccount:
         return EmployeeAccount(
             id = ID.generate(),
             phone_number = phone_number,
@@ -172,14 +175,15 @@ class UserAccountFactory:
             address=address,
             photo=photo,
             roles=roles,
-            categories=categories
+            categories=categories,
+            payment_type=payment_type
         )
     
     @staticmethod
     def load_employee(id: str, phone_number: str, email: str, name: str, password: str,
                       status: AccountStatus, birthdate: date, created_date: date, gender: Gender,
                       dni: str, address: str, photo: str, roles: List[str],
-                      categories: List[EmployeeCategories]) -> EmployeeAccount:
+                      categories: List[EmployeeCategories], payment_type: PaymentType) -> EmployeeAccount:
         return EmployeeAccount(
             id = id,
             phone_number = phone_number,
@@ -194,5 +198,6 @@ class UserAccountFactory:
             address=address,
             roles=roles,
             photo=photo,
-            categories=categories
+            categories=categories,
+            payment_type=payment_type
         )

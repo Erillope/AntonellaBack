@@ -32,7 +32,8 @@ class UserDataFactory(CoreUserDataFactory):
                 'photo': get_base64_string(),
                 'roles': random.sample(roles, k=random.randint(1, len(roles))),
                 'categories': [category.value for category in user.categories],
-            }
+                'payment_type': user.payment_type.value,
+            },
         }
 
     @classmethod

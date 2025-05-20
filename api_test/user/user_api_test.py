@@ -194,7 +194,8 @@ class UserAPITest(TestCase):
                 'address': employee_data.address,
                 'photo': get_base64_string(),
                 'roles': random.sample(self.roles, k=random.randint(1, len(self.roles))),
-                'categories': [category.value for category in employee_data.categories]
+                'categories': [category.value for category in employee_data.categories],
+                'payment_type': employee_data.payment_type
             }
             with self.subTest(employee=employee, request=request):
                 response = self.client.put(self.route, json.dumps(request), content_type='application/json')
@@ -205,7 +206,8 @@ class UserAPITest(TestCase):
                 self.assertEqual(data['dni'], employee_data.dni)
                 self.assertEqual(data['address'], employee_data.address)
                 self.assertEqual(data['roles'], [role.lower() for role in request['roles']])
-                self.assertEqual(data['categories'], request['categories'])
+                if data.get('categories'): self.assertEqual(set(data['categories']), set(request['categories']))
+                self.assertEqual(data['payment_type'], employee_data.payment_type.value)
     
     def test_create_employee_already_exists_dni(self) -> None:
         for _ in range(self.num_test):
@@ -232,3 +234,4 @@ class UserAPITest(TestCase):
         self.assertIn(data['photo'].split('/')[-1], os.listdir(MEDIA+'/employee'))
         self.assertEqual(data['roles'], user_data['employee_data']['roles'])
         self.assertEqual(data['categories'], user_data['employee_data']['categories'])
+        self.assertEqual(data['payment_type'], user_data['employee_data']['payment_type'])

@@ -1,7 +1,7 @@
 from core_test.images_data import get_base64_string
 from core.common import ID
 from core.user import AccountStatus, Gender, UserAccount, UserAccountFactory, RoleFactory, Role, EmployeeAccount
-from core.user.domain.values import UserName, UserEmail, UserPassword, UserPhoneNumber, UserBirthdate, DniValue, RoleAccess, AccessType, PermissionType, EmployeeCategories
+from core.user.domain.values import UserName, UserEmail, UserPassword, UserPhoneNumber, UserBirthdate, DniValue, RoleAccess, AccessType, PermissionType, EmployeeCategories, PaymentType
 import random
 from datetime import date, timedelta
 
@@ -37,6 +37,7 @@ class UserDataFactory:
             photo=get_base64_string(),
             roles=[Role.MATCHER.generate() for _ in range(random.randint(1, 5))],
             categories=random.sample(list(EmployeeCategories), random.randint(1, 3)),
+            payment_type=random.choice(list(PaymentType)),
         )
     
     @classmethod

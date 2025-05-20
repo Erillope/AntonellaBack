@@ -21,6 +21,7 @@ class EmployeeAccountTableData(UserAccountTableData):
     dni = models.CharField(max_length=250, blank=False, unique=True)
     address = models.CharField(max_length=250, blank=False)
     photo = models.CharField(max_length=250, blank=False)
+    payment_type = models.CharField(max_length=25, blank=False)
     
     class Meta:
         db_table = "employee_account"

@@ -2,7 +2,7 @@ from rest_framework import serializers
 from core.user import AccountStatus, Gender
 from core.common import OrdenDirection
 from core.user.service.dto import SignUpDto, UpdateUserDto, FilterUserDto, CreateEmployeeDto
-from core.user.domain.values import AccessType, PermissionType, RoleAccess, EmployeeCategories
+from core.user.domain.values import AccessType, PermissionType, RoleAccess, EmployeeCategories, PaymentType
 from typing import List, Optional
 
 class SignInSerializer(serializers.Serializer):
@@ -17,6 +17,7 @@ class EmployeeDataSerializer(serializers.Serializer):
     roles = serializers.ListField(child=serializers.CharField(max_length=250))
     categories = serializers.ListField(
         child=serializers.ChoiceField(choices=[(c.value, c.value) for c in EmployeeCategories]),required=False)
+    payment_type = serializers.ChoiceField(choices=[(p.value, p.value) for p in PaymentType])
     
     
 class SignUpSerializer(serializers.Serializer):
@@ -44,7 +45,8 @@ class SignUpSerializer(serializers.Serializer):
                 categories=[
                     EmployeeCategories(category)
                     for category in self.validated_data['employee_data']['categories']
-                ]
+                ],
+                payment_type=PaymentType(self.validated_data['employee_data']['payment_type'])
             )
         return SignUpDto(
             phone_number=self.validated_data['phone_number'],
@@ -70,6 +72,7 @@ class UpdateUserSerializer(serializers.Serializer):
     gender = serializers.ChoiceField(choices=[(g.value, g.value) for g in Gender], required=False)
     categories = serializers.ListField(
         child=serializers.ChoiceField(choices=[(c.value, c.value) for c in EmployeeCategories]),required=False)
+    payment_type = serializers.ChoiceField(choices=[(p.value, p.value) for p in PaymentType], required=False)
     
     def to_dto(self) -> UpdateUserDto:
         status = self.validated_data.get('status')
@@ -85,7 +88,8 @@ class UpdateUserSerializer(serializers.Serializer):
             roles=self.validated_data.get('roles'),
             birthdate=self.validated_data.get('birthdate'),
             gender=self.validated_data.get('gender'),
-            categories=self.validated_data.get('categories')
+            categories=self.validated_data.get('categories'),
+            payment_type=self.validated_data.get('payment_type')
         )
 
 

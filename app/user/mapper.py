@@ -1,7 +1,7 @@
 from app.common.table_mapper import TableMapper
 from .models import UserAccountTableData, RoleTableData, EmployeeRoleTableData, EmployeeAccountTableData, RolPermissionTableData, EmployeeCategoriesTableData
 from core.user import UserAccount, Role, UserAccountFactory, RoleFactory, AccountStatus, Gender, EmployeeAccount
-from core.user.domain.values import AccessType, PermissionType, EmployeeCategories
+from core.user.domain.values import AccessType, PermissionType, EmployeeCategories, PaymentType
 
 class UserTableMapper(TableMapper[UserAccountTableData, UserAccount]):
     def __init__(self) -> None:
@@ -49,7 +49,8 @@ class UserTableMapper(TableMapper[UserAccountTableData, UserAccount]):
             ],
             categories= [
                 EmployeeCategories(category) for category in EmployeeCategoriesTableData.get_categories_from_employee(user_table.id)
-            ]
+            ],
+            payment_type = PaymentType(user_table.payment_type.upper())
         )
     
     def _from_client_user(self, user: UserAccount) -> UserAccountTableData:
@@ -79,6 +80,7 @@ class UserTableMapper(TableMapper[UserAccountTableData, UserAccount]):
             dni=user.dni,
             address=user.address,
             photo=user.photo,
+            payment_type=user.payment_type.value.lower(),
         )
 
 

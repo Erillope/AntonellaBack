@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from datetime import date
 from core.user import AccountStatus, Gender
-from core.user.domain.values import RoleAccess, EmployeeCategories
+from core.user.domain.values import RoleAccess, EmployeeCategories, PaymentType
 from core.common import OrdenDirection
 from typing import List, Optional, Dict, Any
 
@@ -20,6 +20,7 @@ class CreateEmployeeDto(SignUpDto):
     photo: str
     roles: List[str]
     categories: List[EmployeeCategories] = []
+    payment_type: PaymentType
 
 
 class UpdateUserDto(BaseModel):
@@ -36,6 +37,7 @@ class UpdateUserDto(BaseModel):
     birthdate: Optional[date] = None
     gender: Optional[Gender] = None
     categories: Optional[List[EmployeeCategories]] = None
+    payment_type: Optional[PaymentType] = None
 
 
 class FilterUserDto(BaseModel):
@@ -64,6 +66,7 @@ class UserDto(BaseModel):
     dni: Optional[str] = None
     address: Optional[str] = None
     photo: Optional[str] = None
+    payment_type: Optional[PaymentType] = None
     phone_number: str
     email: str
     name: str
