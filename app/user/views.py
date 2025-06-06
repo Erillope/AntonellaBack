@@ -96,18 +96,20 @@ class PasswordTokenApi(APIView):
 
 
 class PasswordCodeApi(APIView):
+    user_service = ServiceConfig.filter_user_service
     email_host = ServiceConfig.email_host
     
     @validate()
     def post(self, request: Request) -> Response:
         email = request.GET.get('email').strip().lower()
         random_four_digit_code = str(randint(1000, 9999))
+        user = self.user_service.get_user(user_id=email)
         self.email_host.send_email(EmailMessage(
             subject='Password Reset Code',
             to=email,
             body=f'Tu codigo para cambiar de contraseña es: {random_four_digit_code}'
         ))
-        return success_response({'code': random_four_digit_code})
+        return success_response({'code': random_four_digit_code, 'user_id': user.id})
 
 class ResetPasswordApi(APIView):
     update_user_service = ServiceConfig.update_user_service
