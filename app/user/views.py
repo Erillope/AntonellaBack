@@ -5,6 +5,8 @@ from .config import ServiceConfig
 from app.common.response import validate, success_response, failure_response
 from .serializer import (SignInSerializer, SignUpSerializer, UpdateUserSerializer, ResetPasswordSerializer, 
                          FilterUserSerializer, CreateRoleSerializer, UpdateRoleSerializer)
+from core.common.email import EmailMessage
+from random import randint
 
 class AuthView(APIView):
     auth_service = ServiceConfig.auth_service
@@ -92,6 +94,20 @@ class PasswordTokenApi(APIView):
         token = self.auth_service.create_change_password_token(request.GET.get('email'))
         return success_response(token.model_dump())
 
+
+class PasswordCodeApi(APIView):
+    email_host = ServiceConfig.email_host
+    
+    @validate()
+    def post(self, request: Request) -> Response:
+        email = request.GET.get('email').strip().lower()
+        random_four_digit_code = str(randint(1000, 9999))
+        self.email_host.send_email(EmailMessage(
+            subject='Password Reset Code',
+            to=email,
+            body=f'Tu codigo para cambiar de contraseña es: {random_four_digit_code}'
+        ))
+        return success_response({'code': random_four_digit_code})
 
 class ResetPasswordApi(APIView):
     update_user_service = ServiceConfig.update_user_service

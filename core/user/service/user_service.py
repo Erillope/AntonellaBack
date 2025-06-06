@@ -6,6 +6,7 @@ from .mapper import UserMapper
 from core.common.abstract_repository import GetModel
 from .repository import GetUser
 from core.user import UserAccount, Role, EmployeeAccount
+from core.user.domain.values import PaymentType
 from typing import List
 from core.common.config import AppConfig
 from core.common.email import EmailHost, EmailMessage
@@ -24,7 +25,9 @@ class AuthService(AbstractAuthService):
     
     def init(self) -> None:
         if not self.get_user.exists_super_admin():
-            super_admin_data = CreateEmployeeDto(**AppConfig.default_super_admin())
+            data = AppConfig.default_super_admin()
+            data['payment_type'] = PaymentType.NONE
+            super_admin_data = CreateEmployeeDto(**data)
             self.sign_up(super_admin_data)
             
     def sign_up(self, dto: SignUpDto) -> UserDto:

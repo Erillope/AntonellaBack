@@ -11,6 +11,7 @@ class PaymentType(str, Enum):
     PERCENT = "PERCENT"
     SALARY = "SALARY"
     MIXED = "MIXED"
+    NONE = "NONE"
     
 class AccountStatus(str, Enum):
     '''Estados de la cuenta de usuario'''

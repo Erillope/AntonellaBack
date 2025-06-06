@@ -5,18 +5,19 @@ from core.common.values import AmountValue, ID
 from core.common.exceptions import InvalidTimeRange
 from datetime import date, time
 from core.common.config import AppConfig
+from typing import Optional
 
 class Progresstatus(str, Enum):
     '''Estados de un item de servicio'''
     PENDING = 'PENDIENTE'
-    IN_PROGRESS = 'EN PROGRESO'
+    IN_PROGRESS = 'EN_PROGRESO'
     FINISHED = 'FINALIZADO'
 
     
 class OrderStatus(str, Enum):
     '''Estados de un pedido'''
     CONFIRMED = 'CONFIRMADO'
-    NOT_CONFIRMED = 'NO CONFIRMADO'
+    NOT_CONFIRMED = 'NO_CONFIRMADO'
 
 
 class PaymentStatus(str, Enum):
@@ -65,8 +66,8 @@ class Price(BaseModel):
 
 class Payment(BaseModel):
     employee_id: str
-    percentage: Decimal
-    amount: Decimal
+    percentage: Optional[Decimal] = None
+    amount: Optional[Decimal] = None
     
     @model_validator(mode='after')
     def validate_data(self) -> 'Payment':
@@ -76,6 +77,7 @@ class Payment(BaseModel):
     
     def _validate_data(self) -> None:
         ID.validate(self.employee_id)
+        if not self.percentage or not self.amount: return
         AmountValue.validate(self.percentage)
         AmountValue.validate(self.amount)
     
@@ -94,7 +96,7 @@ class DateInfo(BaseModel):
     '''Información de fecha'''
     day: date
     start_time: time
-    end_time: time
+    end_time: Optional[time] = None
 
     @model_validator(mode='after')
     def validate_data(self) -> 'DateInfo':
@@ -103,12 +105,14 @@ class DateInfo(BaseModel):
         return self
     
     def _validate_data(self) -> None:
+        if not self.end_time: return
         if not self._is_in_time_range():
             raise InvalidTimeRange.invalid_range(self.start_time, self.end_time)
         if(self.end_time < self.start_time):
             raise InvalidTimeRange.invalid_range(self.start_time, self.end_time)
     
     def _is_in_time_range(self) -> bool:
+        if not self.end_time: return True
         is_valid_start = AppConfig.start_time() < self.start_time < AppConfig.end_time()
         is_valid_end = AppConfig.start_time() < self.end_time < AppConfig.end_time()
         return is_valid_start and is_valid_end

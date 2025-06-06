@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'app.tokens',
     'app.user',
     'app.store_service',
+    'app.order',
     'app.product',
     'app.payment',
     'rest_framework',

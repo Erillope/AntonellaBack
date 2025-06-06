@@ -12,11 +12,12 @@ class ServiceConfig:
     save_role = DjangoSaveRole()
     delete_role = DjangoDeleteRole()
     token_service = TokenService(get_token=DjangoGetToken())
+    email_host = DjangoEmailHost()
     auth_service = AuthService(
         get_user=get_user,
         get_role=get_role,
         token_service=token_service,
-        email_host=DjangoEmailHost(),
+        email_host=email_host,
     )
     update_user_service = UpdateUserService(
         get_user=get_user,
