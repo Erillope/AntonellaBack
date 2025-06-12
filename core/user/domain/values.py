@@ -23,6 +23,7 @@ class Gender(str, Enum):
     '''Géneros de usuario'''
     MALE = "MASCULINO"
     FEMALE = "FEMENINO"
+    OTHER = "OTRO"
 
 
 class AccessType(str, Enum):
@@ -127,12 +128,14 @@ class UserPassword:
 
 class UserName:
     '''Validador de nombres de usuario'''
-    REGREX = r"^(?=.{4,16}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$"
+    REGREX = r"^(?=.{4,16}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ._]+(?<![_.])$"
     MATCHER = PatternMatcher(pattern=REGREX)
     
     @classmethod
     def validate(cls, value: str) -> None:
-        if not cls.MATCHER.match(value):
+        names = value.strip().split()
+        all_names_is_valid = all(cls.MATCHER.match(name) for name in names)
+        if len(names) > 4 or not all_names_is_valid:
             raise InvalidUserNameException.invalid_name(value)
 
 

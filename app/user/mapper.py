@@ -27,7 +27,9 @@ class UserTableMapper(TableMapper[UserAccountTableData, UserAccount]):
             birthdate=user_table.birthdate,
             status=AccountStatus(user_table.status.upper()),
             gender=Gender(user_table.gender.upper()),
-            created_date=user_table.created_date
+            created_date=user_table.created_date,
+            dni=user_table.dni,
+            photo=user_table.photo
         )
     
     def _to_employee(self, user_table: EmployeeAccountTableData) -> EmployeeAccount:
@@ -63,7 +65,9 @@ class UserTableMapper(TableMapper[UserAccountTableData, UserAccount]):
             birthdate=user.birthdate,
             status=user.status.value.lower(),
             gender=user.gender.value.lower(),
-            created_date=user.created_date
+            created_date=user.created_date,
+            dni=user.dni,
+            photo=user.photo
         )
     
     def _from_employee_user(self, user: EmployeeAccount) -> EmployeeAccountTableData:

@@ -12,12 +12,12 @@ class SignUpDto(BaseModel):
     gender: Gender
     password: str
     birthdate: date
+    dni: str
+    photo: Optional[str] = None
 
 
 class CreateEmployeeDto(SignUpDto):
-    dni: str
     address: str
-    photo: str
     roles: List[str]
     categories: List[EmployeeCategories] = []
     payment_type: PaymentType
@@ -63,7 +63,7 @@ class RoleDto(BaseModel):
     
 class UserDto(BaseModel):
     id: str
-    dni: Optional[str] = None
+    dni: str
     address: Optional[str] = None
     photo: Optional[str] = None
     payment_type: Optional[PaymentType] = None

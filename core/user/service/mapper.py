@@ -25,7 +25,9 @@ class UserMapper:
             password=dto.password,
             name=dto.name,
             birthdate=dto.birthdate,
-            gender=dto.gender
+            gender=dto.gender,
+            dni=dto.dni,
+            photo=dto.photo
         )
     
     @classmethod
@@ -56,7 +58,9 @@ class UserMapper:
             birthdate=user.birthdate,
             status=user.status,
             gender=user.gender,
-            created_date=user.created_date
+            created_date=user.created_date,
+            dni=user.dni,
+            photo=user.photo,
         )
     
     @classmethod

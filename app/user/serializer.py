@@ -11,9 +11,7 @@ class SignInSerializer(serializers.Serializer):
     
 
 class EmployeeDataSerializer(serializers.Serializer):
-    dni = serializers.CharField(max_length=250)
     address = serializers.CharField(max_length=250)
-    photo = serializers.CharField()
     roles = serializers.ListField(child=serializers.CharField(max_length=250))
     categories = serializers.ListField(
         child=serializers.ChoiceField(choices=[(c.value, c.value) for c in EmployeeCategories]),required=False)
@@ -28,6 +26,8 @@ class SignUpSerializer(serializers.Serializer):
     password = serializers.CharField(max_length=250)
     birthdate = serializers.DateField()
     employee_data = EmployeeDataSerializer(required=False)
+    dni = serializers.CharField(max_length=250)
+    photo = serializers.CharField(required=False)
     
     def to_dto(self) -> SignUpDto:
         if self.validated_data.get('employee_data'):
@@ -38,15 +38,15 @@ class SignUpSerializer(serializers.Serializer):
                 gender=Gender(self.validated_data['gender']),
                 password=self.validated_data['password'],
                 birthdate=self.validated_data['birthdate'],
-                dni=self.validated_data['employee_data']['dni'],
                 address=self.validated_data['employee_data']['address'],
-                photo=self.validated_data['employee_data']['photo'],
                 roles=self.validated_data['employee_data']['roles'],
                 categories=[
                     EmployeeCategories(category)
                     for category in self.validated_data['employee_data']['categories']
                 ],
-                payment_type=PaymentType(self.validated_data['employee_data']['payment_type'])
+                payment_type=PaymentType(self.validated_data['employee_data']['payment_type']),
+                dni=self.validated_data['dni'],
+                photo=self.validated_data.get('photo'),
             )
         return SignUpDto(
             phone_number=self.validated_data['phone_number'],
@@ -55,12 +55,15 @@ class SignUpSerializer(serializers.Serializer):
             gender=Gender(self.validated_data['gender']),
             password=self.validated_data['password'],
             birthdate=self.validated_data['birthdate'],
+            dni=self.validated_data['dni'],
+            photo=self.validated_data.get('photo'),
         )
 
     
 class UpdateUserSerializer(serializers.Serializer):
     id = serializers.UUIDField()
     phone_number = serializers.CharField(max_length=250, required=False)
+    password = serializers.CharField(max_length=250, required=False)
     email = serializers.CharField(max_length=250, required=False)
     name = serializers.CharField(max_length=250, required=False)
     status = serializers.ChoiceField(choices=[(s.name, s.name) for s in AccountStatus], required=False)
@@ -78,6 +81,7 @@ class UpdateUserSerializer(serializers.Serializer):
         status = self.validated_data.get('status')
         return UpdateUserDto(
             id=str(self.validated_data['id']),
+            password=self.validated_data.get('password'),
             phone_number=self.validated_data.get('phone_number'),
             email=self.validated_data.get('email'),
             name=self.validated_data.get('name'),

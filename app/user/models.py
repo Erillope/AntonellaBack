@@ -6,21 +6,21 @@ class UserAccountTableData(models.Model):
     id = models.UUIDField(primary_key=True, editable=False)
     phone_number = models.CharField(max_length=250, blank=False, unique=True)
     email = models.EmailField(max_length=250, blank=False, unique=True)
+    dni = models.CharField(max_length=250, blank=False, unique=True)
     name = models.CharField(max_length=25, blank=False)
     password = models.CharField(max_length=250, blank=False)
     status = models.CharField(max_length=25, choices=[(s.name, s.name) for s in AccountStatus])
     gender = models.CharField(max_length=25, choices=[(g.name, g.name) for g in Gender])
     birthdate = models.DateField(blank=False)
     created_date = models.DateField(auto_now_add=True, editable=False)
+    photo = models.CharField(max_length=250, null=True)
     
     class Meta:
         db_table = "user_account"
 
 
 class EmployeeAccountTableData(UserAccountTableData):
-    dni = models.CharField(max_length=250, blank=False, unique=True)
     address = models.CharField(max_length=250, blank=False)
-    photo = models.CharField(max_length=250, blank=False)
     payment_type = models.CharField(max_length=25, blank=False)
     
     class Meta:

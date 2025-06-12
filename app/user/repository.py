@@ -29,7 +29,7 @@ class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount], GetUser):
         if self.exists_by_email(user.email): return False
         if self.exists_by_phone_number(user.phone_number): return False
         if self.exists(user.id): return False
-        if isinstance(user, EmployeeAccount) and self.exists_employee_by_dni(user.dni): return False
+        if self.exists_by_dni(user.dni): return False
         return True
     
     def get(self, unique: str) -> UserAccount:
@@ -37,10 +37,10 @@ class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount], GetUser):
             return self.get_by_email(unique)
         if UserPhoneNumber.is_phone_number(unique):
             return self.get_by_phone_number(unique)
-        if self.exists_employee_by_id(unique):
-            table = EmployeeAccountTableData.objects.get(id=unique)
+        if self.exists_by_dni(unique):
+            table = UserAccountTableData.objects.get(id=unique)
             return self.mapper.to_model(table)
-        return super().get(unique)
+        return self.get_by_id(unique)
     
     def get_by_email(self, email: str) -> UserAccount:
         if not self.exists_by_email(email):
@@ -49,6 +49,15 @@ class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount], GetUser):
             table = EmployeeAccountTableData.objects.get(email=email.lower())
             return self.mapper.to_model(table)
         table = self.table.objects.get(email=email.lower())
+        return self.mapper.to_model(table)
+
+    def get_by_id(self, user_id: str) -> UserAccount:
+        if not self.exists_by_id(user_id):
+            raise ModelNotFoundException.not_found(user_id)
+        if self.exists_employee_by_id(user_id):
+            table = EmployeeAccountTableData.objects.get(id=user_id)
+            return self.mapper.to_model(table)
+        table = self.table.objects.get(id=user_id)
         return self.mapper.to_model(table)
     
     def get_by_phone_number(self, phone_number: str) -> UserAccount:
@@ -59,7 +68,7 @@ class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount], GetUser):
             return self.mapper.to_model(table)
         table = self.table.objects.get(phone_number=phone_number)
         return self.mapper.to_model(table)
-        
+    
     def exists_by_phone_number(self, phone_number: str) -> bool:
         return self.table.objects.filter(phone_number=phone_number).exists()
     
@@ -68,6 +77,9 @@ class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount], GetUser):
     
     def exists_by_id(self, user_id: str) -> bool:
         return super().exists(user_id)
+    
+    def exists_by_dni(self, dni: str) -> bool:
+        return self.table.objects.filter(dni=dni).exists()
     
     def exists_super_admin(self) -> bool:
         return EmployeeRoleTableData.objects.filter(role__name=Role.SUPER_ADMIN).exists()
@@ -81,9 +93,6 @@ class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount], GetUser):
     
     def exists_employee_by_phone_number(self, phone_number: str) -> bool:
         return EmployeeAccountTableData.objects.filter(phone_number=phone_number).exists()
-    
-    def exists_employee_by_dni(self, dni: str) -> bool:
-        return EmployeeAccountTableData.objects.filter(dni=dni).exists()
     
     def filter(self, order_by: str, direction: OrdenDirection,
                limit: Optional[int]=None, offset: Optional[int]=None,
@@ -138,14 +147,12 @@ class DjangoSaveUser(DjangoSaveModel[UserAccountTableData, UserAccount], EventSu
             raise UserAlreadyExistsException.already_exists(user.phone_number)
         if old_user.email != user.email and self.get_user.exists_by_email(user.email):
             raise UserAlreadyExistsException.already_exists(user.email)
+        if old_user.dni != user.dni and self.get_user.exists_by_dni(user.dni):
+            raise UserAlreadyExistsException.already_exists(user.dni)
         if isinstance(user, EmployeeAccount) and isinstance(old_user, EmployeeAccount):
-            if old_user.dni != user.dni and self.get_user.exists_employee_by_dni(user.dni):
-                raise UserAlreadyExistsException.already_exists(user.dni)
-            super().save(user)
             self.save_categories(user.id, user.categories)
             self.save_roles(user.id, user.roles)
-        else:
-            super().save(user)
+        super().save(user)
         
     def handle(self, event: Event) -> None:
         if isinstance(event, UserAccountSaved):
