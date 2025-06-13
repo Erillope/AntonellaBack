@@ -57,7 +57,7 @@ class ServiceItemTableMapper(TableMapper[ServiceItemTable, ServiceItem]):
                 end_time=table.date_info_end_time
             ),
             status=Progresstatus(table.status.upper()),
-            price=Price.calculate(table.base_price),
+            price=Price.calculate(table.base_price) if table.base_price else None,
             payment_percentage=table.payment_percentage,
             payments=[
                 Payment(
