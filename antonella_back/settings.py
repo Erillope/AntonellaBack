@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'app.order',
     'app.product',
     'app.payment',
+    'app.answers',
     'rest_framework',
     "corsheaders"
 ]

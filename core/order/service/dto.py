@@ -11,12 +11,13 @@ class PaymentDto(BaseModel):
 
 
 class ServiceItemDto(BaseModel):
+    id: Optional[str] = None
     order_id: str
     service_id: str
     payment_percentage: Optional[Decimal] = None
     date_info: DateInfo
     status: Optional[Progresstatus] = None
-    base_price: Decimal
+    base_price: Optional[Decimal] = None
     payments: List[PaymentDto]
 
 class UpdateServiceItemDto(BaseModel):
@@ -44,6 +45,7 @@ class OrderDto(BaseModel):
     id: str
     client_id: str
     status: OrderStatusInfo
+    created_date: date
 
 
 class RequestEmployeeScheduleDto(BaseModel):

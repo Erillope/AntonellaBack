@@ -14,9 +14,8 @@ class ServiceItem(BaseModel):
     payment_percentage: Optional[Decimal] = None
     date_info: DateInfo
     status: Progresstatus
-    price: Price
+    price: Optional[Price] = None
     payments: List[Payment]
-    created_date: date
     _order_id: str = PrivateAttr("")
     
     @model_validator(mode='after')
@@ -31,7 +30,7 @@ class ServiceItem(BaseModel):
         if self.payment_percentage:
             AmountValue.validate_percentage(self.payment_percentage)
         self.date_info._validate_data()
-        self.price._validate_data()
+        self.price._validate_data() if self.price else None
     
     def update_data(self, service_id: Optional[str] = None, payment_percentage: Optional[Decimal] = None,
                         date_info: Optional[DateInfo] = None, status: Optional[Progresstatus] = None,
@@ -52,31 +51,11 @@ class ServiceItem(BaseModel):
         if payments is not None:
             self.payments = payments
         self._validate_data()
-            
-    def total_payment(self) -> Decimal:
-        if not self.payment_percentage: 
-            raise MissingPaymentPercentageException.missing_payment_percentage()
-        return self.price.base_price * self.payment_percentage
-    
-    def profits(self) -> Decimal:
-        return self.price.base_price - self.total_payment()
-    
-    def add_employee_payment(self, employee_id: str, employee_percentage: Decimal) -> None:
-        payment = Payment.calculate(employee_id, self.total_payment(), employee_percentage)
-        if payment in self.payments:
-            raise EmployeeAlreadyIsInServiceItem.already_in_service_item(employee_id)
-        self.payments.append(payment)
     
     def remove_employee_payment(self, employee_id: str) -> None:
         for payment in self.payments:
             if payment.employee_id == employee_id:
                 self.payments.remove(payment)
-                break
-    
-    def update_employee_payment_percentage(self, employee_id: str, new_percentage: Decimal) -> None:
-        for payment in self.payments:
-            if payment.employee_id == employee_id:
-                payment = Payment.calculate(employee_id, self.total_payment(), new_percentage)
                 break
     
     def set_order_id(self, order_id: str) -> None:
@@ -101,22 +80,20 @@ class ServiceItem(BaseModel):
 
 class ServiceItemFactory:
     @classmethod
-    def create(cls, service_id: str, day: date, start_time: time, base_price: Decimal, payments: List[Payment]) -> ServiceItem:
+    def create(cls, service_id: str, day: date, start_time: time, base_price: Optional[Decimal], payments: List[Payment]) -> ServiceItem:
         return ServiceItem(
             id= ID.generate(),
             service_id= service_id,
             date_info= DateInfo(day= day, start_time= start_time),
             status= Progresstatus.PENDING,
-            price= Price.calculate(base_price),
+            price= Price.calculate(base_price) if base_price else None,
             payments= payments,
-            created_date= date.today()
         )
     
     @classmethod
     def load(cls, id: str, service_id: str, order_id: str, day: DateInfo, status: Progresstatus,
-             price: Price, payments: List[Payment], created_date: date,
+             price: Optional[Price], payments: List[Payment],
              payment_percentage: Optional[Decimal] = None) -> ServiceItem:
-        
         item = ServiceItem(
             id= id,
             service_id= service_id,
@@ -125,7 +102,6 @@ class ServiceItemFactory:
             status= status,
             price= price,
             payments= payments,
-            created_date= created_date
         )
         item.set_order_id(order_id)
         return item

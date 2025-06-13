@@ -7,6 +7,9 @@ from app.order.models import ServiceItemTable, OrderTable
 from typing import List
 from core.common import EventSubscriber, Event
 from core.order.domain.events import OrderSaved, OrderDeleted, ServiceItemSaved, ServiceItemDeleted
+from .models import PaymentTable
+from app.store_service.models import StoreServiceTableData
+from app.user.models import EmployeeAccountTableData
 
 class DjangoGetOrder(DjangoGetModel[OrderTable, Order]):
     def __init__(self) -> None:
@@ -47,6 +50,18 @@ class DjangoSaveServiceItem(DjangoSaveModel[ServiceItemTable, ServiceItem], Even
         super().__init__(ServiceItemTableMapper())
         EventSubscriber.__init__(self)
 
+    def save(self, model: ServiceItem) -> None:
+        super().save(model)
+        for payment in model.payments:
+            PaymentTable.objects.filter(employee__id=payment.employee_id, service_item__id=model.id).delete()
+            PaymentTable.objects.create(
+                employee=EmployeeAccountTableData.objects.get(id=payment.employee_id),
+                percentage=payment.percentage,
+                amount=payment.amount,
+                service_item=ServiceItemTable.objects.get(id=model.id)
+            )
+        
+    
     def handle(self, event: Event) -> None:
         if isinstance(event, ServiceItemSaved):
             self.save(event.service_item)

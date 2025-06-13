@@ -1,7 +1,7 @@
 from ..common.table_mapper import TableMapper
 from core.order.domain.order import Order, OrderFactory
 from core.order.domain.item import ServiceItem, ServiceItemFactory, Payment
-from core.order.domain.values import OrderStatusInfo, OrderStatus, PaymentStatus, PaymentType, Progresstatus, DateInfo
+from core.order.domain.values import OrderStatusInfo, OrderStatus, PaymentStatus, PaymentType, Progresstatus, DateInfo, Price
 from .models import OrderTable, ServiceItemTable, PaymentTable
 
 class OrderTableMapper(TableMapper[OrderTable, Order]):
@@ -43,7 +43,7 @@ class ServiceItemTableMapper(TableMapper[ServiceItemTable, ServiceItem]):
             date_info_start_time=model.date_info.start_time,
             date_info_end_time=model.date_info.end_time,
             status=model.status.lower(),
-            base_price=model.price.base_price
+            base_price=model.price.base_price if model.price else None
         )
     
     def to_model(self, table: ServiceItemTable) -> ServiceItem:
@@ -57,14 +57,13 @@ class ServiceItemTableMapper(TableMapper[ServiceItemTable, ServiceItem]):
                 end_time=table.date_info_end_time
             ),
             status=Progresstatus(table.status.upper()),
-            price=table.base_price,
+            price=Price.calculate(table.base_price),
             payment_percentage=table.payment_percentage,
             payments=[
                 Payment(
-                    employee_id=payment.employee_id,
+                    employee_id=str(payment.employee_id),
                     percentage=payment.percentage,
                     amount=payment.amount
                 ) for payment in PaymentTable.from_service_item(table.id)
             ],
-            created_date=table.created_date
         )

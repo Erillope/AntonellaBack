@@ -28,4 +28,5 @@ urlpatterns = [
     path('api/config/', include('app.config.urls')),
     path('api/payment/', include('app.payment.urls')),
     path('api/order/', include('app.order.urls')),
+    path('api/answer/', include('app.answers.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
