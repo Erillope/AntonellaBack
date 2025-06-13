@@ -26,6 +26,10 @@ class ServiceItemService(AbstractServiceItemService):
     def create_service_item(self, dto: ServiceItemDto, order_id: str) -> ServiceItemDto:
         service_item = ServiceItemMapper.to_service_item(dto)
         service_item.set_order_id(order_id)
+        if dto.payment_percentage:
+            service_item.set_payment_percentage(dto.payment_percentage)
+        if dto.date_info.end_time:
+            service_item.date_info.set_end_time(dto.date_info.end_time)
         service_item.save()
         return ServiceItemMapper.to_service_item_dto(service_item)
     

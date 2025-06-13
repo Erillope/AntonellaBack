@@ -4,13 +4,13 @@ from core.order.service.dto import CreateOrderDto, UpdateOrderDto, RequestEmploy
 from typing import List
 
 class DateInfoSerializer(serializers.Serializer):
-    date = serializers.DateField()
+    day = serializers.DateField()
     start = serializers.TimeField()
     end = serializers.TimeField(required=False)
     
     def to_date_info(self) -> DateInfo:
         return DateInfo(
-            day=self.validated_data['date'],
+            day=self.validated_data['day'],
             start_time=self.validated_data['start'],
             end_time=self.validated_data.get('end')
         )
@@ -22,7 +22,7 @@ class PaymentSerializer(serializers.Serializer):
     
     def to_payment(self) -> PaymentDto:
         return PaymentDto(
-            employee_id=self.validated_data['employee_id'],
+            employee_id=str(self.validated_data['employee_id']),
             percentage=self.validated_data.get('percentage'),
         )
     
@@ -37,17 +37,17 @@ class ServiceItemSerializer(serializers.Serializer):
     payment_percentage = serializers.DecimalField(max_digits=5, decimal_places=2, required=False)
     
     def to_dto(self) -> ServiceItemDto:
-        date_info = DateInfoSerializer(**self.validated_data['date_info'])
-        date_info.validate()
+        date_info = DateInfoSerializer(data=self.validated_data['date_info'])
+        date_info.is_valid()
         payments: List[PaymentDto] = []
         for payment_data in self.validated_data.get('payments', []):
-            payment = PaymentSerializer(**payment_data)
-            payment.validate()
+            payment = PaymentSerializer(data=payment_data)
+            payment.is_valid()
             payments.append(payment.to_payment())
             
         return ServiceItemDto(
-            order_id = self.validated_data['order_id'],
-            service_id=self.validated_data['service_id'],
+            order_id = str(self.validated_data['order_id']),
+            service_id=str(self.validated_data['service_id']),
             payment_percentage=self.validated_data.get('payment_percentage'),
             date_info=date_info.to_date_info(),
             status=Progresstatus(self.validated_data['status']),
@@ -66,12 +66,12 @@ class UpdateServiceItemSerializer(serializers.Serializer):
     payments = serializers.ListField(child=PaymentSerializer(), required=False)
     
     def to_dto(self) -> UpdateServiceItemDto:
-        date_info = DateInfoSerializer(**self.validated_data['date_info']) if 'date_info' in self.validated_data else None
-        if date_info: date_info.validate()
+        date_info = DateInfoSerializer(data=self.validated_data['date_info']) if 'date_info' in self.validated_data else None
+        if date_info: date_info.is_valid()
         payments: List[PaymentDto] = []
         for payment_data in self.validated_data.get('payments', []):
-            payment = PaymentSerializer(**payment_data)
-            payment.validate()
+            payment = PaymentSerializer(data=payment_data)
+            payment.is_valid()
             payments.append(payment.to_payment())
             
         return UpdateServiceItemDto(
@@ -87,27 +87,27 @@ class UpdateServiceItemSerializer(serializers.Serializer):
 
 class OrderStatusInfoSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=[(status.value, status.value) for status in OrderStatus])
-    pogress_status = serializers.ChoiceField(choices=[(status.value, status.value) for status in Progresstatus])
+    progress_status = serializers.ChoiceField(choices=[(status.value, status.value) for status in Progresstatus])
     payment_status = serializers.ChoiceField(choices=[(status.value, status.value) for status in PaymentStatus])
     payment_type = serializers.ChoiceField(choices=[(ptype.value, ptype.value) for ptype in PaymentType])
     
     def to_order_status_info(self) -> OrderStatusInfo:
         return OrderStatusInfo(
             status=OrderStatus(self.validated_data['status']),
-            progress_status=Progresstatus(self.validated_data['pogress_status']),
+            progress_status=Progresstatus(self.validated_data['progress_status']),
             payment_status=PaymentStatus(self.validated_data['payment_status']),
             payment_type=PaymentType(self.validated_data['payment_type'])
         )
     
 class CreateOrderSerializer(serializers.Serializer):
-    client_email = serializers.EmailField()
+    client_id = serializers.UUIDField()
     status = OrderStatusInfoSerializer()
     
     def to_dto(self) -> CreateOrderDto:
-        status_info = OrderStatusInfoSerializer(**self.validated_data['status'])
-        status_info.validate()
+        status_info = OrderStatusInfoSerializer(data=self.validated_data['status'])
+        status_info.is_valid()
         return CreateOrderDto(
-            client_id=self.validated_data['client_email'],
+            client_id=str(self.validated_data['client_id']),
             status=status_info.to_order_status_info()
         )
 

@@ -83,6 +83,10 @@ class ServiceItem(BaseModel):
         ID.validate(order_id)
         self._order_id = order_id
     
+    def set_payment_percentage(self, payment_percentage: Decimal) -> None:
+        AmountValue.validate_percentage(payment_percentage)
+        self.payment_percentage = payment_percentage
+    
     def get_order_id(self) -> str:
         if not self._order_id:
             raise MissingOrderIdException.missing_order_id()

@@ -78,11 +78,12 @@ class Payment(BaseModel):
     def _validate_data(self) -> None:
         ID.validate(self.employee_id)
         if not self.percentage or not self.amount: return
-        AmountValue.validate(self.percentage)
+        AmountValue.validate_percentage(self.percentage)
         AmountValue.validate(self.amount)
     
     @classmethod
     def calculate(cls, employee_id: str, base_price: Decimal, percentage: Decimal) -> 'Payment':
+        AmountValue.validate_percentage(percentage)
         amount = base_price * percentage
         return cls(employee_id=employee_id, percentage=percentage, amount=amount)
     
@@ -103,6 +104,11 @@ class DateInfo(BaseModel):
         '''Valida los datos de la fecha'''
         self._validate_data()
         return self
+
+    def set_end_time(self, end_time: time) -> None:
+        '''Establece la hora de finalización'''
+        self.end_time = end_time
+        self._validate_data()
     
     def _validate_data(self) -> None:
         if not self.end_time: return

@@ -4,7 +4,21 @@ from core.order.domain.item import ServiceItem, ServiceItemFactory, Payment
 from core.order.domain.values import OrderStatusInfo, OrderStatus, PaymentStatus, PaymentType, Progresstatus, DateInfo
 from .models import OrderTable, ServiceItemTable, PaymentTable
 
-class OrderTableMapper(TableMapper[Order, OrderTable]):
+class OrderTableMapper(TableMapper[OrderTable, Order]):
+    def to_model(self, table: OrderTable) -> Order:
+        return OrderFactory.load(
+            id=str(table.id),
+            client_id=str(table.client_id),
+            status=OrderStatusInfo(
+                status=OrderStatus(table.status.upper()),
+                progress_status=Progresstatus(table.progress_status.upper()),
+                payment_status=PaymentStatus(table.payment_status.upper()),
+                payment_type=PaymentType(table.payment_type.upper())
+            ),
+            card_charge=table.card_charge,
+            created_date=table.created_date
+        )
+    
     def to_table(self, model: Order) -> OrderTable:
         return OrderTable(
             id=model.id,
@@ -17,22 +31,8 @@ class OrderTableMapper(TableMapper[Order, OrderTable]):
             card_charge=model.card_charge,
         )
 
-    def from_table(self, table: OrderTable) -> Order:
-        return OrderFactory.load(
-            id=table.id,
-            client_id=table.client_id,
-            status=OrderStatusInfo(
-                status=OrderStatus(table.status.capitalize()),
-                progress_status=Progresstatus(table.progress_status.capitalize()),
-                payment_status=PaymentStatus(table.payment_status.capitalize()),
-                payment_type=PaymentType(table.payment_type.capitalize())
-            ),
-            card_charge=table.card_charge,
-            created_date=table.created_date
-        )
 
-
-class ServiceItemTableMapper(TableMapper[ServiceItem, OrderTable]):
+class ServiceItemTableMapper(TableMapper[ServiceItemTable, ServiceItem]):
     def to_table(self, model: ServiceItem) -> ServiceItemTable:
         return ServiceItemTable(
             id=model.id,
@@ -46,17 +46,17 @@ class ServiceItemTableMapper(TableMapper[ServiceItem, OrderTable]):
             base_price=model.price.base_price
         )
     
-    def from_table(self, table: ServiceItemTable) -> ServiceItem:
+    def to_model(self, table: ServiceItemTable) -> ServiceItem:
         return ServiceItemFactory.load(
-            id=table.id,
-            service_id=table.service_id,
-            order_id=table.order_id,
+            id=str(table.id),
+            service_id=str(table.service_id),
+            order_id=str(table.order_id),
             day= DateInfo(
                 day=table.date_info_day,
                 start_time=table.date_info_start_time,
                 end_time=table.date_info_end_time
             ),
-            status=Progresstatus(table.status.capitalize()),
+            status=Progresstatus(table.status.upper()),
             price=table.base_price,
             payment_percentage=table.payment_percentage,
             payments=[

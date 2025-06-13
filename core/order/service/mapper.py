@@ -1,6 +1,5 @@
 from .dto import CreateOrderDto, ServiceItemDto, OrderDto, PaymentDto
 from ..domain import OrderFactory, ServiceItem, ServiceItemFactory, Payment, Order
-from typing import List
 
 class OrderMapper:
     @classmethod

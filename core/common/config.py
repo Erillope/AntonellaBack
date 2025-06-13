@@ -23,7 +23,7 @@ class AppConfig:
 
     @classmethod
     def start_time(cls) -> time:
-        return time.fromisoformat(cls.data.get('start_time', '08:00:00'))
+        return time.fromisoformat(cls.data.get('start_time', '04:00:00'))
     
     @classmethod
     def end_time(cls) -> time:

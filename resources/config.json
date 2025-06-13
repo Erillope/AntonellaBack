@@ -1,7 +1,7 @@
 {
     "iva": 15.00,
     "payment_percentage": 0.5,
-    "start_time": "08:00",
+    "start_time": "04:00",
     "end_time": "20:00",
     "default_super_admin": {
         "phone_number": "0987654321",
