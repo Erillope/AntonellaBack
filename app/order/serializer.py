@@ -51,7 +51,7 @@ class ServiceItemSerializer(serializers.Serializer):
             payment_percentage=self.validated_data.get('payment_percentage'),
             date_info=date_info.to_date_info(),
             status=Progresstatus(self.validated_data['status']),
-            base_price=self.validated_data['base_price'],
+            base_price=self.validated_data.get('base_price'),
             payments=payments
         )
 
