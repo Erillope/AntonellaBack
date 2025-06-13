@@ -3,7 +3,7 @@ from rest_framework import serializers
 class AnswerInfoSerializer(serializers.Serializer):
     text = serializers.CharField(max_length=1000, required=False)
     images = serializers.ListField(
-        child=serializers.CharField(max_length=1000),
+        child=serializers.CharField(),
         required=False
     )    
     
