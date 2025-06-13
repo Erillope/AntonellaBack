@@ -101,3 +101,7 @@ class FilterUserService(AbstractFilterUserService):
     def get_by_role(self, role: str) -> List[UserDto]:
         users = self._get_user.get_by_role(role)
         return [UserMapper.to_dto(user) for user in users]
+    
+    def get_all(self) -> List[UserDto]:
+        users = self._get_user.get_all()
+        return [UserMapper.to_dto(user) for user in users]

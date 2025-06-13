@@ -34,8 +34,12 @@ class UserView(APIView):
 
     @validate()
     def get(self, request: Request) -> Response:
-        user = self.filter_user_service.get_user(request.GET.get('user_id'))
-        return success_response(user.user_dump())
+        if request.GET.get('id'):
+            user = self.filter_user_service.get_user(request.GET.get('id'))
+            return success_response(user.user_dump())
+        else:
+            users = self.filter_user_service.get_all()
+            return success_response([user.user_dump() for user in users])
 
 
 class FilterUserView(APIView):

@@ -32,7 +32,7 @@ class ServiceItemSerializer(serializers.Serializer):
     service_id = serializers.UUIDField()
     date_info = DateInfoSerializer()
     status = serializers.ChoiceField(choices=[(status.value, status.value) for status in Progresstatus])
-    base_price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    base_price = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
     payments = serializers.ListField(child=PaymentSerializer())
     payment_percentage = serializers.DecimalField(max_digits=5, decimal_places=2, required=False)
     
