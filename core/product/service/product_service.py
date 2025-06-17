@@ -30,6 +30,12 @@ class ProductService(AbstractProductService):
         )
         product.save()
         return ProductMapper.to_dto(product)
+
+    def reduce_stock(self, product_id: str, quantity: int) -> ProductDto:
+        product = self.get_product.get(product_id)
+        product.reduce_stock(quantity)
+        product.save()
+        return ProductMapper.to_dto(product)
     
     def delete(self, product_id: str) -> ProductDto:
         product = self.get_product.get(product_id)

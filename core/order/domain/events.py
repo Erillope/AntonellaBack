@@ -3,7 +3,7 @@ from core.common import Event
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .order import Order
-    from .item import ServiceItem
+    from .item import ServiceItem, ProductItem
 
 class OrderSaved(Event):
     def __init__(self, order: Order):
@@ -23,3 +23,13 @@ class ServiceItemSaved(Event):
 class ServiceItemDeleted(Event):
     def __init__(self, service_item_id: str):
         self.service_item_id = service_item_id
+
+
+class ProductItemSaved(Event):
+    def __init__(self, product_item: ProductItem):
+        self.product_item = product_item
+    
+
+class ProductItemDeleted(Event):
+    def __init__(self, product_item_id: str):
+        self.product_item_id = product_item_id

@@ -10,6 +10,9 @@ class AbstractProductService(ABC):
     def update(self, dto: UpdateProductDto) -> ProductDto: ...
     
     @abstractmethod
+    def reduce_stock(self, product_id: str, quantity: int) -> ProductDto: ...
+    
+    @abstractmethod
     def get(self, product_id: str) -> ProductDto: ...
     
     @abstractmethod

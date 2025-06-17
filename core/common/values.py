@@ -67,7 +67,7 @@ class OrdenDirection(Enum):
 
 class AmountValue:
     @classmethod
-    def validate(cls, value: Decimal) -> None:
+    def validate(cls, value: Decimal | int) -> None:
         if value < 0:
             raise InvalidAmount.invalid_amount(value)
     

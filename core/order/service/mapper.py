@@ -1,5 +1,5 @@
-from .dto import CreateOrderDto, ServiceItemDto, OrderDto, PaymentDto
-from ..domain import OrderFactory, ServiceItem, ServiceItemFactory, Payment, Order
+from .dto import CreateOrderDto, ServiceItemDto, OrderDto, PaymentDto, ProductItemDto
+from ..domain import OrderFactory, ServiceItem, ServiceItemFactory, Payment, Order, ProductItem, ProductItemFactory
 
 class OrderMapper:
     @classmethod
@@ -56,4 +56,24 @@ class ServiceItemMapper:
                     percentage=payment.percentage
                 ) for payment in item.payments
             ]
+        )
+
+
+class ProductItemMapper:
+    @classmethod
+    def to_product_item(cls, dto: ProductItemDto) -> ProductItem:
+        return ProductItemFactory.create(
+            product_id=dto.product_id,
+            quantity=dto.quantity,
+            base_price=dto.base_price
+        )
+    
+    @classmethod
+    def to_product_item_dto(cls, item: ProductItem) -> ProductItemDto:
+        return ProductItemDto(
+            id=item.id,
+            order_id=item.get_order_id(),
+            product_id=item.product_id,
+            quantity=item.quantity,
+            base_price=item.price.base_price
         )

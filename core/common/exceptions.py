@@ -28,7 +28,7 @@ class MediaNotFoundException(SystemException):
 
 class InvalidAmount(SystemException):
     @classmethod
-    def invalid_amount(cls, amount: Decimal) -> "InvalidAmount":
+    def invalid_amount(cls, amount: Decimal | int) -> "InvalidAmount":
         return cls(f"El monto {amount} no es válido.")
     
     @classmethod

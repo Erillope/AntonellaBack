@@ -62,3 +62,18 @@ class EmployeeScheduleDto(BaseModel):
         service_id: str
         start_time: time
         end_time: time
+
+
+class ProductItemDto(BaseModel):
+    id: Optional[str] = None
+    order_id: str
+    product_id: str
+    quantity: int
+    base_price: Decimal
+
+
+class UpdateProductItemDto(BaseModel):
+    id: str
+    product_id: Optional[str] = None
+    quantity: Optional[int] = None
+    base_price: Optional[Decimal] = None

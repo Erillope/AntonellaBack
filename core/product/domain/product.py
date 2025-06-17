@@ -2,11 +2,13 @@ from pydantic import BaseModel, model_validator, PrivateAttr
 from datetime import date
 from decimal import Decimal
 from core.common import ID, Event
+from core.common.values import AmountValue
 from typing import Optional, List, ClassVar
 from core.common.image_storage import Base64ImageStorage, ImageSaved, ImageDeleted
 from core.store_service.domain.values import ServiceType
 from .values import ProductName, ProductStatus
 from .events import ProductSaved, ProductDeleted
+from .exceptions import CannotReduceStockException
 
 class Product(BaseModel):
     id: str
@@ -66,6 +68,12 @@ class Product(BaseModel):
             self.volume = volume
         
         self._validate_data()
+    
+    def reduce_stock(self, quantity: int) -> None:
+        AmountValue.validate(quantity)
+        if self.stock < quantity:
+            raise CannotReduceStockException.cannot_reduce_stock(self.id, self.stock, quantity)
+        self.stock -= quantity
         
     def set_images(self, images: List[str]) -> None:
         self.images = []

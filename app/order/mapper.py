@@ -1,8 +1,8 @@
 from ..common.table_mapper import TableMapper
 from core.order.domain.order import Order, OrderFactory
-from core.order.domain.item import ServiceItem, ServiceItemFactory, Payment
-from core.order.domain.values import OrderStatusInfo, OrderStatus, PaymentStatus, PaymentType, Progresstatus, DateInfo, Price
-from .models import OrderTable, ServiceItemTable, PaymentTable
+from core.order.domain.item import ServiceItem, ServiceItemFactory, ProductItem, ProductItemFactory
+from core.order.domain.values import OrderStatusInfo, OrderStatus, PaymentStatus, PaymentType, Progresstatus, DateInfo, Price, Payment
+from .models import OrderTable, ServiceItemTable, PaymentTable, ProductItemTable
 
 class OrderTableMapper(TableMapper[OrderTable, Order]):
     def to_model(self, table: OrderTable) -> Order:
@@ -66,4 +66,24 @@ class ServiceItemTableMapper(TableMapper[ServiceItemTable, ServiceItem]):
                     amount=payment.amount
                 ) for payment in PaymentTable.from_service_item(table.id)
             ],
+        )
+
+
+class ProductItemTableMapper(TableMapper[ProductItemTable, ProductItem]):
+    def to_table(self, model: ProductItem) -> ProductItemTable:
+        return ProductItemTable(
+            id=model.id,
+            order_id=model.get_order_id(),
+            product_id=model.product_id,
+            quantity=model.quantity,
+            base_price=model.price.base_price
+        )
+    
+    def to_model(self, table: ProductItemTable) -> ProductItem:
+        return ProductItemFactory.load(
+            id=str(table.id),
+            order_id=str(table.order_id),
+            product_id=str(table.product_id),
+            quantity=table.quantity,
+            price=Price.calculate(table.base_price)
         )

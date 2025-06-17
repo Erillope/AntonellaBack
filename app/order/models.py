@@ -1,5 +1,6 @@
 from django.db import models
 from app.store_service.models import StoreServiceTableData
+from app.product.models import ProductTableData
 from app.user.models import EmployeeAccountTableData
 
 class OrderTable(models.Model):
@@ -46,3 +47,17 @@ class PaymentTable(models.Model):
     @classmethod
     def from_service_item(cls, service_item_id: str) -> 'PaymentTable':
         return cls.objects.filter(service_item__id=service_item_id)
+
+
+class ProductItemTable(models.Model):
+    id = models.UUIDField(primary_key=True, editable=False)
+    order = models.ForeignKey(OrderTable, on_delete=models.CASCADE)
+    product = models.ForeignKey(ProductTableData, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    base_price = models.DecimalField(max_digits=10, decimal_places=2)
+    
+    class Meta:
+        db_table = 'product_item_table'
+        constraints = [
+            models.UniqueConstraint(fields=['order', 'product'], name='unique_order_product')
+        ]

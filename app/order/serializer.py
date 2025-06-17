@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from core.order.domain.values import Progresstatus, OrderStatus, PaymentStatus, PaymentType, DateInfo, OrderStatusInfo
-from core.order.service.dto import CreateOrderDto, UpdateOrderDto, RequestEmployeeScheduleDto, ServiceItemDto, PaymentDto, UpdateServiceItemDto
+from core.order.service.dto import CreateOrderDto, UpdateOrderDto, RequestEmployeeScheduleDto, ServiceItemDto, PaymentDto, UpdateServiceItemDto, ProductItemDto, UpdateProductItemDto
 from typing import List
 
 class DateInfoSerializer(serializers.Serializer):
@@ -136,4 +136,33 @@ class RequestEmployeeScheduleSerializer(serializers.Serializer):
             employee_id=self.validated_data['employee_id'],
             start_date=self.validated_data['start_date'],
             end_date=self.validated_data['end_date']
+        )
+
+class ProductItemSerializer(serializers.Serializer):
+    order_id = serializers.UUIDField()
+    product_id = serializers.UUIDField()
+    quantity = serializers.IntegerField()
+    base_price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    
+    def to_dto(self) -> ProductItemDto:
+        return ProductItemDto(
+            order_id=str(self.validated_data['order_id']),
+            product_id=str(self.validated_data['product_id']),
+            quantity=self.validated_data['quantity'],
+            base_price=self.validated_data['base_price']
+        )
+
+
+class UpdateProductItemSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    product_id = serializers.UUIDField(required=False)
+    quantity = serializers.IntegerField(required=False)
+    base_price = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
+    
+    def to_dto(self) -> UpdateProductItemDto:
+        return UpdateProductItemDto(
+            id=self.validated_data['id'],
+            product_id=self.validated_data.get('product_id'),
+            quantity=self.validated_data.get('quantity'),
+            base_price=self.validated_data.get('base_price')
         )

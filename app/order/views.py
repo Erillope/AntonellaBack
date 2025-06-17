@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from app.common.response import success_response, validate
-from .config import order_service, service_item_service
+from .config import order_service, service_item_service, product_item_service
 from .serializer import *
 
 class OrderApiView(APIView):
@@ -52,3 +52,26 @@ class ServiceItemApiView(APIView):
     def delete(self, request: Request) -> Response:
         service_item_service.delete_service_item(request.GET.get('id'))
         return success_response({"message": "Service item deleted successfully"})
+
+
+class ProductItemApiView(APIView):
+    @validate()
+    def get(self, request: Request) -> Response:
+        order_id = request.GET.get('order_id')
+        product_items = product_item_service.get_product_items(order_id)
+        return success_response([item.model_dump() for item in product_items])
+    
+    @validate(ProductItemSerializer)
+    def post(self, request: ProductItemSerializer) -> Response:
+        product_item = product_item_service.create_product_item(request.to_dto(), request.data['order_id'])
+        return success_response(product_item.model_dump())
+    
+    @validate(UpdateProductItemSerializer)
+    def put(self, request: UpdateProductItemSerializer) -> Response:
+        product_item = product_item_service.update_product_item(request.to_dto())
+        return success_response(product_item.model_dump())
+    
+    @validate()
+    def delete(self, request: Request) -> Response:
+        product_item_service.delete_product_item(request.GET.get('id'))
+        return success_response({"message": "Product item deleted successfully"})

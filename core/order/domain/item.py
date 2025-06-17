@@ -4,9 +4,9 @@ from datetime import date, time
 from .values import Progresstatus, Price, Payment, DateInfo
 from typing import List
 from core.common.values import ID, AmountValue
-from .exceptions import EmployeeAlreadyIsInServiceItem, MissingPaymentPercentageException, MissingOrderIdException
+from .exceptions import MissingOrderIdException
 from typing import Optional
-from .events import ServiceItemSaved, ServiceItemDeleted
+from .events import ServiceItemSaved, ServiceItemDeleted, ProductItemSaved, ProductItemDeleted
 
 class ServiceItem(BaseModel):
     id: str
@@ -102,6 +102,75 @@ class ServiceItemFactory:
             status= status,
             price= price,
             payments= payments,
+        )
+        item.set_order_id(order_id)
+        return item
+
+
+class ProductItem(BaseModel):
+    id: str
+    product_id: str
+    price: Price
+    quantity: int
+    _order_id: str = PrivateAttr("")
+    
+    @model_validator(mode='after')
+    def validate_data(self) -> 'ProductItem':
+        '''Valida los datos del item de producto'''
+        self._validate_data()
+        return self
+
+    def _validate_data(self) -> None:
+        ID.validate(self.id)
+        ID.validate(self.product_id)
+        AmountValue.validate(self.quantity)
+        self.price._validate_data()
+    
+    def update_data(self, product_id: Optional[str] = None, base_price: Optional[Decimal] = None,
+                    quantity: Optional[int] = None) -> None:
+        if product_id is not None:
+            ID.validate(product_id)
+            self.product_id = product_id
+        if base_price is not None:
+            self.price = Price.calculate(base_price)
+        if quantity is not None:
+            self.quantity = quantity
+        self._validate_data()
+    
+    def set_order_id(self, order_id: str) -> None:
+        ID.validate(order_id)
+        self._order_id = order_id
+    
+    def get_order_id(self) -> str:
+        if not self._order_id:
+            raise MissingOrderIdException.missing_order_id()
+        return self._order_id
+    
+    def save(self) -> None:
+        if not self._order_id: raise MissingOrderIdException.missing_order_id()
+        ProductItemSaved(self).publish()
+    
+    def delete(self) -> None:
+        ProductItemDeleted(self.id).publish()
+
+
+class ProductItemFactory:
+    @classmethod
+    def create(cls, product_id: str, base_price: Decimal, quantity: int) -> ProductItem:
+        return ProductItem(
+            id= ID.generate(),
+            quantity= quantity,
+            product_id= product_id,
+            price= Price.calculate(base_price),
+        )
+    
+    @classmethod
+    def load(cls, id: str, product_id: str, order_id: str, price: Price, quantity: int) -> ProductItem:
+        item = ProductItem(
+            id= id,
+            product_id= product_id,
+            price= price,
+            quantity=quantity
         )
         item.set_order_id(order_id)
         return item

@@ -1,14 +1,13 @@
-from core.order.service.repository import GetServiceItem
-from core.order.domain.item import ServiceItem
+from core.order.service.repository import GetServiceItem, GetProductItem
+from core.order.domain.item import ServiceItem, ProductItem
 from core.order.domain.order import Order
 from app.common.django_repository import DjangoGetModel, DjangoSaveModel, DjangoDeleteModel
-from .mapper import ServiceItemTableMapper, OrderTableMapper
-from app.order.models import ServiceItemTable, OrderTable
+from .mapper import ServiceItemTableMapper, OrderTableMapper, ProductItemTableMapper
+from app.order.models import ServiceItemTable, OrderTable, ProductItemTable
 from typing import List
 from core.common import EventSubscriber, Event
-from core.order.domain.events import OrderSaved, OrderDeleted, ServiceItemSaved, ServiceItemDeleted
+from core.order.domain.events import OrderSaved, OrderDeleted, ServiceItemSaved, ServiceItemDeleted, ProductItemSaved, ProductItemDeleted
 from .models import PaymentTable
-from app.store_service.models import StoreServiceTableData
 from app.user.models import EmployeeAccountTableData
 
 class DjangoGetOrder(DjangoGetModel[OrderTable, Order]):
@@ -75,3 +74,32 @@ class DjangoDeleteServiceItem(DjangoDeleteModel[ServiceItemTable, ServiceItem], 
     def handle(self, event: Event) -> None:
         if isinstance(event, ServiceItemDeleted):
             self.delete(event.service_item_id)
+
+
+class DjangoGetProductItem(DjangoGetModel[ProductItemTable, ProductItem], GetProductItem):
+    def __init__(self) -> None:
+        super().__init__(ProductItemTable, ProductItemTableMapper())
+
+    def get_by_order_id(self, order_id: str) -> List[ProductItem]:
+        product_item_tables = ProductItemTable.objects.filter(order__id=order_id)
+        return [self.mapper.to_model(item) for item in product_item_tables]
+
+
+class DjangoSaveProductItem(DjangoSaveModel[ProductItemTable, ProductItem], EventSubscriber):
+    def __init__(self) -> None:
+        super().__init__(ProductItemTableMapper())
+        EventSubscriber.__init__(self)
+
+    def handle(self, event: Event) -> None:
+        if isinstance(event, ProductItemSaved):
+            self.save(event.product_item)
+
+
+class DjangoDeleteProductItem(DjangoDeleteModel[ProductItemTable, ProductItem], EventSubscriber):
+    def __init__(self) -> None:
+        super().__init__(ProductItemTable, ProductItemTableMapper(), DjangoGetProductItem())
+        EventSubscriber.__init__(self)
+
+    def handle(self, event: Event) -> None:
+        if isinstance(event, ProductItemDeleted):
+            self.delete(event.product_item_id)
