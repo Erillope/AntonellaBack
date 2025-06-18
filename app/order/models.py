@@ -2,10 +2,11 @@ from django.db import models
 from app.store_service.models import StoreServiceTableData
 from app.product.models import ProductTableData
 from app.user.models import EmployeeAccountTableData
+from app.user.models import UserAccountTableData
 
 class OrderTable(models.Model):
     id = models.UUIDField(primary_key=True, editable=False)
-    client_id = models.UUIDField()
+    client = models.ForeignKey(UserAccountTableData, on_delete=models.CASCADE)
     card_charge = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=50)
     progress_status = models.CharField(max_length=50)

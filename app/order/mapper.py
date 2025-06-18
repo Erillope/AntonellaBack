@@ -8,7 +8,7 @@ class OrderTableMapper(TableMapper[OrderTable, Order]):
     def to_model(self, table: OrderTable) -> Order:
         return OrderFactory.load(
             id=str(table.id),
-            client_id=str(table.client_id),
+            client_id=str(table.client.id),
             status=OrderStatusInfo(
                 status=OrderStatus(table.status.upper()),
                 progress_status=Progresstatus(table.progress_status.upper()),

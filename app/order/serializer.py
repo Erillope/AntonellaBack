@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from core.order.domain.values import Progresstatus, OrderStatus, PaymentStatus, PaymentType, DateInfo, OrderStatusInfo
-from core.order.service.dto import CreateOrderDto, UpdateOrderDto, RequestEmployeeScheduleDto, ServiceItemDto, PaymentDto, UpdateServiceItemDto, ProductItemDto, UpdateProductItemDto
+from core.order.service.dto import CreateOrderDto, UpdateOrderDto, RequestEmployeeScheduleDto, ServiceItemDto, PaymentDto, UpdateServiceItemDto, ProductItemDto, UpdateProductItemDto, FilterServiceItemByDto, RequestEmployeeServiceInfoDto
 from typing import List
 
 class DateInfoSerializer(serializers.Serializer):
@@ -114,15 +114,19 @@ class CreateOrderSerializer(serializers.Serializer):
 class UpdateOrderSerializer(serializers.Serializer):
     id = serializers.UUIDField()
     client_id = serializers.UUIDField(required=False)
-    status = OrderStatusInfoSerializer(required=False)
+    status = serializers.ChoiceField(choices=[(status.value, status.value) for status in OrderStatus], required=False)
+    progress_status = serializers.ChoiceField(choices=[(status.value, status.value) for status in Progresstatus], required=False)
+    payment_status = serializers.ChoiceField(choices=[(status.value, status.value) for status in PaymentStatus], required=False)
+    payment_type = serializers.ChoiceField(choices=[(ptype.value, ptype.value) for ptype in PaymentType], required=False)
     
     def to_dto(self) -> UpdateOrderDto:
-        status_info = OrderStatusInfoSerializer(**self.validated_data['status']) if 'status' in self.validated_data else None
-        if status_info: status_info.validate()
         return UpdateOrderDto(
-            id=self.validated_data['id'],
-            client_id=self.validated_data.get('client_id'),
-            status=status_info.to_order_status_info() if status_info else None
+            id=str(self.validated_data['id']),
+            client_id=str(self.validated_data.get('client_id')) if 'client_id' in self.validated_data else None,
+            status= self.validated_data.get('status'),
+            progress_status=self.validated_data.get('progress_status'),
+            payment_status=self.validated_data.get('payment_status'),
+            payment_type=self.validated_data.get('payment_type')
         )
 
 
@@ -165,4 +169,44 @@ class UpdateProductItemSerializer(serializers.Serializer):
             product_id=self.validated_data.get('product_id'),
             quantity=self.validated_data.get('quantity'),
             base_price=self.validated_data.get('base_price')
+        )
+
+
+class FilterServiceItemBySerializer(serializers.Serializer):
+    client_id = serializers.UUIDField(required=False)
+    start_date = serializers.DateField(required=False)
+    end_date = serializers.DateField(required=False)
+    status = serializers.ChoiceField(choices=[(status.value, status.value) for status in Progresstatus], required=False)
+    service_id = serializers.UUIDField(required=False)
+    employee_id = serializers.UUIDField(required=False)
+    limit = serializers.IntegerField(required=False)
+    offset = serializers.IntegerField(required=False)
+    
+    def to_dto(self) -> FilterServiceItemByDto:
+        return FilterServiceItemByDto(
+            client_id=str(self.validated_data.get('client_id')) if self.validated_data.get('client_id') else None,
+            start_date=self.validated_data.get('start_date'),
+            end_date=self.validated_data.get('end_date'),
+            status=self.validated_data.get('status'),
+            service_id=str(self.validated_data.get('service_id')) if self.validated_data.get('service_id') else None,
+            employee_id=str(self.validated_data.get('employee_id')) if self.validated_data.get('employee_id') else None,
+            limit=self.validated_data.get('limit'),
+            offset=self.validated_data.get('offset')
+        )
+
+
+class RequestEmployeeServiceInfoSerializer(serializers.Serializer):
+    employee_id = serializers.UUIDField()
+    start_date = serializers.DateField()
+    end_date = serializers.DateField()
+    limit = serializers.IntegerField(required=False)
+    offset = serializers.IntegerField(required=False)
+    
+    def to_dto(self) -> RequestEmployeeServiceInfoDto:
+        return RequestEmployeeServiceInfoDto(
+            employee_id=str(self.validated_data['employee_id']),
+            start_date=self.validated_data['start_date'],
+            end_date=self.validated_data['end_date'],
+            limit=self.validated_data.get('limit'),
+            offset=self.validated_data.get('offset')
         )

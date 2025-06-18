@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from .dto import CreateOrderDto, OrderDto, UpdateOrderDto
-from ..domain.order import Order
+from ..domain.order import Order, OrderStatusInfo
 from .mapper import OrderMapper
 from typing import List
 from core.common.abstract_repository import GetModel
@@ -39,7 +39,12 @@ class OrderService(AbstractOrderService):
         order = self._get_order.get(dto.id)
         order.update_data(
             client_id=dto.client_id,
-            status=dto.status
+            status=OrderStatusInfo(
+                status=dto.status if dto.status else order.status.status,
+                progress_status=dto.progress_status if dto.progress_status else order.status.progress_status,
+                payment_status=dto.payment_status if dto.payment_status else order.status.payment_status,
+                payment_type=dto.payment_type if dto.payment_type else order.status.payment_type
+            )
         )
         order.save()
         return OrderMapper.to_order_dto(order)

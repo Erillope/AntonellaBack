@@ -75,3 +75,18 @@ class ProductItemApiView(APIView):
     def delete(self, request: Request) -> Response:
         product_item_service.delete_product_item(request.GET.get('id'))
         return success_response({"message": "Product item deleted successfully"})
+
+
+class ServiceItemFilterApiView(APIView):
+    @validate(FilterServiceItemBySerializer)
+    def post(self, request: FilterServiceItemBySerializer) -> Response:
+        filter_dto = request.to_dto()
+        service_items = service_item_service.filter_service_items(filter_dto)
+        return success_response([item.model_dump() for item in service_items])
+
+
+class EmployeeServiceInfoView(APIView):
+    @validate(RequestEmployeeServiceInfoSerializer)
+    def post(self, request: RequestEmployeeServiceInfoSerializer) -> Response:
+        employee_service_info = service_item_service.get_employee_service_info(request.to_dto())
+        return success_response(employee_service_info.model_dump())

@@ -1,7 +1,7 @@
 from decimal import Decimal
 from pydantic import BaseModel
-from ..domain.values import Progresstatus, OrderStatusInfo, DateInfo
-from typing import Optional, List
+from ..domain.values import Progresstatus, OrderStatusInfo, DateInfo, PaymentStatus, PaymentType, OrderStatus
+from typing import Optional, List, Tuple
 from datetime import date, time
 
 
@@ -27,7 +27,7 @@ class UpdateServiceItemDto(BaseModel):
     date_info: Optional[DateInfo] = None
     status: Optional[Progresstatus] = None
     base_price: Optional[Decimal] = None
-    payments: List[PaymentDto] = []
+    payments: Optional[List[PaymentDto]] = None
 
 
 class CreateOrderDto(BaseModel):
@@ -38,7 +38,10 @@ class CreateOrderDto(BaseModel):
 class UpdateOrderDto(BaseModel):
     id: str
     client_id: Optional[str] = None
-    status: Optional[OrderStatusInfo] = None
+    status: Optional[OrderStatus] = None
+    progress_status: Optional[Progresstatus] = None
+    payment_status: Optional[PaymentStatus] = None
+    payment_type: Optional[PaymentType] = None
     
 
 class OrderDto(BaseModel):
@@ -77,3 +80,30 @@ class UpdateProductItemDto(BaseModel):
     product_id: Optional[str] = None
     quantity: Optional[int] = None
     base_price: Optional[Decimal] = None
+
+
+class FilterServiceItemByDto(BaseModel):
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    client_id: Optional[str] = None
+    status: Optional[Progresstatus] = None
+    service_id: Optional[str] = None
+    employee_id: Optional[str] = None
+    limit: Optional[int] = None
+    offset: Optional[int] = None
+
+
+class RequestEmployeeServiceInfoDto(BaseModel):
+    employee_id: str
+    start_date: date
+    end_date: date
+    limit: Optional[int] = None
+    offset: Optional[int] = None
+    
+class EmployeeServiceInfoDto(BaseModel):
+    employee_id: str
+    start_date: date
+    end_date: date
+    total_facturado: Decimal
+    total_pagado: Decimal
+    service_items: List[ServiceItemDto]
