@@ -14,6 +14,15 @@ class AnswerTableData(models.Model):
             models.UniqueConstraint(fields=['client', 'question', 'service_item'], name='unique_item_question_answer')
         ]
 
+    @classmethod
+    def get_question_answer(cls, client_id: str, service_item_id: str, question_id: str) -> str:
+        answer = cls.objects.get(client__id=client_id, service_item__id=service_item_id, question__id=question_id)
+        
+        if TextAnswerTableData.objects.filter(id=answer.id).exists():
+            return TextAnswerTableData.objects.get(id=answer.id).text
+        
+        return ImageAnswerTableData.objects.filter(id=answer.id).values_list('image', flat=True).first() or ""
+                
 class TextAnswerTableData(AnswerTableData):
     text = models.TextField()
 
@@ -22,7 +31,7 @@ class TextAnswerTableData(AnswerTableData):
 
 
 class ImageAnswerTableData(AnswerTableData):
-    images = models.CharField(max_length=250)
+    image = models.CharField(max_length=250)
 
     class Meta:
         db_table = "image_answer"
