@@ -24,7 +24,7 @@ class Product(BaseModel):
     stock_modified_date: date
     created_date: date
     status: ProductStatus
-    IMAGE_PATH: ClassVar[str] = f'product'
+    IMAGE_PATH: ClassVar[str] = 'product'
     _events: List[Event] = PrivateAttr(default=[])
     
     @model_validator(mode='after')

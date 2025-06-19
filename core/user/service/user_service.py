@@ -56,7 +56,7 @@ class AuthService(AbstractAuthService):
 
     def _validate_unique_super_admin(self, dto: SignUpDto) -> None:
         if not isinstance(dto, CreateEmployeeDto): return
-        if not Role.SUPER_ADMIN in dto.roles: return
+        if Role.SUPER_ADMIN not in dto.roles: return
         if not self.get_user.exists_super_admin(): return
         raise AlreadyExistsSuperAdminException.already_exists()
 
