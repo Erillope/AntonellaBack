@@ -88,7 +88,7 @@ TEMPLATES = [
 
 TEMPLATES[0]["DIRS"] = [os.path.join(BASE_DIR, "client", "dist")]
 
-STATIC_URL = "admin/assets/"
+STATIC_URL = "/admin/assets/"
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "client", "dist", "assets")

@@ -75,8 +75,8 @@ class UpdateServiceItemSerializer(serializers.Serializer):
             payments.append(payment.to_payment())
             
         return UpdateServiceItemDto(
-            id=self.validated_data['id'],
-            service_id=self.validated_data.get('service_id'),
+            id=str(self.validated_data['id']) if 'id' in self.validated_data else None,
+            service_id=str(self.validated_data.get('service_id')) if 'service_id' in self.validated_data else None,
             payment_percentage=self.validated_data.get('payment_percentage'),
             date_info=date_info,
             status=Progresstatus(self.validated_data['status']) if 'status' in self.validated_data else None,
