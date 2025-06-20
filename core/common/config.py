@@ -11,7 +11,7 @@ MEDIA = "resources/media/"
 
 class AppConfig:
     server_host = "https://erillope.pythonanywhere.com/"
-    client_host = "http://localhost:5173/"
+    client_host = "https://erillope.pythonanywhere.com/"
     reset_password_url = client_host + "password/reset/"
     data = {}
     with open(os.path.join(resources_path, "config.json"), encoding='utf-8') as file:
