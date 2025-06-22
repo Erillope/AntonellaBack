@@ -1,14 +1,8 @@
-from app.common.django_repository import DjangoGetModel
 from .repository import (DjangoSaveStoreService, DjangoDeleteStoreService, DjangoSaveQuestion, 
-                         DjangoDeleteQuestion, DjangoGetQuestion)
-from .mapper import StoreServiceTableMapper
-from .models import StoreServiceTableData
-from core.store_service import StoreService, StoreServices, QuestionService
+                         DjangoDeleteQuestion, DjangoGetQuestion, DjangoGetStoreService)
+from core.store_service import StoreServices, QuestionService
 
-get_store_service = DjangoGetModel[StoreServiceTableData, StoreService](
-    mapper=StoreServiceTableMapper(),
-    table=StoreServiceTableData
-)
+get_store_service = DjangoGetStoreService()
 
 save_store_service = DjangoSaveStoreService()
 

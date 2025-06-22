@@ -6,10 +6,19 @@ from app.common.exceptions import ModelNotFoundException
 from core.store_service.domain.events import (StoreServiceSaved, StoreServiceDeleted, QuestionSaved,
                                               QuestionDeleted)
 from .mapper import StoreServiceTableMapper, QuestionTableMapper
-from typing import Optional, List
-from core.store_service.service.repository import GetQuestion
+from typing import List
+from core.store_service.service.repository import GetQuestion, GetService
 from core.common import ID
 
+class DjangoGetStoreService(DjangoGetModel[StoreServiceTableData, StoreService], GetService):
+    def __init__(self) -> None:
+        super().__init__(StoreServiceTableData, StoreServiceTableMapper())
+    
+    def find_by_name(self, name: str) -> List[StoreService]:
+        services = StoreServiceTableData.objects.filter(name__icontains=name.lower())
+        return [self.mapper.to_model(service) for service in services]
+    
+    
 class DjangoSaveStoreService(DjangoSaveModel[StoreServiceTableData, StoreService], EventSubscriber):
     def __init__(self) -> None:
         super().__init__(StoreServiceTableMapper())

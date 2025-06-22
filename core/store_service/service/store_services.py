@@ -2,7 +2,7 @@ from .abstract_services import AbstractStoreServices, AbstractQuestionService
 from .dto import (StoreServiceDto, CreateStoreServiceDto, UpdateStoreServiceDto, FilterStoreServiceDto,
                   CreateQuestionDto, QuestionDto, UpdateQuestionDto)
 from typing import List, Optional
-from .repository import GetQuestion
+from .repository import GetQuestion, GetService
 from core.common.abstract_repository import GetModel
 from core.store_service import StoreService, ImageChoiceQuestion, TextChoiceQuestion, Choice
 from .mapper import StoreServiceMapper, QuestionMapper
@@ -42,7 +42,7 @@ class QuestionService(AbstractQuestionService):
 
 
 class StoreServices(AbstractStoreServices):
-    def __init__(self, get_service: GetModel[StoreService],
+    def __init__(self, get_service: GetService,
                  question_service: AbstractQuestionService) -> None:
         self.get_service = get_service
         self.question_service = question_service
@@ -78,6 +78,14 @@ class StoreServices(AbstractStoreServices):
         service = self.get_service.get(id)
         questions = self.question_service.service_questions(service.id)
         return StoreServiceMapper.to_dto(service, questions)
+    
+    def find_by_name(self, name: str) -> List[StoreServiceDto]:
+        service = self.get_service.find_by_name(name)
+        dtos: List[StoreServiceDto] = []
+        for s in service:
+            questions = self.question_service.service_questions(s.id)
+            dtos.append(StoreServiceMapper.to_dto(s, questions))
+        return dtos
     
     def filter(self, dto: FilterStoreServiceDto) -> List[StoreServiceDto]:
         services = self.get_service.filter(
