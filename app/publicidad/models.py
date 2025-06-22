@@ -34,8 +34,8 @@ class ServicePublicidad(models.Model):
         db_table = 'service_publicidad'
     
     @classmethod
-    def get_publicidad_services(cls, publicidad_id: str) -> List[PublicidadTable]:
-        return [sp.service for sp in cls.objects.filter(publicidad__id=publicidad_id)]
+    def get_publicidad_services(cls, publicidad_id: str) -> List['ServicePublicidad']:
+        return [sp for sp in cls.objects.filter(publicidad__id=publicidad_id)]
 
 
 class ProductPublicidad(models.Model):
