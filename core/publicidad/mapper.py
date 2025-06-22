@@ -19,7 +19,7 @@ class PublicidadMapper:
         return PublicidadFactory.create(
             title=dto.title,
             images=dto.images,
-            desciption=dto.description,
-            service_items=dto.service_items,
-            product_items=dto.product_items
+            description=dto.description,
+            service_items=dto.service_items if dto.service_items else [],
+            product_items=dto.product_items if dto.product_items else []
         )

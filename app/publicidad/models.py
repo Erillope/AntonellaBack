@@ -4,7 +4,7 @@ from app.product.models import ProductTableData
 from typing import List
 
 class PublicidadTable(models.Model):
-    id = models.AutoField(primary_key=True)
+    id = models.UUIDField(primary_key=True, editable=False)
     title = models.CharField(max_length=255)
     description = models.TextField()
     created_date = models.DateField()

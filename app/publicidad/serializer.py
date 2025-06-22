@@ -14,10 +14,10 @@ class CreatePublicidadSerializer(serializers.Serializer):
         child=serializers.CharField(), required=True
     )
     service_items = serializers.ListField(
-        child=ItemDataSerializer(), required=True
+        child=ItemDataSerializer(), required=False
     )
     product_items = serializers.ListField(
-        child=ItemDataSerializer(), required=True
+        child=ItemDataSerializer(), required=False
     )
     
     def get_service_items(self) -> list[ItemData]:
@@ -25,7 +25,7 @@ class CreatePublicidadSerializer(serializers.Serializer):
         for item in self.validated_data['service_items']:
             item_serializer = ItemDataSerializer(data=item)
             item_serializer.is_valid()
-            item_datas.append(ItemData(id=item_serializer.validated_data['id'], discount=item_serializer.validated_data.get('discount')))
+            item_datas.append(ItemData(id=str(item_serializer.validated_data['id']), discount=item_serializer.validated_data.get('discount')))
         return item_datas
 
     def get_product_items(self) -> list[ItemData]:
@@ -33,7 +33,7 @@ class CreatePublicidadSerializer(serializers.Serializer):
         for item in self.validated_data['product_items']:
             item_serializer = ItemDataSerializer(data=item)
             item_serializer.is_valid()
-            item_datas.append(ItemData(id=item_serializer.validated_data['id'], discount=item_serializer.validated_data.get('discount')))
+            item_datas.append(ItemData(id=str(item_serializer.validated_data['id']), discount=item_serializer.validated_data.get('discount')))
         return item_datas
     
     def to_dto(self) -> CreatePublicidadDTO:    
@@ -41,8 +41,8 @@ class CreatePublicidadSerializer(serializers.Serializer):
             title=self.validated_data['title'],
             description=self.validated_data['description'],
             images=self.validated_data['images'],
-            service_items=self.get_service_items(),
-            product_items=self.get_product_items()
+            service_items=self.get_service_items() if 'service_items' in self.validated_data else None,
+            product_items=self.get_product_items() if 'product_items' in self.validated_data else None
         )
 
 
@@ -64,7 +64,7 @@ class UpdatePublicidadSerializer(serializers.Serializer):
         for item in self.validated_data.get('service_items'):
             item_serializer = ItemDataSerializer(data=item)
             item_serializer.is_valid()
-            item_datas.append(ItemData(id=item_serializer.validated_data['id'], discount=item_serializer.validated_data.get('discount')))
+            item_datas.append(ItemData(id=str(item_serializer.validated_data['id']), discount=item_serializer.validated_data.get('discount')))
         return item_datas
 
     def get_product_items(self) -> list[ItemData]:
@@ -72,7 +72,7 @@ class UpdatePublicidadSerializer(serializers.Serializer):
         for item in self.validated_data.get('product_items'):
             item_serializer = ItemDataSerializer(data=item)
             item_serializer.is_valid()
-            item_datas.append(ItemData(id=item_serializer.validated_data['id'], discount=item_serializer.validated_data.get('discount')))
+            item_datas.append(ItemData(id=str(item_serializer.validated_data['id']), discount=item_serializer.validated_data.get('discount')))
         return item_datas
     
     def to_dto(self) -> UpdatePublicidadDTO:

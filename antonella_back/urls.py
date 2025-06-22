@@ -31,5 +31,6 @@ urlpatterns = [
     path('api/order/', include('app.order.urls')),
     path('api/answer/', include('app.answers.urls')),
     path('api/publicidad/', include('app.publicidad.urls')),
+    path('api/chat/', include('app.chat.urls')),
     re_path(r'^admin(?:/.*)?$', TemplateView.as_view(template_name='index.html')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL, document_root=os.path.join(BASE_DIR, "client", "dist", "assets"))

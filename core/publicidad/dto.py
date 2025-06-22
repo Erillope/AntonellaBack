@@ -7,8 +7,8 @@ class CreatePublicidadDTO(BaseModel):
     title: str
     description: str
     images: List[str]
-    service_items: List[ItemData]
-    product_items: List[ItemData]
+    service_items: Optional[List[ItemData]] = None
+    product_items: Optional[List[ItemData]] = None
 
 
 class UpdatePublicidadDTO(BaseModel):
@@ -24,6 +24,6 @@ class PublicidadDTO(BaseModel):
     title: str
     description: str
     images: List[str]
-    service_items: List[ItemData]
-    product_items: List[ItemData]
+    service_items: Optional[List[ItemData]] = None
+    product_items: Optional[List[ItemData]] = None
     created_date: date

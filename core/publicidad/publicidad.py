@@ -1,6 +1,5 @@
 from pydantic import BaseModel, model_validator, PrivateAttr
 from typing import List, Optional, ClassVar
-from enum import Enum
 from core.common import ID, Event
 from core.common.image_storage import Base64ImageStorage, ImageSaved, ImageDeleted
 from .events import PublicidadSaved, PublicidadDeleted
@@ -69,14 +68,14 @@ class Publicidad(BaseModel):
 
 class PublicidadFactory:
     @classmethod
-    def create(cls, title: str, images: List[str], service_items: List[ItemData], product_items: List[ItemData], desciption: str) -> Publicidad:
+    def create(cls, title: str, images: List[str], description: str, service_items: List[ItemData], product_items: List[ItemData]) -> Publicidad:
         publicidad = Publicidad(
             id=ID.generate(),
             service_items=service_items,
             product_items=product_items,
             title=title,
             images=images,
-            description=desciption,
+            description=description,
             created_date=date.today()
         )
         return publicidad

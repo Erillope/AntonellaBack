@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'app.payment',
     'app.answers',
     'app.publicidad',
+    'app.chat',
     'rest_framework',
     "corsheaders"
 ]

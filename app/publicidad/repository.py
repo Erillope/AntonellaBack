@@ -24,17 +24,17 @@ class DjangoSavePublicidad(DjangoSaveModel[PublicidadTable, Publicidad], EventSu
     def save_images(self, publicidad: Publicidad) -> None:
         PublicidadImage.objects.filter(publicidad_id=publicidad.id).delete()
         for image in publicidad.images:
-            PublicidadImage.objects.create(publicidad=publicidad.id, image=image)
+            PublicidadImage.objects.create(publicidad_id=publicidad.id, image=image)
     
     def save_service_items(self, publicidad: Publicidad) -> None:
         ServicePublicidad.objects.filter(publicidad_id=publicidad.id).delete()
         for item in publicidad.service_items:
-            ServicePublicidad.objects.create(publicidad_id=publicidad.id, id=item.id, discount=item.discount)
+            ServicePublicidad.objects.create(publicidad_id=publicidad.id, service_id=item.id, discount=item.discount)
     
     def save_product_items(self, publicidad: Publicidad) -> None:
         ProductPublicidad.objects.filter(publicidad_id=publicidad.id).delete()
         for item in publicidad.product_items:
-            ProductPublicidad.objects.create(publicidad_id=publicidad.id, id=item.id, discount=item.discount)
+            ProductPublicidad.objects.create(publicidad_id=publicidad.id, product_id=item.id, discount=item.discount)
     
     def handle(self, event: Event) -> None:
         if isinstance(event, PublicidadSaved):
