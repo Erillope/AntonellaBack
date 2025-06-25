@@ -1,6 +1,6 @@
 from pydantic import BaseModel, model_validator, PrivateAttr
 from datetime import datetime
-from typing import ClassVar
+from typing import ClassVar, Optional
 from enum import Enum
 from .events import ChatMessageSaved
 from core.common.values import ID, GuayaquilDatetime
@@ -14,6 +14,7 @@ class MessageType(str, Enum):
     
 class ChatMessage(BaseModel):
     chat_id: str
+    id: str
     sender_id: str
     content: str
     timestamp: datetime
@@ -27,6 +28,7 @@ class ChatMessage(BaseModel):
         return self
     
     def _validate(self) -> None:
+        ID.validate(self.id)
         ID.validate(self.chat_id)
         ID.validate(self.sender_id)
         self.timestamp = GuayaquilDatetime.localize(self.timestamp)

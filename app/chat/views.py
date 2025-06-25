@@ -11,11 +11,11 @@ from core.chat.dto import AddMessageDto
 class ChatApiView(APIView):
     @validate()
     def get(self, request: Request) -> Response:
-        chat_id = request.GET.get('chat_id')
+        user_id = request.GET.get('user_id')
         offset = int(request.GET.get('offset')) if request.GET.get('offset') else 0
         limit = int(request.GET.get('limit')) if request.GET.get('limit') else 20
-        if chat_id:
-            chats = chat_service.get_messages(chat_id, offset, limit)
+        if user_id:
+            chats = chat_service.get_messages(user_id, offset, limit)
             return success_response([chat.model_dump() for chat in chats])
         return success_response([
             {

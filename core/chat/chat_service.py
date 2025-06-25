@@ -3,6 +3,7 @@ from .chat import ChatMessage
 from .dto import AddMessageDto
 from .repository import GetChatMessage
 from datetime import datetime
+from core.common import ID
 
 class AbstractChatService(ABC):
     @abstractmethod
@@ -18,6 +19,7 @@ class ChatService(AbstractChatService):
 
     def add_message(self, dto: AddMessageDto) -> ChatMessage:
         message = ChatMessage(
+            id = ID.generate(),
             chat_id=dto.chat_id,
             sender_id=dto.sender_id,
             content=dto.content,
@@ -27,7 +29,7 @@ class ChatService(AbstractChatService):
         message.save()
         return message
 
-    def get_messages(self, chat_id: str, offset: int = 0, limit: int = 20) -> list[ChatMessage]:
-        return self.repository.get_chat_history(chat_id, offset, limit)
+    def get_messages(self, user_id: str, offset: int = 0, limit: int = 20) -> list[ChatMessage]:
+        return self.repository.get_chat_history(user_id, offset, limit)
 
 

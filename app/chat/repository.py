@@ -14,15 +14,16 @@ class DjangoGetChatMessage(DjangoGetModel[ChatMessageTable, ChatMessage], GetCha
     def __init__(self) -> None:
         super().__init__(ChatMessageTable ,ChatMessageTableMapper())
     
-    def get_chat_history(self, chat_id: str, offset: int, limit: int) -> List[ChatMessage]:
-        tables = ChatMessageTable.objects.filter(chat_id=chat_id).order_by('-timestamp')[offset:offset + limit]
+    def get_chat_history(self, user_id: str, offset: int, limit: int) -> List[ChatMessage]:
+        chat = ChatTable.objects.filter(user__id=user_id).first()
+        tables = ChatMessageTable.objects.filter(chat_id=chat.id).order_by('-timestamp')[offset:offset + limit]
         return [self.mapper.to_model(table) for table in tables]
 
 class DjangoChatMessageSaved(DjangoSaveModel[ChatMessageTable, ChatMessage], EventSubscriber):
     def __init__(self) -> None:
         super().__init__(ChatMessageTableMapper())
         EventSubscriber.__init__(self)
-    
+        
     def create_chat(self, user_id: str) -> None:
         if ChatTable.objects.filter(user_id=user_id).exists():
             return
