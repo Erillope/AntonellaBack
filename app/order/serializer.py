@@ -98,7 +98,7 @@ class OrderStatusInfoSerializer(serializers.Serializer):
             progress_status=Progresstatus(self.validated_data['progress_status']),
             payment_status=PaymentStatus(self.validated_data['payment_status']),
             payment_type=PaymentType(self.validated_data['payment_type']),
-            client_confirmed=self.validated_data.get['client_confirmed']
+            client_confirmed=self.validated_data['client_confirmed']
         )
     
 class CreateOrderSerializer(serializers.Serializer):
