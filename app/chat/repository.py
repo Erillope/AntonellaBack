@@ -8,6 +8,7 @@ from .models import ChatMessageTable, ChatTable
 from core.chat.events import ChatMessageSaved
 from core.user.domain.events import UserAccountSaved
 from core.user.domain.user import EmployeeAccount
+from core.common import ID
 
 class DjangoGetChatMessage(DjangoGetModel[ChatMessageTable, ChatMessage], GetChatMessage):
     def __init__(self) -> None:
@@ -25,7 +26,7 @@ class DjangoChatMessageSaved(DjangoSaveModel[ChatMessageTable, ChatMessage], Eve
     def create_chat(self, user_id: str) -> None:
         if ChatTable.objects.filter(user_id=user_id).exists():
             return
-        ChatTable.objects.create(user_id=user_id)
+        ChatTable.objects.create(user_id=user_id, id=ID.generate())
         
     def handle(self, event: Event) -> None:
         if isinstance(event, ChatMessageSaved):
