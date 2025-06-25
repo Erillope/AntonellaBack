@@ -75,7 +75,7 @@ class UpdateServiceItemSerializer(serializers.Serializer):
             payments.append(payment.to_payment())
             
         return UpdateServiceItemDto(
-            id=str(self.validated_data['id']) if 'id' in self.validated_data else None,
+            id=str(self.validated_data['id']),
             service_id=str(self.validated_data.get('service_id')) if 'service_id' in self.validated_data else None,
             payment_percentage=self.validated_data.get('payment_percentage'),
             date_info=date_info,
@@ -90,13 +90,15 @@ class OrderStatusInfoSerializer(serializers.Serializer):
     progress_status = serializers.ChoiceField(choices=[(status.value, status.value) for status in Progresstatus])
     payment_status = serializers.ChoiceField(choices=[(status.value, status.value) for status in PaymentStatus])
     payment_type = serializers.ChoiceField(choices=[(ptype.value, ptype.value) for ptype in PaymentType])
+    client_confirmed = serializers.ChoiceField(choices=[(status.value, status.value) for status in OrderStatus])
     
     def to_order_status_info(self) -> OrderStatusInfo:
         return OrderStatusInfo(
             status=OrderStatus(self.validated_data['status']),
             progress_status=Progresstatus(self.validated_data['progress_status']),
             payment_status=PaymentStatus(self.validated_data['payment_status']),
-            payment_type=PaymentType(self.validated_data['payment_type'])
+            payment_type=PaymentType(self.validated_data['payment_type']),
+            client_confirmed=self.validated_data.get['client_confirmed']
         )
     
 class CreateOrderSerializer(serializers.Serializer):
@@ -118,6 +120,7 @@ class UpdateOrderSerializer(serializers.Serializer):
     progress_status = serializers.ChoiceField(choices=[(status.value, status.value) for status in Progresstatus], required=False)
     payment_status = serializers.ChoiceField(choices=[(status.value, status.value) for status in PaymentStatus], required=False)
     payment_type = serializers.ChoiceField(choices=[(ptype.value, ptype.value) for ptype in PaymentType], required=False)
+    client_confirmed = serializers.ChoiceField(choices=[(status.value, status.value) for status in OrderStatus], required=False)
     
     def to_dto(self) -> UpdateOrderDto:
         return UpdateOrderDto(
@@ -126,7 +129,8 @@ class UpdateOrderSerializer(serializers.Serializer):
             status= self.validated_data.get('status'),
             progress_status=self.validated_data.get('progress_status'),
             payment_status=self.validated_data.get('payment_status'),
-            payment_type=self.validated_data.get('payment_type')
+            payment_type=self.validated_data.get('payment_type'),
+            client_confirmed=self.validated_data.get('client_confirmed')
         )
 
 

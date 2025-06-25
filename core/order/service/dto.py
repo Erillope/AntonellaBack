@@ -42,6 +42,7 @@ class UpdateOrderDto(BaseModel):
     progress_status: Optional[Progresstatus] = None
     payment_status: Optional[PaymentStatus] = None
     payment_type: Optional[PaymentType] = None
+    client_confirmed: Optional[OrderStatus] = None
     
 
 class OrderDto(BaseModel):

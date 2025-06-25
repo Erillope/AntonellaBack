@@ -12,6 +12,7 @@ class OrderTable(models.Model):
     progress_status = models.CharField(max_length=50)
     payment_status = models.CharField(max_length=50)
     payment_type = models.CharField(max_length=50)
+    client_confirmed = models.CharField(max_length=50)
     created_date = models.DateField()
     
     class Meta:

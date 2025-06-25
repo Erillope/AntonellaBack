@@ -13,7 +13,8 @@ class OrderTableMapper(TableMapper[OrderTable, Order]):
                 status=OrderStatus(table.status.upper()),
                 progress_status=Progresstatus(table.progress_status.upper()),
                 payment_status=PaymentStatus(table.payment_status.upper()),
-                payment_type=PaymentType(table.payment_type.upper())
+                payment_type=PaymentType(table.payment_type.upper()),
+                client_confirmed=table.client_confirmed.upper()
             ),
             card_charge=table.card_charge,
             created_date=table.created_date
@@ -27,6 +28,7 @@ class OrderTableMapper(TableMapper[OrderTable, Order]):
             progress_status=model.status.progress_status.lower(),
             payment_status=model.status.payment_status.lower(),
             payment_type=model.status.payment_type.lower(),
+            client_confirmed=model.status.client_confirmed.lower(),
             created_date=model.created_date,
             card_charge=model.card_charge,
         )

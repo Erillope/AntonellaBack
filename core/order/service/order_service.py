@@ -43,7 +43,8 @@ class OrderService(AbstractOrderService):
                 status=dto.status if dto.status else order.status.status,
                 progress_status=dto.progress_status if dto.progress_status else order.status.progress_status,
                 payment_status=dto.payment_status if dto.payment_status else order.status.payment_status,
-                payment_type=dto.payment_type if dto.payment_type else order.status.payment_type
+                payment_type=dto.payment_type if dto.payment_type else order.status.payment_type,
+                client_confirmed=dto.client_confirmed if dto.client_confirmed is not None else order.status.client_confirmed,
             )
         )
         order.save()

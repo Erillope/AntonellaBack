@@ -37,6 +37,7 @@ class OrderStatusInfo(BaseModel):
     progress_status: Progresstatus
     payment_status: PaymentStatus
     payment_type: PaymentType
+    client_confirmed: OrderStatus
 
     
 class Price(BaseModel):
