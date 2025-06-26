@@ -47,5 +47,5 @@ class ProductPublicidad(models.Model):
         db_table = 'product_publicidad'
     
     @classmethod
-    def get_publicidad_products(cls, publicidad_id: str) -> List[ProductTableData]:
-        return [pp.product for pp in cls.objects.filter(publicidad__id=publicidad_id)]
+    def get_publicidad_products(cls, publicidad_id: str) -> List['ProductPublicidad']:
+        return [pp for pp in cls.objects.filter(publicidad__id=publicidad_id)]

@@ -11,3 +11,6 @@ class GetQuestion(GetModel[Question], ABC):
 class GetService(GetModel[StoreService], ABC):
     @abstractmethod
     def find_by_name(self, name: str) -> List[StoreService]: ...
+    
+    @abstractmethod
+    def find_by_type(self, type: str) -> List[StoreService]: ...

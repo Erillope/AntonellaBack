@@ -14,6 +14,9 @@ class StoreServiceView(APIView):
         if request.GET.get('name'):
             services = store_services.find_by_name(request.GET.get('name'))
             return success_response([service.service_dump() for service in services])
+        if request.Get.get('type'):
+            services = store_services.find_by_type(request.GET.get('type'))
+            return success_response([service.service_dump() for service in services])
         else:
             services = store_services.get_all()
             return success_response([service.service_dump() for service in services])

@@ -87,6 +87,14 @@ class StoreServices(AbstractStoreServices):
             dtos.append(StoreServiceMapper.to_dto(s, questions))
         return dtos
     
+    def find_by_type(self, type: str) -> List[StoreServiceDto]:
+        service = self.get_service.find_by_type(type)
+        dtos: List[StoreServiceDto] = []
+        for s in service:
+            questions = self.question_service.service_questions(s.id)
+            dtos.append(StoreServiceMapper.to_dto(s, questions))
+        return dtos
+    
     def filter(self, dto: FilterStoreServiceDto) -> List[StoreServiceDto]:
         services = self.get_service.filter(
             order_by=dto.order_by,

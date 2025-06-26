@@ -21,6 +21,12 @@ class AbstractStoreServices(ABC):
     
     @abstractmethod
     def filter(self, dto: FilterStoreServiceDto) -> List[StoreServiceDto]: ...
+    
+    @abstractmethod
+    def find_by_type(self, type: str) -> List[StoreServiceDto]: ...
+    
+    @abstractmethod
+    def find_by_name(self, name: str) -> List[StoreServiceDto]: ...
 
 
 class AbstractQuestionService(ABC):

@@ -18,6 +18,10 @@ class DjangoGetStoreService(DjangoGetModel[StoreServiceTableData, StoreService],
         services = StoreServiceTableData.objects.filter(name__icontains=name.lower())
         return [self.mapper.to_model(service) for service in services]
     
+    def find_by_type(self, type: str) -> List[StoreService]:
+        services = StoreServiceTableData.objects.filter(type=type.lower())
+        return [self.mapper.to_model(service) for service in services]
+    
     
 class DjangoSaveStoreService(DjangoSaveModel[StoreServiceTableData, StoreService], EventSubscriber):
     def __init__(self) -> None:
