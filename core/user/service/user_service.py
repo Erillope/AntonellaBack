@@ -94,7 +94,9 @@ class FilterUserService(AbstractFilterUserService):
         return UserMapper.to_dto(user)
     
     def filter_user(self, dto: FilterUserDto) -> List[UserDto]:
-        users = self._get_user.filter(dto.order_by, dto.order_direction, dto.limit, dto.offset, dto.fields)
+        if dto.service_category:
+            self._get_user.prepare_service_category_filter(dto.service_category.value)
+        users = self._get_user.get_filtered_users(limit=dto.limit, offset=dto.offset)
         return [UserMapper.to_dto(user) for user in users]
     
     def get_by_role(self, role: str) -> List[UserDto]:

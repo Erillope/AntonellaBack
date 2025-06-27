@@ -61,10 +61,10 @@ class UpdateStoreServiceDto(BaseModel):
 
 
 class FilterStoreServiceDto(BaseModel):
-    order_by: str
+    type: Optional[ServiceType] = None
+    name: Optional[str] = None
     offset: Optional[int] = None
     limit: Optional[int] = None
-    order_direction: OrdenDirection = OrdenDirection.DESC
 
 
 class QuestionDto(BaseModel):

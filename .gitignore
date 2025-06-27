@@ -16,6 +16,7 @@ __pycache__/
 *.swp
 
 # Archivos de paquetes y distribuciones
+media/
 build/
 dist/
 *.egg

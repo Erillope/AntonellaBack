@@ -2,7 +2,6 @@ from pydantic import BaseModel
 from datetime import date
 from core.user import AccountStatus, Gender
 from core.user.domain.values import RoleAccess, EmployeeCategories, PaymentType
-from core.common import OrdenDirection
 from typing import List, Optional, Dict, Any
 
 class SignUpDto(BaseModel):
@@ -41,12 +40,9 @@ class UpdateUserDto(BaseModel):
 
 
 class FilterUserDto(BaseModel):
-    fields : Dict[str, str] = {}
-    order_by: str
+    service_category: Optional[EmployeeCategories] = None
     offset: Optional[int] = None
     limit: Optional[int] = None
-    order_direction: OrdenDirection = OrdenDirection.DESC
-
 
 class RoleDto(BaseModel):
     id: str

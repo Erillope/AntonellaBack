@@ -19,7 +19,8 @@ class AnswerApiView(APIView):
             {
                 "question_id": question.id,
                 "question_title": question.title,
-                "question_type": question.input_type,
+                "input_type": question.input_type,
+                "choice_type": question.choice_type,
                 "answer": AnswerTableData.get_question_answer(client_id=client_id, service_item_id=service_item_id, question_id=question.id)
             }
             for question in questions

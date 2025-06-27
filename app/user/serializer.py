@@ -98,20 +98,16 @@ class UpdateUserSerializer(serializers.Serializer):
 
 
 class FilterUserSerializer(serializers.Serializer):
-    fields = serializers.DictField(required=False)
-    order_by = serializers.CharField(max_length=250)
+    service_category = serializers.ChoiceField(
+        choices=[(c.value, c.value) for c in EmployeeCategories], required=False)
     offset = serializers.IntegerField(required=False)
     limit = serializers.IntegerField(required=False)
-    order_direction = serializers.ChoiceField(choices=[(o.name, o.name) for o in OrdenDirection], required=False)
     
     def to_dto(self) -> FilterUserDto:
-        order_direction = self.validated_data.get('order_direction')
         return FilterUserDto(
-            fields=self.validated_data.get('fields', {}),
-            order_by=self.validated_data['order_by'],
+            service_category=self.validated_data.get('service_category'),
             offset=self.validated_data.get('offset'),
             limit=self.validated_data.get('limit'),
-            order_direction=OrdenDirection(order_direction) if order_direction else OrdenDirection.DESC
         )
         
 

@@ -41,15 +41,13 @@ class UserView(APIView):
             users = self.filter_user_service.get_all()
             return success_response([user.user_dump() for user in users])
 
-
+    
 class FilterUserView(APIView):
     filter_user_service = ServiceConfig.filter_user_service
     
-    @validate()
-    def get(self, request: Request) -> Response:
-        filter_serializer = FilterUserSerializer(data=request.GET)
-        if not filter_serializer.is_valid(): return failure_response(filter_serializer.errors)
-        users = self.filter_user_service.filter_user(filter_serializer.to_dto())
+    @validate(FilterUserSerializer)
+    def post(self, request: FilterUserSerializer) -> Response:
+        users = self.filter_user_service.filter_user(request.to_dto())
         return success_response([user.user_dump() for user in users])
 
 

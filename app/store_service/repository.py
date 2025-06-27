@@ -6,20 +6,39 @@ from app.common.exceptions import ModelNotFoundException
 from core.store_service.domain.events import (StoreServiceSaved, StoreServiceDeleted, QuestionSaved,
                                               QuestionDeleted)
 from .mapper import StoreServiceTableMapper, QuestionTableMapper
-from typing import List
+from typing import List, Optional
 from core.store_service.service.repository import GetQuestion, GetService
 from core.common import ID
+from django.db.models import Q
 
 class DjangoGetStoreService(DjangoGetModel[StoreServiceTableData, StoreService], GetService):
     def __init__(self) -> None:
         super().__init__(StoreServiceTableData, StoreServiceTableMapper())
+        self._filter = Q()
     
     def find_by_name(self, name: str) -> List[StoreService]:
         services = StoreServiceTableData.objects.filter(name__icontains=name.lower())
         return [self.mapper.to_model(service) for service in services]
     
     def find_by_type(self, type: str) -> List[StoreService]:
-        services = StoreServiceTableData.objects.filter(type=type.lower())
+        services = StoreServiceTableData.objects.filter(type=type.upper())
+        return [self.mapper.to_model(service) for service in services]
+    
+    def prepare_service_name_filter(self, name: str) -> None:
+        self._filter &= Q(name__icontains=name.lower())
+    
+    def prepare_service_type_filter(self, type: str) -> None:
+        self._filter &= Q(type=type.upper())
+    
+    def get_filtered_services(self, limit: Optional[int] = None, offset: Optional[int] = None) -> List[StoreService]:
+        services = StoreServiceTableData.objects.filter(self._filter).distinct()
+        if limit and offset:
+            services = services[offset:offset + limit]
+        if limit:
+            services = services[:limit]
+        if offset:
+            services = services[offset:]
+        self._filter = Q()
         return [self.mapper.to_model(service) for service in services]
     
     

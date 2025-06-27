@@ -96,12 +96,11 @@ class StoreServices(AbstractStoreServices):
         return dtos
     
     def filter(self, dto: FilterStoreServiceDto) -> List[StoreServiceDto]:
-        services = self.get_service.filter(
-            order_by=dto.order_by,
-            offset=dto.offset,
-            limit=dto.limit,
-            direction=dto.order_direction
-        )
+        if dto.type:
+            self.get_service.prepare_service_type_filter(dto.type)
+        if dto.name:
+            self.get_service.prepare_service_name_filter(dto.name)
+        services = self.get_service.get_filtered_services(limit=dto.limit, offset=dto.offset)
         return [self.find(service.id) for service in services]
     
     def get_all(self) -> List[StoreServiceDto]:

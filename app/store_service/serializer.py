@@ -2,7 +2,7 @@ from rest_framework import serializers
 from core.store_service import ServiceType, ServiceStatus
 from core.store_service.domain.values import Price
 from core.store_service.service.dto import (CreateStoreServiceDto, UpdateStoreServiceDto, UpdateQuestionDto,
-                                            QuestionInputType, ChoiceType, CreateQuestionDto, ChoiceDto)
+                                            QuestionInputType, ChoiceType, CreateQuestionDto, ChoiceDto, FilterStoreServiceDto)
 from rest_framework.exceptions import ErrorDetail
 from datetime import datetime
 
@@ -173,4 +173,19 @@ class UpdateStoreSerializer(serializers.Serializer):
                 for price in self.validated_data.get('prices')
             ] if self.validated_data.get('prices') else None,
             images=self.validated_data.get('images')
+        )
+
+
+class FilterStoreSerializer(serializers.Serializer):
+    type = serializers.ChoiceField(choices=[(t.value, t.value) for t in ServiceType], required=False)
+    name = serializers.CharField(max_length=250, required=False)
+    limit = serializers.IntegerField(required=False)
+    offset = serializers.IntegerField(required=False)
+    
+    def to_dto(self) -> FilterStoreServiceDto:
+        return FilterStoreServiceDto(
+            type=self.validated_data.get('type'),
+            name=self.validated_data.get('name'),
+            limit=self.validated_data.get('limit'),
+            offset=self.validated_data.get('offset')
         )

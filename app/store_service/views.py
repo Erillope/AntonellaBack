@@ -3,7 +3,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from app.common.response import success_response, validate
 from .config import store_services, question_service
-from .serializer import (CreateStoreSerializer, UpdateStoreSerializer, CreateQuestionSerializer,          UpdateQuestion)
+from .serializer import (CreateStoreSerializer, UpdateStoreSerializer, CreateQuestionSerializer,          UpdateQuestion, FilterStoreSerializer)
 
 class StoreServiceView(APIView):
     @validate()
@@ -36,6 +36,11 @@ class StoreServiceView(APIView):
         store_service = store_services.delete(request.GET.get('id'))
         return success_response(store_service.service_dump())
 
+class FilterStoreServiceView(APIView):
+    @validate(FilterStoreSerializer)
+    def post(request: FilterStoreSerializer) -> Response:
+        services = store_services.filter(request.to_dto())
+        return success_response([service.service_dump() for service in services])
 
 class QuestionView(APIView):
     @validate()

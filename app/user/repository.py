@@ -9,12 +9,14 @@ from .models import UserAccountTableData, RoleTableData, EmployeeAccountTableDat
 from .mapper import UserTableMapper, RoleTableMapper
 from typing import Dict, Optional, List
 from core.common import OrdenDirection
+from django.db.models import Q
 
 class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount], GetUser):
     def __init__(self) -> None:
         super().__init__(UserAccountTableData, UserTableMapper())
         self.allowed_fields = ['name', 'email', 'status', 'gender', 'birthdate',
                                'phone_number', 'created_date']
+        self._filter = Q()
     
     def exists(self, unique: str) -> bool:
         if UserEmail.is_email(unique):
@@ -85,7 +87,7 @@ class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount], GetUser):
         return EmployeeRoleTableData.objects.filter(role__name=Role.SUPER_ADMIN).exists()
     
     def exists_employee_by_id(self, employee_id: str) -> bool:
-        if not ID.is_id(employee_id): return False
+        if not ID.is_id(str(employee_id)): return False
         return EmployeeAccountTableData.objects.filter(id=employee_id).exists()
     
     def exists_employee_by_email(self, email: str) -> bool:
@@ -107,6 +109,26 @@ class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount], GetUser):
     def get_all(self) -> List[UserAccount]:
         tables = self.table.objects.all()
         return [self.get(str(table.id)) for table in tables]
+    
+    def prepare_service_category_filter(self, service_category: str) -> None:
+        self._filter &= Q(employeeaccounttabledata__employeecategoriestabledata__category=service_category.upper())
+    
+    def get_filtered_users(self, limit: Optional[int] = None, offset: Optional[int] = None) -> List[UserAccount]:
+        user_tables = self.table.objects.filter(self._filter).distinct()
+        if limit and offset:
+            user_tables = user_tables[offset:offset + limit]
+        elif limit:
+            user_tables = user_tables[:limit]
+        elif offset:
+            user_tables = user_tables[offset:]
+        self._filter = Q()
+        models : List[UserAccount] = []
+        for table in user_tables:
+            if self.exists_employee_by_id(table.id):
+                models.append(self.mapper.to_model(EmployeeAccountTableData.objects.get(id=table.id)))
+            else:
+                models.append(self.mapper.to_model(table))
+        return models
     
 
 class DjangoSaveUser(DjangoSaveModel[UserAccountTableData, UserAccount], EventSubscriber):
