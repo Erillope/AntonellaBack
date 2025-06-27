@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from app.common.response import success_response, validate
 from .serializer import *
 from .models import *
-from app.store_service.models import QuestionTableData
+from app.store_service.models import QuestionTableData, ChoiceImage, QuestionChoice
 from core.common import save_storage_image, SystemException
 from core.common.image_storage import Base64ImageStorage
 from typing import Dict, Any, Optional
@@ -20,11 +20,18 @@ class AnswerApiView(APIView):
                 "question_id": question.id,
                 "question_title": question.title,
                 "input_type": question.input_type,
-                "choice_type": question.choice_type,
+                "choice_type": self.get_choice_type(question),
                 "answer": AnswerTableData.get_question_answer(client_id=client_id, service_item_id=service_item_id, question_id=question.id)
             }
             for question in questions
         ])
+    
+    def get_choice_type(self, question: QuestionTableData) -> Optional[str]:
+        if question.input_type == "CHOICE":
+            if ChoiceImage.have_choice_images(question.id):
+                return "IMAGE"
+            return "TEXT"
+        return None
 
     @validate(AnswerSerializer)
     def post(self, request: AnswerSerializer) -> Response:
