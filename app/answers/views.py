@@ -5,6 +5,7 @@ from app.common.response import success_response, validate
 from .serializer import *
 from .models import *
 from app.store_service.models import QuestionTableData, ChoiceImage, QuestionChoice
+from app.order.models import OrderTable
 from core.common import save_storage_image, SystemException
 from core.common.image_storage import Base64ImageStorage
 from typing import Dict, Any, Optional
@@ -14,6 +15,9 @@ class AnswerApiView(APIView):
     def get(self, request: Request) -> Response:
         service_item_id = request.GET.get('service_item_id')
         client_id = request.GET.get('client_id')
+        if not client_id:
+            order = OrderTable.objects.get(serviceitemtable__id=service_item_id)
+            client_id = order.client_id
         questions = QuestionTableData.objects.filter(service__serviceitemtable__id=service_item_id)
         return success_response([
             {

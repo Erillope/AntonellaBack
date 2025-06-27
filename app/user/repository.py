@@ -113,6 +113,15 @@ class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount], GetUser):
     def prepare_service_category_filter(self, service_category: str) -> None:
         self._filter &= Q(employeeaccounttabledata__employeecategoriestabledata__category=service_category.upper())
     
+    def prepare_only_clients_filter(self) -> None:
+        self._filter &= ~Q(id__in=EmployeeAccountTableData.objects.values_list('id', flat=True))
+        
+    def prepare_name_filter(self, name: str, exact: bool = False) -> None:
+        if exact:
+            self._filter &= Q(name__iexact=name.lower())
+        else:
+            self._filter &= Q(name__icontains=name.lower())
+    
     def get_filtered_users(self, limit: Optional[int] = None, offset: Optional[int] = None) -> List[UserAccount]:
         user_tables = self.table.objects.filter(self._filter).distinct()
         if limit and offset:

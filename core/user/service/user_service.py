@@ -96,6 +96,12 @@ class FilterUserService(AbstractFilterUserService):
     def filter_user(self, dto: FilterUserDto) -> List[UserDto]:
         if dto.service_category:
             self._get_user.prepare_service_category_filter(dto.service_category.value)
+        if dto.only_clients:
+            self._get_user.prepare_only_clients_filter()
+        if dto.name:
+            self._get_user.prepare_name_filter(dto.name)
+        if dto.exact_name:
+            self._get_user.prepare_name_filter(dto.exact_name, exact=True)
         users = self._get_user.get_filtered_users(limit=dto.limit, offset=dto.offset)
         return [UserMapper.to_dto(user) for user in users]
     

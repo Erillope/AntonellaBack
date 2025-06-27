@@ -29,6 +29,10 @@ class ServiceItemService(AbstractServiceItemService):
     def __init__(self, get_service_item: GetServiceItem) -> None:
         self._get_service_item = get_service_item
     
+    def get(self, service_item_id: str) -> ServiceItemDto:
+        service_item = self._get_service_item.get(service_item_id)
+        return ServiceItemMapper.to_service_item_dto(service_item)
+    
     def create_service_item(self, dto: ServiceItemDto, order_id: str) -> ServiceItemDto:
         service_item = ServiceItemMapper.to_service_item(dto)
         service_item.set_order_id(order_id)

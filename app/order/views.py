@@ -34,6 +34,9 @@ class OrderApiView(APIView):
 class ServiceItemApiView(APIView):
     @validate()
     def get(self, request: Request) -> Response:
+        if request.GET.get('id'):
+            service_item = service_item_service.get(request.GET.get('id'))
+            return success_response(service_item.model_dump())
         order_id = request.GET.get('order_id')
         service_items = service_item_service.get_service_items(order_id)
         return success_response([item.model_dump() for item in service_items])

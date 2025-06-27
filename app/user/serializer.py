@@ -100,12 +100,18 @@ class UpdateUserSerializer(serializers.Serializer):
 class FilterUserSerializer(serializers.Serializer):
     service_category = serializers.ChoiceField(
         choices=[(c.value, c.value) for c in EmployeeCategories], required=False)
+    only_clients = serializers.BooleanField(default=False, required=False)
+    name = serializers.CharField(max_length=250, required=False)
+    exact_name = serializers.CharField(max_length=250, required=False)
     offset = serializers.IntegerField(required=False)
     limit = serializers.IntegerField(required=False)
     
     def to_dto(self) -> FilterUserDto:
         return FilterUserDto(
             service_category=self.validated_data.get('service_category'),
+            only_clients=self.validated_data.get('only_clients', False),
+            exact_name=self.validated_data.get('exact_name'),
+            name=self.validated_data.get('name'),
             offset=self.validated_data.get('offset'),
             limit=self.validated_data.get('limit'),
         )

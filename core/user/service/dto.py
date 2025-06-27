@@ -41,6 +41,9 @@ class UpdateUserDto(BaseModel):
 
 class FilterUserDto(BaseModel):
     service_category: Optional[EmployeeCategories] = None
+    name: Optional[str] = None
+    exact_name: Optional[str] = None
+    only_clients: Optional[bool] = None
     offset: Optional[int] = None
     limit: Optional[int] = None
 
