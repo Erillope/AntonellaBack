@@ -1,4 +1,4 @@
-# Proyecto Django
+# Antonella Back
 
 Este es un proyecto desarrollado con Django. A continuación se detallan los pasos necesarios para clonar y ejecutar el proyecto localmente.
 
