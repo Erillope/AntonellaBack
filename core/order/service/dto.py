@@ -19,6 +19,7 @@ class ServiceItemDto(BaseModel):
     status: Optional[Progresstatus] = None
     base_price: Optional[Decimal] = None
     payments: List[PaymentDto]
+    discount: Optional[Decimal] = None
 
 class UpdateServiceItemDto(BaseModel):
     id: str
@@ -74,6 +75,7 @@ class ProductItemDto(BaseModel):
     product_id: str
     quantity: int
     base_price: Decimal
+    discount: Optional[Decimal] = None
 
 
 class UpdateProductItemDto(BaseModel):

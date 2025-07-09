@@ -45,7 +45,8 @@ class ServiceItemTableMapper(TableMapper[ServiceItemTable, ServiceItem]):
             date_info_start_time=model.date_info.start_time,
             date_info_end_time=model.date_info.end_time,
             status=model.status.lower(),
-            base_price=model.price.base_price if model.price else None
+            base_price=model.price.base_price if model.price else None,
+            discount=model.discount
         )
     
     def to_model(self, table: ServiceItemTable) -> ServiceItem:
@@ -68,6 +69,7 @@ class ServiceItemTableMapper(TableMapper[ServiceItemTable, ServiceItem]):
                     amount=payment.amount
                 ) for payment in PaymentTable.from_service_item(table.id)
             ],
+            discount=table.discount
         )
 
 
@@ -78,7 +80,8 @@ class ProductItemTableMapper(TableMapper[ProductItemTable, ProductItem]):
             order_id=model.get_order_id(),
             product_id=model.product_id,
             quantity=model.quantity,
-            base_price=model.price.base_price
+            base_price=model.price.base_price,
+            discount=model.discount
         )
     
     def to_model(self, table: ProductItemTable) -> ProductItem:
@@ -87,5 +90,6 @@ class ProductItemTableMapper(TableMapper[ProductItemTable, ProductItem]):
             order_id=str(table.order_id),
             product_id=str(table.product_id),
             quantity=table.quantity,
-            price=Price.calculate(table.base_price)
+            price=Price.calculate(table.base_price),
+            discount=table.discount
         )

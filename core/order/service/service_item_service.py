@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
-from .dto import ServiceItemDto, UpdateServiceItemDto, FilterServiceItemByDto, EmployeeServiceInfoDto, RequestEmployeeServiceInfoDto
-from ..domain.values import Payment
+from .dto import ServiceItemDto, UpdateServiceItemDto, FilterServiceItemByDto, EmployeeServiceInfoDto, RequestEmployeeServiceInfoDto, UpdateOrderDto
+from ..domain.values import Payment, Progresstatus
 from typing import List, Optional
 from .mapper import ServiceItemMapper
 from .repository import GetServiceItem
+from .order_service import AbstractOrderService
 
 class AbstractServiceItemService(ABC):
     @abstractmethod
@@ -26,8 +27,9 @@ class AbstractServiceItemService(ABC):
 
 
 class ServiceItemService(AbstractServiceItemService):
-    def __init__(self, get_service_item: GetServiceItem) -> None:
+    def __init__(self, get_service_item: GetServiceItem, order_service: AbstractOrderService) -> None:
         self._get_service_item = get_service_item
+        self._order_service = order_service
     
     def get(self, service_item_id: str) -> ServiceItemDto:
         service_item = self._get_service_item.get(service_item_id)
@@ -70,6 +72,18 @@ class ServiceItemService(AbstractServiceItemService):
             payments=p
         )
         service_item.save()
+        if dto.status and dto.status == Progresstatus.IN_PROGRESS:
+            self._order_service.update_order(UpdateOrderDto(
+                id=service_item.get_order_id(),
+                progress_status=Progresstatus.IN_PROGRESS
+            ))
+        if dto.status and dto.status == Progresstatus.FINISHED:
+            items = self._get_service_item.get_by_order_id(service_item.get_order_id())
+            if all(item.status == Progresstatus.FINISHED for item in items):
+                self._order_service.update_order(UpdateOrderDto(
+                    id=service_item.get_order_id(),
+                    progress_status=Progresstatus.FINISHED
+                ))
         return ServiceItemMapper.to_service_item_dto(service_item)
     
     def delete_service_item(self, service_item_id: str) -> None:

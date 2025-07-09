@@ -35,6 +35,7 @@ class ServiceItemSerializer(serializers.Serializer):
     base_price = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
     payments = serializers.ListField(child=PaymentSerializer())
     payment_percentage = serializers.DecimalField(max_digits=5, decimal_places=2, required=False)
+    discount = serializers.DecimalField(max_digits=5, decimal_places=2, required=False)
     
     def to_dto(self) -> ServiceItemDto:
         date_info = DateInfoSerializer(data=self.validated_data['date_info'])
@@ -52,7 +53,8 @@ class ServiceItemSerializer(serializers.Serializer):
             date_info=date_info.to_date_info(),
             status=Progresstatus(self.validated_data['status']),
             base_price=self.validated_data.get('base_price'),
-            payments=payments
+            payments=payments,
+            discount=self.validated_data.get('discount')
         )
 
 

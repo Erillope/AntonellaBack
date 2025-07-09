@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
 from .dto import CreateOrderDto, OrderDto, UpdateOrderDto
-from ..domain.order import Order, OrderStatusInfo
+from ..domain.order import Order
 from .mapper import OrderMapper
 from typing import List
 from core.common.abstract_repository import GetModel
+from ..domain.values import OrderStatusInfo
 
 class AbstractOrderService(ABC):
     @abstractmethod

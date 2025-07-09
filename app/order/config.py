@@ -24,6 +24,6 @@ delete_product_item = DjangoDeleteProductItem()
 
 product_item_service = ProductItemService(get_product_item, product_service)
 
-service_item_service = ServiceItemService(get_service_item)
-
 order_service = OrderService(get_order)
+
+service_item_service = ServiceItemService(get_service_item, order_service)
