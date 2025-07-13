@@ -47,8 +47,8 @@ class FilterUserView(APIView):
     
     @validate(FilterUserSerializer)
     def post(self, request: FilterUserSerializer) -> Response:
-        users = self.filter_user_service.filter_user(request.to_dto())
-        return success_response([user.user_dump() for user in users])
+        data = self.filter_user_service.filter_user(request.to_dto())
+        return success_response(data.model_dump())
 
 
 class RoleView(APIView):

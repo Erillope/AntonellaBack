@@ -1,4 +1,3 @@
-from core.common import OrdenDirection
 from core.common.abstract_repository import GetModel, SaveModel, DeleteModel
 from .table_mapper import TableMapper
 from .exceptions import ModelNotFoundException
@@ -28,18 +27,8 @@ class DjangoGetModel(GetModel[Model], Generic[Table, Model]):
         table = self.table.objects.get(id=id)
         return self.mapper.to_model(table)
     
-    def filter(self, order_by: str, direction: OrdenDirection,
-               limit: Optional[int]=None, offset: Optional[int]=None, fields: Dict[str, str]={}) -> List[Model]:
-        tables = []
-        start = 0
-        end = 0
-        if len(fields) == 0:
-            tables = self.table.objects.all()
-        if offset: start = offset
-        if limit: end = start + limit
-        else: end = len(tables)
-        tables = self.table.objects.order_by(order_by) if direction == OrdenDirection.ASC else self.table.objects.order_by(f'-{order_by}')
-        return [self.mapper.to_model(table) for table in tables[start:end]]
+    def total_count(self) -> int:
+        return self.table.objects.count()
 
 
 class DjangoSaveModel(SaveModel[Model], Generic[Table, Model]):

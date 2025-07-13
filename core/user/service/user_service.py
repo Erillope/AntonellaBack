@@ -1,6 +1,6 @@
 from .abstract_services import (AbstractAuthService, AbstractUpdateUserService,
                                 AbstractFilterUserService)
-from .dto import SignUpDto, UserDto, UpdateUserDto, FilterUserDto, CreateEmployeeDto
+from .dto import SignUpDto, UserDto, UpdateUserDto, FilterUserDto, CreateEmployeeDto, FilteredUsersDto
 from .exceptions import IncorrectPasswordException, AlreadyExistsSuperAdminException
 from .mapper import UserMapper
 from core.common.abstract_repository import GetModel
@@ -93,17 +93,14 @@ class FilterUserService(AbstractFilterUserService):
         user = self._get_user.get(user_id)
         return UserMapper.to_dto(user)
     
-    def filter_user(self, dto: FilterUserDto) -> List[UserDto]:
-        if dto.service_category:
-            self._get_user.prepare_service_category_filter(dto.service_category.value)
-        if dto.only_clients:
-            self._get_user.prepare_only_clients_filter()
-        if dto.name:
-            self._get_user.prepare_name_filter(dto.name)
-        if dto.exact_name:
-            self._get_user.prepare_name_filter(dto.exact_name, exact=True)
-        users = self._get_user.get_filtered_users(limit=dto.limit, offset=dto.offset)
-        return [UserMapper.to_dto(user) for user in users]
+    def filter_user(self, dto: FilterUserDto) -> FilteredUsersDto:
+        total = self._get_user.total_count()
+        users, filtered_count = self._get_user.get_filtered_users(dto)
+        return FilteredUsersDto(
+            users=[UserMapper.to_dto(user) for user in users],
+            total=total,
+            filtered_count=filtered_count,
+        )
     
     def get_by_role(self, role: str) -> List[UserDto]:
         users = self._get_user.get_by_role(role)

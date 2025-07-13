@@ -45,3 +45,19 @@ class ProductDto(BaseModel):
     status: ProductStatus
     stock_modified_date: date
     created_date: date
+
+
+class ProductFilterDto(BaseModel):
+    name: Optional[str] = None
+    service_type: Optional[ServiceType] = None
+    start_stock_modified_date: Optional[date] = None
+    end_stock_modified_date: Optional[date] = None
+    limit: Optional[int] = None
+    offset: Optional[int] = None
+    only_count: bool = False
+
+
+class ProductFilterResponseDto(BaseModel):
+    products: List[ProductDto]
+    total_count: int
+    filtered_count: int

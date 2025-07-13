@@ -1,12 +1,12 @@
 from .abstract_services import AbstractProductService
-from .dto import ProductDto, CreateProductDto, UpdateProductDto
-from core.common.abstract_repository import GetModel
+from .dto import ProductDto, CreateProductDto, UpdateProductDto, ProductFilterDto, ProductFilterResponseDto
+from .repository import GetProduct
 from .mapper import ProductMapper
 from ..domain import Product
 from typing import List
 
 class ProductService(AbstractProductService):
-    def __init__(self, get_product: GetModel[Product]) -> None:
+    def __init__(self, get_product: GetProduct) -> None:
         self.get_product = get_product
     
     def create(self, dto: CreateProductDto) -> ProductDto:
@@ -49,3 +49,12 @@ class ProductService(AbstractProductService):
     def get_all(self) -> List[ProductDto]:
         products = self.get_product.get_all()
         return [ProductMapper.to_dto(product) for product in products]
+
+    def filter(self, dto: ProductFilterDto) -> ProductFilterResponseDto:
+        total = self.get_product.total_count()
+        products, filtered_count = self.get_product.get_filtered_products(dto)
+        return ProductFilterResponseDto(
+            total_count=total,
+            filtered_count=filtered_count,
+            products=[ProductMapper.to_dto(product) for product in products]
+        )

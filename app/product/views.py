@@ -3,7 +3,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from app.common.response import success_response, validate
 from .config import product_service
-from .serializer import CreateProductSerializer, UpdateProductSerializer
+from .serializer import CreateProductSerializer, UpdateProductSerializer, FilterProductSerializer
 
 class ProductApiView(APIView):
     @validate()
@@ -29,3 +29,9 @@ class ProductApiView(APIView):
     def delete(self, request: Request) -> Response:
         product = product_service.delete(request.GET.get('id'))
         return success_response(product.model_dump())
+
+class ProductFilterApiView(APIView):
+    @validate(FilterProductSerializer)
+    def post(self, request: FilterProductSerializer) -> Response:
+        dto = product_service.filter(request.to_dto())
+        return success_response(dto.model_dump())

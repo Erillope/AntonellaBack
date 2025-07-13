@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.product.service.dto import CreateProductDto, UpdateProductDto
+from core.product.service.dto import CreateProductDto, UpdateProductDto, ProductFilterDto
 from core.store_service.domain.values import ServiceType
 from core.product.domain.values import ProductStatus
 
@@ -54,4 +54,24 @@ class UpdateProductSerializer(serializers.Serializer):
             product_type=self.validated_data.get('product_type'),
             volume=self.validated_data.get('volume'),
             status=self.validated_data.get('status')
+        )
+
+class FilterProductSerializer(serializers.Serializer):
+    name = serializers.CharField(required=False)
+    service_type = serializers.ChoiceField(choices=[(tag.value, tag.value) for tag in ServiceType], required=False)
+    start_stock_modified_date = serializers.DateField(required=False)
+    end_stock_modified_date = serializers.DateField(required=False)
+    limit = serializers.IntegerField(required=False)
+    offset = serializers.IntegerField(required=False)
+    only_count = serializers.BooleanField(default=False)
+
+    def to_dto(self) -> ProductFilterDto:
+        return ProductFilterDto(
+            name=self.validated_data.get('name'),
+            service_type=self.validated_data.get('service_type'),
+            start_stock_modified_date=self.validated_data.get('start_stock_modified_date'),
+            end_stock_modified_date=self.validated_data.get('end_stock_modified_date'),
+            limit=self.validated_data.get('limit'),
+            offset=self.validated_data.get('offset'),
+            only_count=self.validated_data['only_count']
         )

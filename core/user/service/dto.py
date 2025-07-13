@@ -41,9 +41,14 @@ class UpdateUserDto(BaseModel):
 
 class FilterUserDto(BaseModel):
     service_category: Optional[EmployeeCategories] = None
+    only_count: Optional[bool] = None
     name: Optional[str] = None
+    email: Optional[str] = None
+    phone_number: Optional[str] = None
+    dni: Optional[str] = None
     exact_name: Optional[str] = None
     only_clients: Optional[bool] = None
+    role: Optional[str] = None
     offset: Optional[int] = None
     limit: Optional[int] = None
 
@@ -83,3 +88,8 @@ class UserDto(BaseModel):
         if not self.categories:
             data.pop('categories')
         return data
+
+class FilteredUsersDto(BaseModel):
+    users: List[UserDto]
+    total: int
+    filtered_count: int

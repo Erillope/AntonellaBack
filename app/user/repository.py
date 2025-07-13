@@ -7,16 +7,13 @@ from core.user.domain.events import (UserAccountSaved, RoleSaved, RoleDeleted)
 from app.common.exceptions import ModelNotFoundException
 from .models import UserAccountTableData, RoleTableData, EmployeeAccountTableData, EmployeeRoleTableData, RolPermissionTableData, EmployeeCategoriesTableData
 from .mapper import UserTableMapper, RoleTableMapper
-from typing import Dict, Optional, List
-from core.common import OrdenDirection
+from typing import List, Tuple
 from django.db.models import Q
+from core.user.service.dto import FilterUserDto
 
 class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount], GetUser):
     def __init__(self) -> None:
         super().__init__(UserAccountTableData, UserTableMapper())
-        self.allowed_fields = ['name', 'email', 'status', 'gender', 'birthdate',
-                               'phone_number', 'created_date']
-        self._filter = Q()
     
     def exists(self, unique: str) -> bool:
         if UserEmail.is_email(unique):
@@ -96,12 +93,6 @@ class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount], GetUser):
     def exists_employee_by_phone_number(self, phone_number: str) -> bool:
         return EmployeeAccountTableData.objects.filter(phone_number=phone_number).exists()
     
-    def filter(self, order_by: str, direction: OrdenDirection,
-               limit: Optional[int]=None, offset: Optional[int]=None,
-               fields: Dict[str, str]={}) -> List[UserAccount]:
-        users = super().filter(order_by, direction, limit, offset, fields)
-        return [self.get(user.id) for user in users]
-    
     def get_by_role(self, role: str) -> List[UserAccount]:
         tables = EmployeeRoleTableData.get_employees_from_role(role)
         return [self.mapper.to_model(table) for table in tables]
@@ -110,34 +101,44 @@ class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount], GetUser):
         tables = self.table.objects.all()
         return [self.get(str(table.id)) for table in tables]
     
-    def prepare_service_category_filter(self, service_category: str) -> None:
-        self._filter &= Q(employeeaccounttabledata__employeecategoriestabledata__category=service_category.upper())
-    
-    def prepare_only_clients_filter(self) -> None:
-        self._filter &= ~Q(id__in=EmployeeAccountTableData.objects.values_list('id', flat=True))
-        
-    def prepare_name_filter(self, name: str, exact: bool = False) -> None:
-        if exact:
-            self._filter &= Q(name__iexact=name.lower())
-        else:
-            self._filter &= Q(name__icontains=name.lower())
-    
-    def get_filtered_users(self, limit: Optional[int] = None, offset: Optional[int] = None) -> List[UserAccount]:
-        user_tables = self.table.objects.filter(self._filter).distinct()
-        if limit and offset:
-            user_tables = user_tables[offset:offset + limit]
-        elif limit:
-            user_tables = user_tables[:limit]
-        elif offset:
-            user_tables = user_tables[offset:]
-        self._filter = Q()
+    def build_filter(self, filter_data: FilterUserDto) -> Q:
+        _filter = Q()
+        if filter_data.service_category:
+            _filter &= Q(employeeaccounttabledata__employeecategoriestabledata__category=filter_data.service_category.value.upper())
+        if filter_data.only_clients:
+            _filter &= ~Q(id__in=EmployeeAccountTableData.objects.values_list('id', flat=True))
+        if filter_data.name:
+            _filter &= Q(name__icontains=filter_data.name.lower())
+        elif filter_data.exact_name:
+            _filter &= Q(name__iexact=filter_data.exact_name.lower())
+        if filter_data.role:
+            _filter &= Q(employeeaccounttabledata__employeeroletabledata__role__name=filter_data.role.lower())
+        if filter_data.email:
+            _filter &= Q(email__icontains=filter_data.email.lower())
+        if filter_data.phone_number:
+            _filter &= Q(phone_number__icontains=filter_data.phone_number)
+        if filter_data.dni:
+            _filter &= Q(dni__icontains=filter_data.dni)
+        return _filter
+            
+    def get_filtered_users(self, filter_data: FilterUserDto) -> Tuple[List[UserAccount], int]:
+        _filter = self.build_filter(filter_data)
+        user_tables = self.table.objects.filter(_filter).distinct()
+        tables_count =user_tables.count()
+        if filter_data.only_count: return [], tables_count
+        if filter_data.limit and filter_data.offset:
+            user_tables = user_tables[filter_data.offset:filter_data.offset + filter_data.limit]
+        elif filter_data.limit:
+            user_tables = user_tables[:filter_data.limit]
+        elif filter_data.offset:
+            user_tables = user_tables[filter_data.offset:]
         models : List[UserAccount] = []
         for table in user_tables:
             if self.exists_employee_by_id(table.id):
                 models.append(self.mapper.to_model(EmployeeAccountTableData.objects.get(id=table.id)))
             else:
                 models.append(self.mapper.to_model(table))
-        return models
+        return models, tables_count
     
 
 class DjangoSaveUser(DjangoSaveModel[UserAccountTableData, UserAccount], EventSubscriber):

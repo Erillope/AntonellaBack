@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from .dto import UserDto, SignUpDto, UpdateUserDto, FilterUserDto, RoleDto
+from .dto import UserDto, SignUpDto, UpdateUserDto, FilterUserDto, RoleDto, FilteredUsersDto
 from typing import List, Optional
 from core.token.tokens import Token
 from core.user.domain.values import RoleAccess
@@ -28,7 +28,7 @@ class AbstractFilterUserService(ABC):
     def get_user(self, user_id: str) -> UserDto: ...
     
     @abstractmethod
-    def filter_user(self, dto: FilterUserDto) -> List[UserDto]: ...
+    def filter_user(self, dto: FilterUserDto) -> FilteredUsersDto: ...
     
     @abstractmethod
     def get_by_role(self, role: str) -> List[UserDto]: ...

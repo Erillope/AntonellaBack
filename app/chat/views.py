@@ -51,6 +51,5 @@ class AdminChatView(APIView):
             content=request.validated_data['content'],
             message_type=request.validated_data['message_type']
         )
-        print(dto)
         message = chat_service.add_message(dto)
         return success_response(message.model_dump())

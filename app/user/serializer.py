@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from core.user import AccountStatus, Gender
-from core.common import OrdenDirection
 from core.user.service.dto import SignUpDto, UpdateUserDto, FilterUserDto, CreateEmployeeDto
 from core.user.domain.values import AccessType, PermissionType, RoleAccess, EmployeeCategories, PaymentType
 from typing import List, Optional
@@ -101,8 +100,13 @@ class FilterUserSerializer(serializers.Serializer):
     service_category = serializers.ChoiceField(
         choices=[(c.value, c.value) for c in EmployeeCategories], required=False)
     only_clients = serializers.BooleanField(default=False, required=False)
+    only_count = serializers.BooleanField(default=False, required=False)
     name = serializers.CharField(max_length=250, required=False)
+    role = serializers.CharField(max_length=250, required=False)
     exact_name = serializers.CharField(max_length=250, required=False)
+    email = serializers.CharField(max_length=250, required=False)
+    phone_number = serializers.CharField(max_length=250, required=False)
+    dni = serializers.CharField(max_length=250, required=False)
     offset = serializers.IntegerField(required=False)
     limit = serializers.IntegerField(required=False)
     
@@ -110,10 +114,15 @@ class FilterUserSerializer(serializers.Serializer):
         return FilterUserDto(
             service_category=self.validated_data.get('service_category'),
             only_clients=self.validated_data.get('only_clients', False),
+            only_count=self.validated_data.get('only_count', False),
             exact_name=self.validated_data.get('exact_name'),
             name=self.validated_data.get('name'),
             offset=self.validated_data.get('offset'),
             limit=self.validated_data.get('limit'),
+            role=self.validated_data.get('role'),
+            email=self.validated_data.get('email'),
+            phone_number=self.validated_data.get('phone_number'),
+            dni=self.validated_data.get('dni')
         )
         
 

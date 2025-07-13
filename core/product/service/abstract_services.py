@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from .dto import ProductDto, CreateProductDto, UpdateProductDto
+from .dto import ProductDto, CreateProductDto, UpdateProductDto, ProductFilterDto, ProductFilterResponseDto
 from typing import List
 
 class AbstractProductService(ABC):
@@ -20,3 +20,6 @@ class AbstractProductService(ABC):
     
     @abstractmethod
     def get_all(self) -> List[ProductDto]: ...
+    
+    @abstractmethod
+    def filter(self, dto: ProductFilterDto) -> ProductFilterResponseDto: ...

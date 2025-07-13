@@ -15,8 +15,7 @@ class GetModel(ABC, Generic[Model]):
     def get(self, id: str) -> Model: ...
     
     @abstractmethod
-    def filter(self, order_by: str, direction: OrdenDirection,
-               limit: Optional[int]=None, offset: Optional[int]=None, fields: Dict[str, str]={}) -> List[Model]: ...
+    def total_count(self) -> int: ...
 
 
 class SaveModel(ABC, Generic[Model]):
