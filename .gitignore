@@ -64,3 +64,5 @@ db.sqlite3
 # Otros casos específicos del proyecto
 .mypy_cache
 .ini
+
+"resources/antonella_firebase.json" 

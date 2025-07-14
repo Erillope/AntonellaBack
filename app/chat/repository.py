@@ -9,6 +9,8 @@ from core.chat.events import ChatMessageSaved
 from core.user.domain.events import UserAccountSaved
 from core.user.domain.user import EmployeeAccount
 from core.common import ID
+from core.chat.dto import UserChatDto
+from django.db.models import Count
 
 class DjangoGetChatMessage(DjangoGetModel[ChatMessageTable, ChatMessage], GetChatMessage):
     def __init__(self) -> None:
@@ -18,6 +20,16 @@ class DjangoGetChatMessage(DjangoGetModel[ChatMessageTable, ChatMessage], GetCha
         chat = ChatTable.objects.filter(user__id=user_id).first()
         tables = ChatMessageTable.objects.filter(chat_id=chat.id).order_by('-timestamp')[offset:offset + limit]
         return [self.mapper.to_model(table) for table in tables]
+
+    def get_user_chats(self) -> List[UserChatDto]:
+        chats = ChatTable.objects.annotate(num_messages=Count('chatmessagetable')).filter(num_messages__gt=0)
+        return [
+            UserChatDto(
+                user_id=str(chat.user.id),
+                user_name=chat.user.name,
+                user_photo=chat.user.photo if chat.user.photo else None
+            ) for chat in chats
+        ]
 
 class DjangoChatMessageSaved(DjangoSaveModel[ChatMessageTable, ChatMessage], EventSubscriber):
     def __init__(self) -> None:

@@ -2,11 +2,13 @@ from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from app.common.response import success_response, validate
-from .config import chat_service
+from .config import chat_service, notification_service
+from core.common.notification import NotificationMessage
 from .serializer import AddChatMessageSerializer
 from .models import ChatTable
 from app.user.models import UserAccountTableData
 from core.chat.dto import AddMessageDto
+from core.chat.chat import MessageType
 
 class ChatApiView(APIView):
     @validate()
@@ -41,6 +43,11 @@ class UserChatView(APIView):
 
 
 class AdminChatView(APIView):
+    @validate()
+    def get(self, request: Request) -> Response:
+        chats = chat_service.get_user_chats()
+        return success_response([chat.model_dump() for chat in chats])
+    
     @validate(AddChatMessageSerializer)
     def post(self, request: AddChatMessageSerializer) -> Response:
         chat = ChatTable.objects.get(user__id=request.validated_data['user_id'])
@@ -52,4 +59,10 @@ class AdminChatView(APIView):
             message_type=request.validated_data['message_type']
         )
         message = chat_service.add_message(dto)
+        notification_message = NotificationMessage(
+            title="Nuevo mensaje de Antonella",
+            body=message.content if message.message_type == MessageType.TEXT else "Antonella te ha enviado una foto",
+            user_id=chat.user.id
+        )
+        notification_service.send_notification(notification_message)
         return success_response(message.model_dump())
