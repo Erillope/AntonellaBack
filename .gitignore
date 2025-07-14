@@ -65,4 +65,4 @@ db.sqlite3
 .mypy_cache
 .ini
 
-"resources/antonella_firebase.json" 
+resources/antonella_firebase.json
