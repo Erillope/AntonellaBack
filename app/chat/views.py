@@ -39,6 +39,7 @@ class UserChatView(APIView):
             message_type=request.validated_data['message_type']
         )
         message = chat_service.add_message(dto)
+        print(message)
         return success_response(message.model_dump())
 
 

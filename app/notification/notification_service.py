@@ -12,6 +12,7 @@ class FirebaseNotificationService(NotificationService):
         firebase_admin.initialize_app(cred)
     
     def send_notification(self, message: NotificationMessage) -> None:
+        if not UserNotificationToken.objects.filter(user__id=message.user_id).exists(): return
         message = messaging.Message(
             notification=messaging.Notification(
                 title=message.title,
