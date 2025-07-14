@@ -2,7 +2,8 @@ from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from app.common.response import success_response, validate
-from .config import chat_service, notification_service
+from .config import chat_service
+from app.notification.config import notification_service
 from core.common.notification import NotificationMessage
 from .serializer import AddChatMessageSerializer
 from .models import ChatTable
@@ -39,7 +40,6 @@ class UserChatView(APIView):
             message_type=request.validated_data['message_type']
         )
         message = chat_service.add_message(dto)
-        print(message)
         return success_response(message.model_dump())
 
 

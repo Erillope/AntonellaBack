@@ -7,3 +7,14 @@ class UserNotificationToken(models.Model):
     
     class Meta:
         db_table = 'user_notification_token'
+
+
+class NotificationTable(models.Model):
+    id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=255)
+    body = models.TextField()
+    created_at = models.DateTimeField()
+    to = models.CharField(max_length=255)
+
+    class Meta:
+        db_table = 'notification'
