@@ -15,6 +15,8 @@ class NotificationTable(models.Model):
     body = models.TextField()
     created_at = models.DateTimeField()
     to = models.CharField(max_length=255)
+    type = models.CharField(max_length=50)
+    publish_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'notification'

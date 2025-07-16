@@ -8,6 +8,7 @@ from core.common.values import GuayaquilDatetime
 from app.user.models import UserAccountTableData
 from core.common.notification import NotificationMessage
 from .config import notification_service
+from datetime import datetime
 
 class NotificationTokenView(APIView):
     @validate(AddNotificationTokenSerializer)
@@ -43,11 +44,16 @@ class NotificationView(APIView):
     
     @validate(NotificationSerializer)
     def post(self, request: NotificationSerializer) -> Response:
+        publish_date = request.validated_data.get('publish_date', None)
+        if publish_date:
+            publish_date = GuayaquilDatetime.localize(publish_date)
         notification = NotificationTable.objects.create(
             title=request.validated_data['title'],
             body=request.validated_data['body'],
             created_at=GuayaquilDatetime.now(),
-            to=request.validated_data['to']
+            to=request.validated_data['to'],
+            type=request.validated_data['type'],
+            publish_date=publish_date
         )
         for user in UserAccountTableData.objects.all():
             if UserNotificationToken.objects.filter(user=user).exists():
@@ -55,7 +61,9 @@ class NotificationView(APIView):
                     NotificationMessage(
                         user_id=str(user.id),
                         title=notification.title,
-                        body=notification.body
+                        body=notification.body,
+                        type=notification.type,
+                        publish_date=notification.publish_date if notification.publish_date else None
                     )
                 )
         
@@ -64,5 +72,7 @@ class NotificationView(APIView):
             "title": notification.title,
             "body": notification.body,
             "created_at": notification.created_at.isoformat(),
-            "to": notification.to
+            "to": notification.to,
+            "type": notification.type.value,
+            "publish_date": notification.publish_date.isoformat() if notification.publish_date else None
         })
