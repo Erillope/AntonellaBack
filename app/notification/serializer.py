@@ -12,3 +12,13 @@ class NotificationSerializer(serializers.Serializer):
     to = serializers.CharField(max_length=255)
     type = serializers.ChoiceField(choices=[(tag.value, tag.value) for tag in NotificationType], default=NotificationType.INSTANTANEA.value, required=False)
     publish_date = serializers.DateTimeField(required=False, allow_null=True)
+
+
+class NotificationFilterSerializer(serializers.Serializer):
+    title = serializers.CharField(required=False, allow_blank=True)
+    type = serializers.ChoiceField(choices=[(tag.value, tag.value) for tag in NotificationType], required=False, allow_null=True)
+    start_date = serializers.DateTimeField(required=False, allow_null=True)
+    end_date = serializers.DateTimeField(required=False, allow_null=True)
+    limit = serializers.IntegerField(required=False)
+    offset = serializers.IntegerField(required=False)
+    only_count = serializers.BooleanField(required=False, default=False)

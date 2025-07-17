@@ -3,12 +3,12 @@ from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from app.common.response import success_response, validate
-from .serializer import AddNotificationTokenSerializer, NotificationSerializer
+from .serializer import AddNotificationTokenSerializer, NotificationSerializer, NotificationFilterSerializer
 from core.common.values import GuayaquilDatetime
 from app.user.models import UserAccountTableData
 from core.common.notification import NotificationMessage
 from .config import notification_service
-from datetime import datetime
+from django.db.models import Q
 
 class NotificationTokenView(APIView):
     @validate(AddNotificationTokenSerializer)
@@ -37,20 +37,25 @@ class NotificationView(APIView):
                 "id": notification.id,
                 "title": notification.title,
                 "body": notification.body,
-                "created_at": notification.created_at.isoformat(),
-                "to": notification.to
+                "created_at": GuayaquilDatetime.localize(notification.created_at).isoformat(),
+                "to": notification.to,
+                "type": notification.type,
+                "publish_date": GuayaquilDatetime.localize(notification.publish_date).isoformat() if notification.publish_date else None
             } for notification in notifications
         ])
     
     @validate(NotificationSerializer)
     def post(self, request: NotificationSerializer) -> Response:
         publish_date = request.validated_data.get('publish_date', None)
+        created_at = GuayaquilDatetime.now()
         if publish_date:
             publish_date = GuayaquilDatetime.localize(publish_date)
+        else:
+            publish_date = created_at
         notification = NotificationTable.objects.create(
             title=request.validated_data['title'],
             body=request.validated_data['body'],
-            created_at=GuayaquilDatetime.now(),
+            created_at=created_at,
             to=request.validated_data['to'],
             type=request.validated_data['type'],
             publish_date=publish_date
@@ -71,8 +76,55 @@ class NotificationView(APIView):
             "id": notification.id,
             "title": notification.title,
             "body": notification.body,
-            "created_at": notification.created_at.isoformat(),
+            "created_at": GuayaquilDatetime.localize(notification.created_at).isoformat(),
             "to": notification.to,
-            "type": notification.type.value,
-            "publish_date": notification.publish_date.isoformat() if notification.publish_date else None
+            "type": notification.type,
+            "publish_date": GuayaquilDatetime.localize(notification.publish_date).isoformat() if notification.publish_date else None
         })
+    
+
+class NotificationFilterView(APIView):
+    @validate(NotificationFilterSerializer)
+    def post(self, request: NotificationFilterSerializer) -> Response:
+        filters = self.build_filter(request)
+        limit = request.validated_data.get('limit')
+        offset = request.validated_data.get('offset')
+        only_count = request.validated_data.get('only_count', False)
+        total_count = NotificationTable.objects.count()
+        notifications = NotificationTable.objects.filter(filters)
+        if only_count:
+            return success_response({"count": total_count, "filtered_count": notifications.count(), "notifications": []})
+        if limit is not None and offset is not None:
+            notifications = notifications[offset:offset + limit]
+        elif limit is not None:
+            notifications = notifications[:limit]
+        elif offset is not None:
+            notifications = notifications[offset:]
+        return success_response({
+            "count": total_count,
+            "filtered_count": notifications.count(),
+            "notifications": [
+                {
+                    "id": notification.id,
+                    "title": notification.title,
+                    "body": notification.body,
+                    "created_at": GuayaquilDatetime.localize(notification.created_at).isoformat(),
+                    "to": notification.to,
+                    "type": notification.type,
+                    "publish_date": GuayaquilDatetime.localize(notification.publish_date).isoformat() if notification.publish_date else None
+                } for notification in notifications
+            ]
+        })
+        
+    
+    def build_filter(self, data: NotificationFilterSerializer) -> Q:
+        filters = Q()
+        if data.validated_data.get('title'):
+            filters &= Q(title__icontains=data.validated_data['title'])
+        if data.validated_data.get('type'):
+            filters &= Q(type=data.validated_data['type'])
+        if data.validated_data.get('start_date'):
+            filters &= Q(created_at__gte=data.validated_data['start_date'])
+        if data.validated_data.get('end_date'):
+            filters &= Q(created_at__lte=data.validated_data['end_date'])
+        return filters
