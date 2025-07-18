@@ -5,6 +5,7 @@ from .models import UserNotificationToken
 from core.common.config import resources_path
 import os
 from apscheduler.schedulers.background import BackgroundScheduler #type: ignore
+from firebase_admin._messaging_utils import UnregisteredError #type: ignore
 
 class FirebaseNotificationService(NotificationService):
     def __init__(self) -> None:
@@ -25,6 +26,12 @@ class FirebaseNotificationService(NotificationService):
             token=UserNotificationToken.objects.get(user__id=message_data.user_id).token,
         )
         if message_data.type == NotificationType.PROGRAMADA and message_data.publish_date:
-            self.scheduler.add_job(lambda: messaging.send(message), 'date', run_date=message_data.publish_date)
+            self.scheduler.add_job(lambda: self.send(message), 'date', run_date=message_data.publish_date)
         else:
+            self.send(message)
+    
+    def send(self, message: messaging.Message) -> None:
+        try:
             messaging.send(message)
+        except UnregisteredError:
+            print("Token no registrado o caducado.")
