@@ -8,11 +8,12 @@ from apscheduler.schedulers.background import BackgroundScheduler #type: ignore
 
 class FirebaseNotificationService(NotificationService):
     def __init__(self) -> None:
-        credential_path = os.path.join(resources_path, 'antonella_firebase.json')
-        cred = credentials.Certificate(credential_path)
-        firebase_admin.initialize_app(cred)
-        self.scheduler = BackgroundScheduler()
-        self.scheduler.start()
+        if not firebase_admin._apps:
+            credential_path = os.path.join(resources_path, 'antonella_firebase.json')
+            cred = credentials.Certificate(credential_path)
+            firebase_admin.initialize_app(cred)
+            self.scheduler = BackgroundScheduler()
+            self.scheduler.start()
     
     def send_notification(self, message_data: NotificationMessage) -> None:
         if not UserNotificationToken.objects.filter(user__id=message_data.user_id).exists(): return
