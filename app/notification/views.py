@@ -9,6 +9,7 @@ from app.user.models import UserAccountTableData
 from core.common.notification import NotificationMessage
 from .config import notification_service
 from django.db.models import Q
+from datetime import datetime
 
 class NotificationTokenView(APIView):
     @validate(AddNotificationTokenSerializer)
@@ -31,6 +32,17 @@ class NotificationTokenView(APIView):
 class NotificationView(APIView):
     @validate()
     def get(self, request: Request) -> Response:
+        if request.GET.get('id'):
+            notification = NotificationTable.objects.get(id=request.GET['id'])
+            return success_response({
+                "id": notification.id,
+                "title": notification.title,
+                "body": notification.body,
+                "created_at": GuayaquilDatetime.localize(notification.created_at).isoformat(),
+                "to": notification.to,
+                "type": notification.type,
+                "publish_date": GuayaquilDatetime.localize(notification.publish_date).isoformat() if notification.publish_date else None
+            })
         notifications = NotificationTable.objects.all()
         return success_response([
             {
@@ -92,8 +104,9 @@ class NotificationFilterView(APIView):
         only_count = request.validated_data.get('only_count', False)
         total_count = NotificationTable.objects.count()
         notifications = NotificationTable.objects.filter(filters)
+        total_filtered = notifications.count()
         if only_count:
-            return success_response({"count": total_count, "filtered_count": notifications.count(), "notifications": []})
+            return success_response({"count": total_count, "filtered_count": total_filtered, "notifications": []})
         if limit is not None and offset is not None:
             notifications = notifications[offset:offset + limit]
         elif limit is not None:
@@ -102,7 +115,7 @@ class NotificationFilterView(APIView):
             notifications = notifications[offset:]
         return success_response({
             "count": total_count,
-            "filtered_count": notifications.count(),
+            "filtered_count": total_filtered,
             "notifications": [
                 {
                     "id": notification.id,
@@ -119,12 +132,15 @@ class NotificationFilterView(APIView):
     
     def build_filter(self, data: NotificationFilterSerializer) -> Q:
         filters = Q()
+        start_date = data.validated_data.get('start_date')
+        end_date = data.validated_data.get('end_date')
         if data.validated_data.get('title'):
             filters &= Q(title__icontains=data.validated_data['title'])
         if data.validated_data.get('type'):
             filters &= Q(type=data.validated_data['type'])
-        if data.validated_data.get('start_date'):
-            filters &= Q(created_at__gte=data.validated_data['start_date'])
-        if data.validated_data.get('end_date'):
-            filters &= Q(created_at__lte=data.validated_data['end_date'])
+        if start_date:
+            filters &= Q(created_at__gte=start_date)
+        if end_date:
+            end_date = datetime(end_date.year, end_date.month, end_date.day, 23, 59, 59)
+            filters &= Q(created_at__lte= end_date)
         return filters

@@ -15,14 +15,13 @@ class FirebaseNotificationService(NotificationService):
         self.scheduler.start()
     
     def send_notification(self, message_data: NotificationMessage) -> None:
-        prueba = "c9XVC843TxK109EplTbqvP:APA91bF_pIekdov9UTzVNq8LPuTqL26p7YKMQG5ODTs0d7g9p2G31r9eklpq4vtOTHb065Mk7jmK0SL-5m4K-SMmBwv80Kmv6F0Rl-75-wosWkdBRGC8m5s"
         if not UserNotificationToken.objects.filter(user__id=message_data.user_id).exists(): return
         message = messaging.Message(
             notification=messaging.Notification(
                 title=message_data.title,
                 body=message_data.body,
             ),
-            token=prueba,
+            token=UserNotificationToken.objects.get(user__id=message_data.user_id).token,
         )
         if message_data.type == NotificationType.PROGRAMADA and message_data.publish_date:
             self.scheduler.add_job(lambda: messaging.send(message), 'date', run_date=message_data.publish_date)
