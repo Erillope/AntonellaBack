@@ -3,7 +3,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from app.common.response import success_response, validate
 from .config import chat_service
-from app.notification.config import notification_service
+from app.notification.config import NotificationConfig
 from core.common.notification import NotificationMessage
 from .serializer import AddChatMessageSerializer
 from .models import ChatTable
@@ -65,5 +65,5 @@ class AdminChatView(APIView):
             body=message.content if message.message_type == MessageType.TEXT else "Antonella te ha enviado una foto",
             user_id=str(chat.user.id)
         )
-        notification_service.send_notification(notification_message)
+        NotificationConfig.notification_service.send_notification(notification_message)
         return success_response(message.model_dump())

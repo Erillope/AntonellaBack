@@ -1,3 +1,4 @@
 from .notification_service import FirebaseNotificationService
 
-notification_service = FirebaseNotificationService()
+class NotificationConfig:
+    notification_service = FirebaseNotificationService()

@@ -7,7 +7,7 @@ from .serializer import AddNotificationTokenSerializer, NotificationSerializer, 
 from core.common.values import GuayaquilDatetime
 from app.user.models import UserAccountTableData
 from core.common.notification import NotificationMessage
-from .config import notification_service
+from .config import NotificationConfig
 from django.db.models import Q
 from datetime import datetime
 
@@ -74,7 +74,7 @@ class NotificationView(APIView):
         )
         for user in UserAccountTableData.objects.all():
             if UserNotificationToken.objects.filter(user=user).exists():
-                notification_service.send_notification(
+                NotificationConfig.notification_service.send_notification(
                     NotificationMessage(
                         user_id=str(user.id),
                         title=notification.title,
