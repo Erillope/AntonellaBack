@@ -4,7 +4,6 @@ from firebase_admin import credentials, messaging
 from .models import UserNotificationToken
 from core.common.config import resources_path
 import os
-from apscheduler.schedulers.background import BackgroundScheduler #type: ignore
 from firebase_admin._messaging_utils import UnregisteredError #type: ignore
 
 class FirebaseNotificationService(NotificationService):
@@ -13,8 +12,6 @@ class FirebaseNotificationService(NotificationService):
             credential_path = os.path.join(resources_path, 'antonella_firebase.json')
             cred = credentials.Certificate(credential_path)
             firebase_admin.initialize_app(cred)
-        self.scheduler = BackgroundScheduler()
-        self.scheduler.start()
     
     def send_notification(self, message_data: NotificationMessage) -> None:
         if not UserNotificationToken.objects.filter(user__id=message_data.user_id).exists(): return
@@ -26,7 +23,8 @@ class FirebaseNotificationService(NotificationService):
             token=UserNotificationToken.objects.get(user__id=message_data.user_id).token,
         )
         if message_data.type == NotificationType.PROGRAMADA and message_data.publish_date:
-            self.scheduler.add_job(lambda: self.send(message), 'date', run_date=message_data.publish_date)
+            pass
+            #self.scheduler.add_job(lambda: self.send(message), 'date', run_date=message_data.publish_date)
         else:
             self.send(message)
     
