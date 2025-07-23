@@ -10,13 +10,14 @@ class CommentView(APIView):
     @validate(CommentSerializer)
     def post(self, request: CommentSerializer) -> Response:
         data = request.validated_data
-        comment = CommentTable.objects.create(
+        comment = CommentTable(
             content=data['content'],
             starts=data['starts'],
             user_id=data['user_id'],
             service_id=data['service_id'],
             created_at=GuayaquilDatetime.now()
         )
+        comment.save()
         return success_response(self.map_comment_to_dict(comment))
     
     @validate()
