@@ -20,6 +20,8 @@ class ChatMessage(BaseModel):
     timestamp: datetime
     message_type: MessageType
     IMAGE_PATH: ClassVar[str] = f'chat'
+    readed_by_client: bool
+    readed_by_admin: bool
     _events: List[Event] = PrivateAttr(default=[])
     
     @model_validator(mode='after')

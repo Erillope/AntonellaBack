@@ -6,7 +6,7 @@ from .config import chat_service
 from app.notification.config import NotificationConfig
 from core.common.notification import NotificationMessage
 from .serializer import AddChatMessageSerializer
-from .models import ChatTable
+from .models import ChatTable, ChatMessageTable
 from app.user.models import UserAccountTableData
 from core.chat.dto import AddMessageDto
 from core.chat.chat import MessageType
@@ -37,10 +37,20 @@ class UserChatView(APIView):
             chat_id=str(chat.id),
             sender_id=str(request.validated_data['user_id']),
             content=request.validated_data['content'],
-            message_type=request.validated_data['message_type']
+            message_type=request.validated_data['message_type'],
+            readed_by_client=True,
+            readed_by_admin=False
         )
         message = chat_service.add_message(dto)
         return success_response(message.model_dump())
+    
+    @validate()
+    def put(self, request: Request) -> Response:
+        message_id = request.GET.get('message_id')
+        message = ChatMessageTable.objects.get(id=message_id)
+        message.readed_by_client = True
+        message.save()
+        return success_response({"message": "Message marked as read by client"})
 
 
 class AdminChatView(APIView):
@@ -57,7 +67,9 @@ class AdminChatView(APIView):
             chat_id=str(chat.id),
             sender_id=str(user.id),
             content=request.validated_data['content'],
-            message_type=request.validated_data['message_type']
+            message_type=request.validated_data['message_type'],
+            readed_by_client=False,
+            readed_by_admin=True
         )
         message = chat_service.add_message(dto)
         notification_message = NotificationMessage(
@@ -67,3 +79,11 @@ class AdminChatView(APIView):
         )
         NotificationConfig.notification_service.send_notification(notification_message)
         return success_response(message.model_dump())
+    
+    @validate()
+    def put(self, request: Request) -> Response:
+        message_id = request.GET.get('message_id')
+        message = ChatMessageTable.objects.get(id=message_id)
+        message.readed_by_admin = True
+        message.save()
+        return success_response({"message": "Message marked as read by admin"})

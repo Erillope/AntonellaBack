@@ -7,6 +7,7 @@ from .serializer import (SignInSerializer, SignUpSerializer, UpdateUserSerialize
                          FilterUserSerializer, CreateRoleSerializer, UpdateRoleSerializer)
 from core.common.email import EmailMessage
 from random import randint
+from core.common.config import AppConfig
 
 class AuthView(APIView):
     auth_service = ServiceConfig.auth_service
@@ -120,3 +121,12 @@ class ResetPasswordApi(APIView):
     def post(self, request: ResetPasswordSerializer) -> Response:
         user = self.update_user_service.change_password_with_token(**request.validated_data)
         return success_response(user.user_dump())
+
+class UserAdminView(APIView):
+    filter_user_service = ServiceConfig.filter_user_service
+
+    @validate()
+    def get(self, request: Request) -> Response:
+        admin_user = AppConfig.default_super_admin()
+        admin = self.filter_user_service.get_user(user_id=admin_user['email'])
+        return success_response(admin.user_dump())

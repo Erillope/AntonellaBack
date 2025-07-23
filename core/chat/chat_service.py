@@ -27,7 +27,9 @@ class ChatService(AbstractChatService):
             sender_id=dto.sender_id,
             content=dto.content,
             timestamp=datetime.now(),
-            message_type=dto.message_type
+            message_type=dto.message_type,
+            readed_by_client=dto.readed_by_client,
+            readed_by_admin=dto.readed_by_admin
         )
         message.save()
         return message
@@ -37,5 +39,6 @@ class ChatService(AbstractChatService):
     
     def get_user_chats(self) -> list[UserChatDto]:
         return self.repository.get_user_chats()
+    
 
 

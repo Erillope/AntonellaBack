@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'app.publicidad',
     'app.notification',
     'app.chat',
+    'app.comments',
     'rest_framework',
     "corsheaders"
 ]

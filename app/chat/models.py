@@ -15,6 +15,8 @@ class ChatMessageTable(models.Model):
     content = models.TextField()
     timestamp = models.DateTimeField()
     message_type = models.CharField(max_length=10)
+    readed_by_client = models.BooleanField(default=False)
+    readed_by_admin = models.BooleanField(default=False)
     
     class Meta:
         ordering = ['timestamp']

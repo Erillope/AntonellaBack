@@ -16,6 +16,7 @@ class NotificationTable(models.Model):
     created_at = models.DateTimeField()
     to = models.CharField(max_length=255)
     type = models.CharField(max_length=50)
+    redirect_to = models.CharField(max_length=255, blank=True)
     publish_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:

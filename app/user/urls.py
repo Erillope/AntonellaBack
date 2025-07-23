@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import AuthView, UserView, RoleView, UserRoleView, PasswordTokenApi, ResetPasswordApi, FilterUserView, PasswordCodeApi
+from .views import *
 
 urlpatterns = [
     path('user/auth/', AuthView.as_view()),
@@ -9,5 +9,6 @@ urlpatterns = [
     path('user/role/', UserRoleView.as_view()),
     path('user/password/token/', PasswordTokenApi.as_view()),
     path('user/password/code/', PasswordCodeApi.as_view()),
-    path('user/password/reset/', ResetPasswordApi.as_view())
+    path('user/password/reset/', ResetPasswordApi.as_view()),
+    path('user/admin/', UserAdminView.as_view())
 ]

@@ -7,6 +7,8 @@ class AddMessageDto(BaseModel):
     sender_id: str
     content: str
     message_type: MessageType
+    readed_by_client: bool
+    readed_by_admin: bool
 
 
 class UserChatDto(BaseModel):

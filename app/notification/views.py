@@ -34,6 +34,7 @@ class NotificationView(APIView):
     def get(self, request: Request) -> Response:
         if request.GET.get('id'):
             notification = NotificationTable.objects.get(id=request.GET['id'])
+            redirect_to = notification.redirect_to if notification.redirect_to else ""
             return success_response({
                 "id": notification.id,
                 "title": notification.title,
@@ -41,6 +42,7 @@ class NotificationView(APIView):
                 "created_at": GuayaquilDatetime.localize(notification.created_at).isoformat(),
                 "to": notification.to,
                 "type": notification.type,
+                "redirect_to": redirect_to,
                 "publish_date": GuayaquilDatetime.localize(notification.publish_date).isoformat() if notification.publish_date else None
             })
         notifications = NotificationTable.objects.all()
@@ -52,6 +54,7 @@ class NotificationView(APIView):
                 "created_at": GuayaquilDatetime.localize(notification.created_at).isoformat(),
                 "to": notification.to,
                 "type": notification.type,
+                "redirect_to": notification.redirect_to if notification.redirect_to else "",
                 "publish_date": GuayaquilDatetime.localize(notification.publish_date).isoformat() if notification.publish_date else None
             } for notification in notifications
         ])
@@ -64,13 +67,15 @@ class NotificationView(APIView):
             publish_date = GuayaquilDatetime.localize(publish_date)
         else:
             publish_date = created_at
+        redirect_to = request.validated_data.get('redirect_to', "")
         notification = NotificationTable.objects.create(
             title=request.validated_data['title'],
             body=request.validated_data['body'],
             created_at=created_at,
             to=request.validated_data['to'],
             type=request.validated_data['type'],
-            publish_date=publish_date
+            publish_date=publish_date,
+            redirect_to=redirect_to
         )
         for user in UserAccountTableData.objects.all():
             if UserNotificationToken.objects.filter(user=user).exists():
@@ -91,6 +96,7 @@ class NotificationView(APIView):
             "created_at": GuayaquilDatetime.localize(notification.created_at).isoformat(),
             "to": notification.to,
             "type": notification.type,
+            "redirect_to": notification.redirect_to if notification.redirect_to else "",
             "publish_date": GuayaquilDatetime.localize(notification.publish_date).isoformat() if notification.publish_date else None
         })
     
