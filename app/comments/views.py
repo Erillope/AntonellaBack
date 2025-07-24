@@ -12,7 +12,7 @@ class CommentView(APIView):
         data = request.validated_data
         comment = CommentTable(
             content=data['content'],
-            starts=data['starts'],
+            starts=data['stars'],
             user_id=data['user_id'],
             service_id=data['service_id'],
             created_at=GuayaquilDatetime.now()
