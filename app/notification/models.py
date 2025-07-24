@@ -21,3 +21,13 @@ class NotificationTable(models.Model):
 
     class Meta:
         db_table = 'notification'
+
+
+class NotificationLogTable(models.Model):
+    id = models.AutoField(primary_key=True)
+    notification = models.ForeignKey(NotificationTable, on_delete=models.CASCADE)
+    user = models.ForeignKey(UserAccountTableData, on_delete=models.CASCADE)
+    readed = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = 'notification_log'

@@ -1,4 +1,4 @@
-from .models import UserNotificationToken, NotificationTable
+from .models import UserNotificationToken, NotificationTable, NotificationLogTable
 from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -88,6 +88,11 @@ class NotificationView(APIView):
                         publish_date=notification.publish_date if notification.publish_date else None
                     )
                 )
+                NotificationLogTable.objects.create(
+                        notification=notification,
+                        user=user,
+                        readed=False
+                )
         
         return success_response({
             "id": notification.id,
@@ -150,3 +155,26 @@ class NotificationFilterView(APIView):
             end_date = datetime(end_date.year, end_date.month, end_date.day, 23, 59, 59)
             filters &= Q(created_at__lte= end_date)
         return filters
+
+
+class NotificationLogView(APIView):
+    def get(self, request: Request) -> Response:
+        user_id = request.GET.get('user_id')
+        notifications_logs = NotificationLogTable.objects.filter(user__id=user_id)
+        notifications = [NotificationTable.objects.get(id=log.notification.id) for log in notifications_logs]
+        return success_response([{
+            "id": log.id,
+            "notifications": [
+                {
+                    "id": notification.id,
+                    "title": notification.title,
+                    "body": notification.body,
+                    "created_at": GuayaquilDatetime.localize(notification.created_at).isoformat(),
+                    "to": notification.to,
+                    "type": notification.type,
+                    "publish_date": GuayaquilDatetime.localize(notification.publish_date).isoformat() if notification.publish_date else None
+                } for notification in notifications
+            ],
+            "user_id": log.user.id,
+            "readed": log.readed
+        } for log in notifications])
