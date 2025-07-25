@@ -15,15 +15,17 @@ class FirebaseNotificationService(NotificationService):
     
     def send_notification(self, message_data: NotificationMessage) -> None:
         if not UserNotificationToken.objects.filter(user__id=message_data.user_id).exists(): return
+        extra_data = {
+                'redirect_to': message_data.redirect_to,
+                'notification_type': message_data.notification_type,
+            }
+        extra_data.update(message_data.extra)
         message = messaging.Message(
             notification=messaging.Notification(
                 title=message_data.title,
                 body=message_data.body,
             ),
-            data={
-                'redirect_to': message_data.redirect_to,
-                'notification_type': message_data.notification_type,
-            }.update(message_data.extra),
+            data=extra_data,
             token=UserNotificationToken.objects.get(user__id=message_data.user_id).token,
         )
         if message_data.type == NotificationType.PROGRAMADA and message_data.publish_date:
