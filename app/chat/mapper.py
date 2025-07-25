@@ -22,5 +22,7 @@ class ChatMessageTableMapper(TableMapper[ChatMessageTable, ChatMessage]):
             sender_id=model.sender_id,
             content=model.content,
             timestamp=model.timestamp,
-            message_type=model.message_type
+            message_type=model.message_type,
+            readed_by_client=model.readed_by_client,
+            readed_by_admin=model.readed_by_admin
         )
