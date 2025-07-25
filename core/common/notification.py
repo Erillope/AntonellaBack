@@ -15,6 +15,7 @@ class NotificationMessage(BaseModel):
     type: NotificationType = NotificationType.INSTANTANEA
     publish_date: Optional[datetime] = None
     redirect_to: str = ""
+    notification_type: str = ""
 
 class NotificationService(ABC):
     @abstractmethod

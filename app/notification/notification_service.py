@@ -21,7 +21,8 @@ class FirebaseNotificationService(NotificationService):
                 body=message_data.body,
             ),
             data={
-                'redirect_to': message_data.redirect_to
+                'redirect_to': message_data.redirect_to,
+                'notification_type': message_data.notification_type,
             },
             token=UserNotificationToken.objects.get(user__id=message_data.user_id).token,
         )

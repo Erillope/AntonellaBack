@@ -43,6 +43,7 @@ class NotificationView(APIView):
                 "to": notification.to,
                 "type": notification.type,
                 "redirect_to": redirect_to,
+                "notification_type": notification.notification_type,
                 "publish_date": GuayaquilDatetime.localize(notification.publish_date).isoformat() if notification.publish_date else None
             })
         notifications = NotificationTable.objects.all()
@@ -55,6 +56,7 @@ class NotificationView(APIView):
                 "to": notification.to,
                 "type": notification.type,
                 "redirect_to": notification.redirect_to if notification.redirect_to else "",
+                "notification_type": notification.notification_type,
                 "publish_date": GuayaquilDatetime.localize(notification.publish_date).isoformat() if notification.publish_date else None
             } for notification in notifications
         ])
@@ -75,7 +77,8 @@ class NotificationView(APIView):
             to=request.validated_data['to'],
             type=request.validated_data['type'],
             publish_date=publish_date,
-            redirect_to=redirect_to
+            redirect_to=redirect_to,
+            notification_type=request.validated_data.get('notification_type', "")
         )
         for user in UserAccountTableData.objects.all():
             if UserNotificationToken.objects.filter(user=user).exists():
@@ -86,7 +89,8 @@ class NotificationView(APIView):
                         body=notification.body,
                         type=notification.type,
                         publish_date=notification.publish_date if notification.publish_date else None,
-                        redirect_to=notification.redirect_to
+                        redirect_to=notification.redirect_to,
+                        notification_type=notification.notification_type
                     )
                 )
                 NotificationLogTable.objects.create(
@@ -103,6 +107,7 @@ class NotificationView(APIView):
             "to": notification.to,
             "type": notification.type,
             "redirect_to": notification.redirect_to if notification.redirect_to else "",
+            "notification_type": notification.notification_type,
             "publish_date": GuayaquilDatetime.localize(notification.publish_date).isoformat() if notification.publish_date else None
         })
     
@@ -161,21 +166,23 @@ class NotificationFilterView(APIView):
 class NotificationLogView(APIView):
     def get(self, request: Request) -> Response:
         user_id = request.GET.get('user_id')
-        notifications_logs = NotificationLogTable.objects.filter(user__id=user_id)
-        notifications = [NotificationTable.objects.get(id=log.notification.id) for log in notifications_logs]
+        notifications_logs = NotificationLogTable.objects.filter(user__id=user_id) 
         return success_response([{
             "id": log.id,
-            "notifications": [
+            "notifications": 
                 {
-                    "id": notification.id,
-                    "title": notification.title,
-                    "body": notification.body,
-                    "created_at": GuayaquilDatetime.localize(notification.created_at).isoformat(),
-                    "to": notification.to,
-                    "type": notification.type,
-                    "publish_date": GuayaquilDatetime.localize(notification.publish_date).isoformat() if notification.publish_date else None
-                } for notification in notifications
-            ],
+                    "id": log.notification.id,
+                    "title": log.notification.title,
+                    "body": log.notification.body,
+                    "created_at": GuayaquilDatetime.localize(log.notification.created_at).isoformat(),
+                    "to": log.notification.to,
+                    "notification_type": log.notification.notification_type,
+                    "type": log.notification.type,
+                    "publish_date": GuayaquilDatetime.localize(log.notification.publish_date).isoformat() if log.notification.publish_date else None,
+                    "redirect_to": log.notification.redirect_to,
+                    "notification_type": log.notification.notification_type
+                }
+            ,
             "user_id": log.user.id,
             "readed": log.readed
-        } for log in notifications])
+        } for log in notifications_logs])
