@@ -77,7 +77,12 @@ class AdminChatView(APIView):
             body=message.content if message.message_type == MessageType.TEXT else "Antonella te ha enviado una foto",
             user_id=str(chat.user.id),
             redirect_to='CHAT',
-            extra=message.model_dump(),
+            extra={
+                "message_id": str(message.id),
+                "sender_id": str(user.id),
+                "user_id": str(chat.user.id),
+                "message_type": message.message_type.value,
+            },
         )
         NotificationConfig.notification_service.send_notification(notification_message)
         return success_response(message.model_dump())

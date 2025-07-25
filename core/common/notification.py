@@ -16,7 +16,8 @@ class NotificationMessage(BaseModel):
     publish_date: Optional[datetime] = None
     redirect_to: str = ""
     notification_type: str = ""
-    extra: Dict[str, Any] = {}
+    extra: Dict[str, str] = {}
+
 
 class NotificationService(ABC):
     @abstractmethod
