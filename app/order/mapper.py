@@ -17,7 +17,9 @@ class OrderTableMapper(TableMapper[OrderTable, Order]):
                 client_confirmed=table.client_confirmed.upper()
             ),
             card_charge=table.card_charge,
-            created_date=table.created_date
+            iva=table.iva,
+            created_date=table.created_date,
+            order_date=table.order_date if table.order_date else None
         )
     
     def to_table(self, model: Order) -> OrderTable:
@@ -31,6 +33,8 @@ class OrderTableMapper(TableMapper[OrderTable, Order]):
             client_confirmed=model.status.client_confirmed.lower(),
             created_date=model.created_date,
             card_charge=model.card_charge,
+            iva=model.iva,
+            order_date=model.order_date if model.order_date else None
         )
 
 

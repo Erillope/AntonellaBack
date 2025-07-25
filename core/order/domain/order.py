@@ -5,13 +5,16 @@ from .values import OrderStatusInfo
 from core.common.values import ID
 from .events import OrderSaved, OrderDeleted
 from datetime import date
+from core.common.config import AppConfig
 
 class Order(BaseModel):
     id: str
     client_id: str
     status: OrderStatusInfo
     card_charge: Decimal
+    iva: Decimal
     created_date: date
+    order_date: Optional[date]
     
     @model_validator(mode='after')
     def validate_data(self) -> 'Order':
@@ -46,15 +49,20 @@ class OrderFactory:
             client_id=client_id,
             card_charge=Decimal('1'),
             status=status,
-            created_date=date.today()
+            created_date=date.today(),
+            order_date=None,
+            iva=AppConfig.iva()
         )
     
     @classmethod
-    def load(cls, id: str, client_id: str, status: OrderStatusInfo, card_charge: Decimal, created_date: date) -> Order:
+    def load(cls, id: str, client_id: str, status: OrderStatusInfo, card_charge: Decimal, created_date: date, 
+             order_date: Optional[date], iva: Decimal) -> Order:
         return Order(
             id=id,
             client_id=client_id,
             card_charge=card_charge,
             status=status,
-            created_date=created_date
+            created_date=created_date,
+            order_date=order_date,
+            iva=iva
         )

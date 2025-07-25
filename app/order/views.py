@@ -3,7 +3,9 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from app.common.response import success_response, validate
 from .config import order_service, service_item_service, product_item_service
-from .serializer import CreateOrderSerializer, UpdateOrderSerializer, ServiceItemSerializer, UpdateServiceItemSerializer, ProductItemSerializer, UpdateProductItemSerializer, FilterServiceItemBySerializer, RequestEmployeeServiceInfoSerializer
+from .serializer import (CreateOrderSerializer, UpdateOrderSerializer, ServiceItemSerializer, UpdateServiceItemSerializer,
+                         ProductItemSerializer, UpdateProductItemSerializer, FilterServiceItemBySerializer,
+                         RequestEmployeeServiceInfoSerializer, FilterOrderSerializer)
 
 class OrderApiView(APIView):
     @validate()
@@ -29,7 +31,14 @@ class OrderApiView(APIView):
     def delete(self, request: Request) -> Response:
         order_service.delete_order(request.GET.get('id'))
         return success_response({"message": "Order deleted successfully"})
-    
+
+
+class FilterOrderApiView(APIView):
+    @validate(FilterOrderSerializer)
+    def post(self, request: FilterOrderSerializer) -> Response:
+        filter_dto = request.to_dto()
+        filter_data = order_service.filter_orders(filter_dto)
+        return success_response(filter_data.model_dump())
 
 class ServiceItemApiView(APIView):
     @validate()

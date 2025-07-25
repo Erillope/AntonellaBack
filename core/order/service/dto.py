@@ -1,10 +1,9 @@
 from decimal import Decimal
 from pydantic import BaseModel
 from ..domain.values import Progresstatus, OrderStatusInfo, DateInfo, PaymentStatus, PaymentType, OrderStatus
-from typing import Optional, List, Tuple
+from typing import Optional, List
 from datetime import date, time
-
-
+from core.store_service.domain.values import ServiceType
 class PaymentDto(BaseModel):
     employee_id: str
     percentage: Optional[Decimal] = None
@@ -51,7 +50,14 @@ class OrderDto(BaseModel):
     client_id: str
     status: OrderStatusInfo
     created_date: date
+    order_date: Optional[date] = None
+    card_charge: Decimal
+    iva: Decimal
 
+class FilterOrderResponseDto(BaseModel):
+    orders: List[OrderDto]
+    total_count: int
+    filtered_count: int
 
 class RequestEmployeeScheduleDto(BaseModel):
     employee_id: str
@@ -110,3 +116,14 @@ class EmployeeServiceInfoDto(BaseModel):
     total_facturado: Decimal
     total_pagado: Decimal
     service_items: List[ServiceItemDto]
+
+class FilterOrderDto(BaseModel):
+    client_id: Optional[str] = None
+    status: Optional[OrderStatus] = None
+    progress_status: Optional[Progresstatus] = None
+    service_type: Optional[ServiceType] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    limit: Optional[int] = None
+    offset: Optional[int] = None
+    only_count: Optional[bool] = False

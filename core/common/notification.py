@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from abc import ABC, abstractmethod
 from enum import Enum
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict, Any
 
 class NotificationType(str, Enum):
     INSTANTANEA = "INSTANTANEA"
@@ -16,6 +16,7 @@ class NotificationMessage(BaseModel):
     publish_date: Optional[datetime] = None
     redirect_to: str = ""
     notification_type: str = ""
+    extra: Dict[str, Any] = {}
 
 class NotificationService(ABC):
     @abstractmethod

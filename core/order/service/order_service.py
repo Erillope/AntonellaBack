@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from .dto import CreateOrderDto, OrderDto, UpdateOrderDto
-from ..domain.order import Order
+from .dto import CreateOrderDto, OrderDto, UpdateOrderDto, FilterOrderDto, FilterOrderResponseDto
+from .repository import GetOrder
 from .mapper import OrderMapper
 from typing import List
-from core.common.abstract_repository import GetModel
 from ..domain.values import OrderStatusInfo
+from datetime import date
 
 class AbstractOrderService(ABC):
     @abstractmethod
@@ -22,9 +22,15 @@ class AbstractOrderService(ABC):
     @abstractmethod
     def get_all(self) -> List[OrderDto]: ...
 
+    @abstractmethod
+    def set_date(self, order_id: str, date: date) -> OrderDto: ...
+
+    @abstractmethod
+    def filter_orders(self, dto: FilterOrderDto) -> FilterOrderResponseDto: ...
+
 
 class OrderService(AbstractOrderService):
-    def __init__(self, get_order: GetModel[Order]) -> None:
+    def __init__(self, get_order: GetOrder) -> None:
         self._get_order = get_order
     
     def create_order(self, dto: CreateOrderDto) -> OrderDto:
@@ -58,3 +64,16 @@ class OrderService(AbstractOrderService):
     def get_all(self) -> List[OrderDto]:
         orders = self._get_order.get_all()
         return [OrderMapper.to_order_dto(order) for order in orders]
+    
+    def filter_orders(self, dto: FilterOrderDto) -> FilterOrderResponseDto:
+        orders, filtered_count = self._get_order.filter_orders(dto)
+        total_count = self._get_order.total_count()
+        order_dtos = [OrderMapper.to_order_dto(order) for order in orders]
+        return FilterOrderResponseDto(orders=order_dtos, total_count=total_count, filtered_count=filtered_count)
+        
+    
+    def set_date(self, order_id: str, date: date) -> OrderDto:
+        order = self._get_order.get(order_id)
+        order.order_date = date
+        order.save()
+        return OrderMapper.to_order_dto(order)

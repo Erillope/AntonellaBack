@@ -8,12 +8,14 @@ class OrderTable(models.Model):
     id = models.UUIDField(primary_key=True, editable=False)
     client = models.ForeignKey(UserAccountTableData, on_delete=models.CASCADE)
     card_charge = models.DecimalField(max_digits=10, decimal_places=2)
+    iva = models.DecimalField(max_digits=5, decimal_places=2, default=0.15)
     status = models.CharField(max_length=50)
     progress_status = models.CharField(max_length=50)
     payment_status = models.CharField(max_length=50)
     payment_type = models.CharField(max_length=50)
     client_confirmed = models.CharField(max_length=50)
     created_date = models.DateField()
+    order_date = models.DateField(null=True, blank=True)
     
     class Meta:
         db_table = 'order_table'

@@ -42,6 +42,7 @@ class ServiceItemService(AbstractServiceItemService):
             service_item.set_payment_percentage(dto.payment_percentage)
         if dto.date_info.end_time:
             service_item.date_info.set_end_time(dto.date_info.end_time)
+        self._order_service.set_date(order_id, dto.date_info.day)
         service_item.save()
         return ServiceItemMapper.to_service_item_dto(service_item)
     

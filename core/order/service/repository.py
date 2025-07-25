@@ -1,7 +1,9 @@
 from core.common.abstract_repository import GetModel
 from ..domain.item import ServiceItem, ProductItem
+from ..domain.order import Order
+from .dto import FilterOrderDto
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from datetime import date
 from decimal import Decimal
 
@@ -40,3 +42,8 @@ class GetServiceItem(GetModel[ServiceItem], ABC):
 class GetProductItem(GetModel[ProductItem], ABC):
     @abstractmethod
     def get_by_order_id(self, order_id: str) -> List[ProductItem]: ...
+
+
+class GetOrder(GetModel[Order], ABC):
+    @abstractmethod
+    def filter_orders(self, dto: FilterOrderDto) -> Tuple[List[Order], int]: ...

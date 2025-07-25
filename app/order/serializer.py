@@ -1,7 +1,11 @@
 from rest_framework import serializers
 from core.order.domain.values import Progresstatus, OrderStatus, PaymentStatus, PaymentType, DateInfo, OrderStatusInfo
-from core.order.service.dto import CreateOrderDto, UpdateOrderDto, RequestEmployeeScheduleDto, ServiceItemDto, PaymentDto, UpdateServiceItemDto, ProductItemDto, UpdateProductItemDto, FilterServiceItemByDto, RequestEmployeeServiceInfoDto
+from core.order.service.dto import (CreateOrderDto, UpdateOrderDto, RequestEmployeeScheduleDto, ServiceItemDto, PaymentDto,
+                                    UpdateServiceItemDto, ProductItemDto, UpdateProductItemDto, FilterServiceItemByDto,
+                                    RequestEmployeeServiceInfoDto, FilterOrderDto)
 from typing import List
+
+from core.store_service.domain.values import ServiceType
 
 class DateInfoSerializer(serializers.Serializer):
     day = serializers.DateField()
@@ -215,4 +219,29 @@ class RequestEmployeeServiceInfoSerializer(serializers.Serializer):
             end_date=self.validated_data['end_date'],
             limit=self.validated_data.get('limit'),
             offset=self.validated_data.get('offset')
+        )
+
+
+class FilterOrderSerializer(serializers.Serializer):
+    client_id = serializers.UUIDField(required=False)
+    status = serializers.ChoiceField(choices=[(status.value, status.value) for status in OrderStatus], required=False)
+    progress_status = serializers.ChoiceField(choices=[(status.value, status.value) for status in Progresstatus], required=False)
+    start_date = serializers.DateField(required=False)
+    end_date = serializers.DateField(required=False)
+    limit = serializers.IntegerField(required=False)
+    offset = serializers.IntegerField(required=False)
+    only_count = serializers.BooleanField(required=False, default=False)
+    service_type = serializers.ChoiceField(choices=[(stype.value, stype.value) for stype in ServiceType], required=False)
+    
+    def to_dto(self) -> FilterOrderDto:
+        return FilterOrderDto(
+            client_id=str(self.validated_data.get('client_id')) if self.validated_data.get('client_id') else None,
+            status=self.validated_data.get('status'),
+            progress_status=self.validated_data.get('progress_status'),
+            start_date=self.validated_data.get('start_date'),
+            end_date=self.validated_data.get('end_date'),
+            service_type=self.validated_data.get('service_type'),
+            limit=self.validated_data.get('limit'),
+            offset=self.validated_data.get('offset'),
+            only_count=self.validated_data.get('only_count', False)
         )

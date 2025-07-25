@@ -16,7 +16,10 @@ class OrderMapper:
             id=order.id,
             client_id=order.client_id,
             status=order.status,
-            created_date=order.created_date
+            created_date=order.created_date,
+            order_date=order.order_date,
+            card_charge=order.card_charge,
+            iva=order.iva
         )
 
 

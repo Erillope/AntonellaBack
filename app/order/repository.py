@@ -1,10 +1,11 @@
-from core.order.service.repository import GetServiceItem, GetProductItem
+from core.order.service.repository import GetServiceItem, GetProductItem, GetOrder
 from core.order.domain.item import ServiceItem, ProductItem
 from core.order.domain.order import Order
+from core.order.service.dto import FilterOrderDto
 from app.common.django_repository import DjangoGetModel, DjangoSaveModel, DjangoDeleteModel
 from .mapper import ServiceItemTableMapper, OrderTableMapper, ProductItemTableMapper
 from app.order.models import ServiceItemTable, OrderTable, ProductItemTable
-from typing import List, Optional
+from typing import List, Optional, Tuple
 from core.common import EventSubscriber, Event
 from core.order.domain.events import OrderSaved, OrderDeleted, ServiceItemSaved, ServiceItemDeleted, ProductItemSaved, ProductItemDeleted
 from .models import PaymentTable
@@ -13,10 +14,38 @@ from django.db.models import Q, Sum
 from datetime import date
 from decimal import Decimal
 
-class DjangoGetOrder(DjangoGetModel[OrderTable, Order]):
+class DjangoGetOrder(DjangoGetModel[OrderTable, Order], GetOrder):
     def __init__(self) -> None:
         super().__init__(OrderTable, OrderTableMapper())
 
+    def build_filter(self, dto: FilterOrderDto) -> Q:
+        filter_conditions = Q()
+        if dto.client_id:
+            filter_conditions &= Q(client__id=dto.client_id)
+        if dto.status:
+            filter_conditions &= Q(status=dto.status.value.lower())
+        if dto.progress_status:
+            filter_conditions &= Q(progress_status=dto.progress_status.value.lower())
+        if dto.service_type:
+            filter_conditions &= Q(serviceitemtable__service__type=dto.service_type.value.lower())
+        if dto.start_date:
+            filter_conditions &= Q(order_date__gte=dto.start_date)
+        if dto.end_date:
+            filter_conditions &= Q(order_date__lte=dto.end_date)
+        return filter_conditions
+    
+    def filter_orders(self, dto: FilterOrderDto) -> Tuple[List[Order], int]:
+        _filter = self.build_filter(dto)
+        orders = OrderTable.objects.filter(_filter).distinct()
+        orders_count = orders.count()
+        if dto.only_count: return [], orders_count
+        if dto.limit and dto.offset is not None:
+            orders = orders[dto.offset:dto.offset + dto.limit]
+        elif dto.limit:
+            orders = orders[:dto.limit]
+        elif dto.offset is not None:
+            orders = orders[dto.offset:]
+        return [self.mapper.to_model(order) for order in orders], orders_count
 
 class DjangoSaveOrder(DjangoSaveModel[OrderTable, Order], EventSubscriber):
     def __init__(self) -> None:
