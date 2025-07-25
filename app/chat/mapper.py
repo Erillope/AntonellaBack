@@ -10,7 +10,9 @@ class ChatMessageTableMapper(TableMapper[ChatMessageTable, ChatMessage]):
             sender_id=str(table.sender.id),
             content=table.content,
             timestamp=table.timestamp,
-            message_type=table.message_type
+            message_type=table.message_type,
+            readed_by_client=table.readed_by_client,
+            readed_by_admin=table.readed_by_admin
         )
     
     def to_table(self, model: ChatMessage) -> ChatMessageTable:
