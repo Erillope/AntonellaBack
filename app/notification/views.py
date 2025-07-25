@@ -27,6 +27,14 @@ class NotificationTokenView(APIView):
             notification_token.save()
         
         return success_response({"user_id": str(notification_token.user.id), "token": notification_token.token})
+    
+    def delete(self, request: Request) -> Response:
+        user_id = request.GET.get('user_id')
+        if not UserNotificationToken.objects.filter(user__id=user_id).exists():
+            return success_response({"message": "Notification token not found"})
+        notification_token = UserNotificationToken.objects.get(user__id=user_id)
+        notification_token.delete()
+        return success_response({"message": "Notification token deleted successfully"})
 
 
 class NotificationView(APIView):
