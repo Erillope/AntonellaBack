@@ -19,7 +19,7 @@ class StoreServiceMapper:
         return store_service
     
     @classmethod
-    def to_dto(cls, service: StoreService, questions: Optional[List[QuestionDto]]=None) -> StoreServiceDto:
+    def to_dto(cls, service: StoreService, stars: float, questions: Optional[List[QuestionDto]]=None) -> StoreServiceDto:
         return StoreServiceDto(
             id=service.id,
             name=service.name,
@@ -38,6 +38,7 @@ class StoreServiceMapper:
                 for price in service.prices
                 ],
             duration=service.duration,
+            stars=stars,
             created_date=service.created_date
         )
 

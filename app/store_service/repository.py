@@ -9,7 +9,7 @@ from .mapper import StoreServiceTableMapper, QuestionTableMapper
 from typing import List, Optional
 from core.store_service.service.repository import GetQuestion, GetService
 from core.common import ID
-from django.db.models import Q
+from django.db.models import Q, Avg
 
 class DjangoGetStoreService(DjangoGetModel[StoreServiceTableData, StoreService], GetService):
     def __init__(self) -> None:
@@ -40,6 +40,11 @@ class DjangoGetStoreService(DjangoGetModel[StoreServiceTableData, StoreService],
             services = services[offset:]
         self._filter = Q()
         return [self.mapper.to_model(service) for service in services]
+    
+    def get_stars(self, service_id: str) -> float:
+        servicio = StoreServiceTableData.objects.get(id=service_id)
+        promedio = servicio.commenttable_set.aggregate(promedio=Avg('starts'))['promedio']
+        return promedio if promedio is not None else 0.0
     
     
 class DjangoSaveStoreService(DjangoSaveModel[StoreServiceTableData, StoreService], EventSubscriber):

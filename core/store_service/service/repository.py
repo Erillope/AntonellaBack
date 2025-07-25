@@ -23,3 +23,6 @@ class GetService(GetModel[StoreService], ABC):
     
     @abstractmethod
     def get_filtered_services(self, limit: Optional[int] = None, offset: Optional[int] = None) -> List[StoreService]: ...
+
+    @abstractmethod
+    def get_stars(self, service_id: str) -> float: ...

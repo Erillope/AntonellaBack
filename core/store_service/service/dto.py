@@ -100,6 +100,7 @@ class StoreServiceDto(BaseModel):
     prices: List[PriceDto]
     images: List[str] = []
     questions: Optional[List[QuestionDto]] = None
+    stars: float
     created_date: date
     
     def service_dump(self) -> Dict[str, Any]:

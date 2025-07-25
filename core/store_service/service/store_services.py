@@ -3,8 +3,7 @@ from .dto import (StoreServiceDto, CreateStoreServiceDto, UpdateStoreServiceDto,
                   CreateQuestionDto, QuestionDto, UpdateQuestionDto)
 from typing import List, Optional
 from .repository import GetQuestion, GetService
-from core.common.abstract_repository import GetModel
-from core.store_service import StoreService, ImageChoiceQuestion, TextChoiceQuestion, Choice
+from core.store_service import ImageChoiceQuestion, TextChoiceQuestion, Choice
 from .mapper import StoreServiceMapper, QuestionMapper
 
 class QuestionService(AbstractQuestionService):
@@ -51,7 +50,7 @@ class StoreServices(AbstractStoreServices):
         service = StoreServiceMapper.to_store_service(dto)
         service.save()
         questions = [self.question_service.create(service.id, question) for question in dto.questions]
-        return StoreServiceMapper.to_dto(service, questions)
+        return StoreServiceMapper.to_dto(service, 0, questions)
     
     def update(self, dto: UpdateStoreServiceDto) -> StoreServiceDto:
         service = self.get_service.get(dto.id)
@@ -77,14 +76,16 @@ class StoreServices(AbstractStoreServices):
     def find(self, id: str) -> StoreServiceDto:
         service = self.get_service.get(id)
         questions = self.question_service.service_questions(service.id)
-        return StoreServiceMapper.to_dto(service, questions)
+        stars = self.get_service.get_stars(service.id)
+        return StoreServiceMapper.to_dto(service, stars, questions)
     
     def find_by_name(self, name: str) -> List[StoreServiceDto]:
         service = self.get_service.find_by_name(name)
         dtos: List[StoreServiceDto] = []
         for s in service:
             questions = self.question_service.service_questions(s.id)
-            dtos.append(StoreServiceMapper.to_dto(s, questions))
+            stars = self.get_service.get_stars(s.id)
+            dtos.append(StoreServiceMapper.to_dto(s, stars, questions))
         return dtos
     
     def find_by_type(self, type: str) -> List[StoreServiceDto]:
@@ -92,7 +93,8 @@ class StoreServices(AbstractStoreServices):
         dtos: List[StoreServiceDto] = []
         for s in service:
             questions = self.question_service.service_questions(s.id)
-            dtos.append(StoreServiceMapper.to_dto(s, questions))
+            stars = self.get_service.get_stars(s.id)
+            dtos.append(StoreServiceMapper.to_dto(s, stars, questions))
         return dtos
     
     def filter(self, dto: FilterStoreServiceDto) -> List[StoreServiceDto]:
