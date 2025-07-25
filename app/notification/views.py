@@ -85,7 +85,8 @@ class NotificationView(APIView):
                         title=notification.title,
                         body=notification.body,
                         type=notification.type,
-                        publish_date=notification.publish_date if notification.publish_date else None
+                        publish_date=notification.publish_date if notification.publish_date else None,
+                        redirect_to=notification.redirect_to
                     )
                 )
                 NotificationLogTable.objects.create(
