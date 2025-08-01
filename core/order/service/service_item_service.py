@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datetime import timedelta
 from .dto import (ServiceItemDto, UpdateServiceItemDto, FilterServiceItemByDto, EmployeeServiceInfoDto,
                   RequestEmployeeServiceInfoDto, UpdateOrderDto, FilterServiceItemResponseDto)
 from ..domain.values import Payment, Progresstatus
@@ -43,6 +44,11 @@ class ServiceItemService(AbstractServiceItemService):
             service_item.set_payment_percentage(dto.payment_percentage)
         if dto.date_info.end_time:
             service_item.date_info.set_end_time(dto.date_info.end_time)
+        else:
+            from datetime import datetime
+            start_dt = datetime.combine(dto.date_info.day, service_item.date_info.start_time)
+            end_time = (start_dt + timedelta(minutes=10)).time()
+            service_item.date_info.set_end_time(end_time)
         self._order_service.set_date(order_id, dto.date_info.day)
         service_item.save()
         return ServiceItemMapper.to_service_item_dto(service_item)
