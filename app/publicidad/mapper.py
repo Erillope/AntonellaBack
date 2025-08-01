@@ -11,14 +11,15 @@ class PublicidadTableMapper(TableMapper[PublicidadTable, Publicidad]):
             created_date=table.created_date,
             images=PublicidadImage.get_publicidad_images(str(table.id)),
             service_items=[
-                ItemData(id=str(sp.service.id), discount=sp.discount)
+                ItemData(id=str(sp.service.id), discount=sp.discount, fixed_amount=sp.fixed_amount, type=sp.type)
                 for sp in ServicePublicidad.get_publicidad_services(str(table.id))
             ],
             product_items=[
-                ItemData(id=str(pp.publicidad.id), discount=pp.discount)
+                ItemData(id=str(pp.publicidad.id), discount=pp.discount, fixed_amount=pp.fixed_amount, type=pp.type)
                 for pp in ProductPublicidad.get_publicidad_products(str(table.id))
             ],
-            description=table.description
+            description=table.description,
+            enabled=table.enabled
         )
     
     def to_table(self, publicidad: Publicidad) -> PublicidadTable:
@@ -26,5 +27,6 @@ class PublicidadTableMapper(TableMapper[PublicidadTable, Publicidad]):
             id=publicidad.id,
             title=publicidad.title,
             created_date=publicidad.created_date,
-            description=publicidad.description
+            description=publicidad.description,
+            enabled=publicidad.enabled
         )

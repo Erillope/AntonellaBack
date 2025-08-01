@@ -31,7 +31,6 @@ class ServiceItemTable(models.Model):
     date_info_end_time = models.TimeField(null=True, blank=True)
     status = models.CharField(max_length=50, null=True, blank=True)
     base_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    discount = models.DecimalField(max_digits=5, decimal_places=2)
     
     class Meta:
         db_table = 'service_item_table'
@@ -60,7 +59,6 @@ class ProductItemTable(models.Model):
     product = models.ForeignKey(ProductTableData, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     base_price = models.DecimalField(max_digits=10, decimal_places=2)
-    discount = models.DecimalField(max_digits=5, decimal_places=2)
     
     class Meta:
         db_table = 'product_item_table'

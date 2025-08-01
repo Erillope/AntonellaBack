@@ -18,7 +18,6 @@ class ServiceItemDto(BaseModel):
     status: Optional[Progresstatus] = None
     base_price: Optional[Decimal] = None
     payments: List[PaymentDto]
-    discount: Optional[Decimal] = None
 
 class UpdateServiceItemDto(BaseModel):
     id: str
@@ -81,7 +80,6 @@ class ProductItemDto(BaseModel):
     product_id: str
     quantity: int
     base_price: Decimal
-    discount: Optional[Decimal] = None
 
 
 class UpdateProductItemDto(BaseModel):
@@ -100,6 +98,12 @@ class FilterServiceItemByDto(BaseModel):
     employee_id: Optional[str] = None
     limit: Optional[int] = None
     offset: Optional[int] = None
+
+class FilterServiceItemResponseDto(BaseModel):
+    service_items: List[ServiceItemDto]
+    only_count: Optional[bool] = False
+    total_count: int
+    filtered_count: int
 
 
 class RequestEmployeeServiceInfoDto(BaseModel):

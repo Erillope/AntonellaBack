@@ -5,9 +5,16 @@ from core.common.image_storage import Base64ImageStorage, ImageSaved, ImageDelet
 from .events import PublicidadSaved, PublicidadDeleted
 from datetime import date
 from decimal import Decimal
+from enum import Enum
+
+class ItemType(str, Enum):
+    DISCOUNT = 'descuento'
+    FIXED = 'fijo'
 
 class ItemData(BaseModel):
     id: str
+    type: ItemType
+    fixed_amount: Optional[Decimal] = None
     discount: Optional[Decimal] = None
     
 class Publicidad(BaseModel):
@@ -18,6 +25,7 @@ class Publicidad(BaseModel):
     images: list[str]
     description: str
     created_date: date
+    enabled: bool = True
     IMAGE_PATH: ClassVar[str] = f'publicidad'
     _events: List[Event] = PrivateAttr(default=[])
 
@@ -33,7 +41,8 @@ class Publicidad(BaseModel):
         self.set_images(self.images)
     
     def change_data(self, title: Optional[str] = None, images: Optional[List[str]] = None,
-                    service_items: Optional[List[ItemData]] = None, product_items: Optional[List[ItemData]] = None, description: Optional[str] = None) -> None:
+                    service_items: Optional[List[ItemData]] = None, product_items: Optional[List[ItemData]] = None,
+                    description: Optional[str] = None, enabled: Optional[bool] = None) -> None:
         if title is not None:
             self.title = title
         if images is not None:
@@ -45,6 +54,8 @@ class Publicidad(BaseModel):
             self.product_items = product_items
         if description is not None:
             self.description = description
+        if enabled is not None:
+            self.enabled = enabled
         self._validate_data()
     
     def set_images(self, images: List[str]) -> None:
@@ -76,12 +87,14 @@ class PublicidadFactory:
             title=title,
             images=images,
             description=description,
-            created_date=date.today()
+            created_date=date.today(),
+            enabled=True
         )
         return publicidad
 
     @classmethod
-    def load(cls, id: str, title: str, images: List[str], service_items: List[ItemData], product_items: List[ItemData], created_date: date, description: str) -> Publicidad:
+    def load(cls, id: str, title: str, images: List[str], service_items: List[ItemData], product_items: List[ItemData], 
+             created_date: date, description: str, enabled: bool) -> Publicidad:
         return Publicidad(
             id=id,
             service_items=service_items,
@@ -89,5 +102,6 @@ class PublicidadFactory:
             title=title,
             images=images,
             created_date=created_date,
-            description=description
+            description=description,
+            enabled=enabled
         )

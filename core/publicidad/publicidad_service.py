@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
-from core.common.abstract_repository import GetModel
-from .publicidad import Publicidad
+from .repository import GetPublicidad
 from .dto import CreatePublicidadDTO, UpdatePublicidadDTO, PublicidadDTO
 from .mapper import PublicidadMapper
 
@@ -21,9 +20,12 @@ class AbstractPublicidadService(ABC):
     @abstractmethod
     def get_all(self) -> List[PublicidadDTO]: ...
 
+    @abstractmethod
+    def get_related_publicidad(self, services_id: List[str], products_id: List[str]) -> List[PublicidadDTO]: ...
+
 
 class PublicidadService(AbstractPublicidadService):
-    def __init__(self, get_publicidad: GetModel[Publicidad]):
+    def __init__(self, get_publicidad: GetPublicidad) -> None:
         self._get_publicidad = get_publicidad
     
     def create_publicidad(self, dto: CreatePublicidadDTO) -> PublicidadDTO:
@@ -37,7 +39,8 @@ class PublicidadService(AbstractPublicidadService):
             title=dto.title,
             images=dto.images,
             service_items=dto.service_items,
-            product_items=dto.product_items
+            product_items=dto.product_items,
+            enabled=dto.enabled
         )
         publicidad.save()
         return PublicidadMapper.to_dto(publicidad)
@@ -53,3 +56,7 @@ class PublicidadService(AbstractPublicidadService):
     def get_publicidad(self, id: str) -> PublicidadDTO:
         publicidad = self._get_publicidad.get(id)
         return PublicidadMapper.to_dto(publicidad)
+    
+    def get_related_publicidad(self, services_id: List[str], products_id: List[str]) -> List[PublicidadDTO]:
+        publicidades = self._get_publicidad.get_related_publicidad(services_id, products_id)
+        return [PublicidadMapper.to_dto(pub) for pub in publicidades]

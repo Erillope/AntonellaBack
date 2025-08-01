@@ -17,6 +17,7 @@ class UpdatePublicidadDTO(BaseModel):
     images: Optional[List[str]] = None
     service_items: Optional[List[ItemData]] = None
     product_items: Optional[List[ItemData]] = None
+    enabled: Optional[bool] = None
 
 
 class PublicidadDTO(BaseModel):
@@ -27,3 +28,4 @@ class PublicidadDTO(BaseModel):
     service_items: Optional[List[ItemData]] = None
     product_items: Optional[List[ItemData]] = None
     created_date: date
+    enabled: bool = True

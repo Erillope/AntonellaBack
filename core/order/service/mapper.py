@@ -1,6 +1,5 @@
 from .dto import CreateOrderDto, ServiceItemDto, OrderDto, PaymentDto, ProductItemDto
 from ..domain import OrderFactory, ServiceItem, ServiceItemFactory, Payment, Order, ProductItem, ProductItemFactory
-from decimal import Decimal
 
 class OrderMapper:
     @classmethod
@@ -42,7 +41,6 @@ class ServiceItemMapper:
             start_time=dto.date_info.start_time,
             base_price=dto.base_price,
             payments=p,
-            discount=dto.discount if dto.discount else Decimal(0)
         )
     
     @classmethod
@@ -60,8 +58,7 @@ class ServiceItemMapper:
                     employee_id=payment.employee_id,
                     percentage=payment.percentage
                 ) for payment in item.payments
-            ],
-            discount=item.discount
+            ]
         )
 
 
@@ -72,7 +69,6 @@ class ProductItemMapper:
             product_id=dto.product_id,
             quantity=dto.quantity,
             base_price=dto.base_price,
-            discount=dto.discount if dto.discount else Decimal(0)
         )
     
     @classmethod
@@ -83,5 +79,4 @@ class ProductItemMapper:
             product_id=item.product_id,
             quantity=item.quantity,
             base_price=item.price.base_price,
-            discount=item.discount
         )

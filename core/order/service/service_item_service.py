@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from .dto import ServiceItemDto, UpdateServiceItemDto, FilterServiceItemByDto, EmployeeServiceInfoDto, RequestEmployeeServiceInfoDto, UpdateOrderDto
+from .dto import (ServiceItemDto, UpdateServiceItemDto, FilterServiceItemByDto, EmployeeServiceInfoDto,
+                  RequestEmployeeServiceInfoDto, UpdateOrderDto, FilterServiceItemResponseDto)
 from ..domain.values import Payment, Progresstatus
 from typing import List, Optional
 from .mapper import ServiceItemMapper
@@ -20,7 +21,7 @@ class AbstractServiceItemService(ABC):
     def delete_service_item(self, service_item_id: str) -> None: ...
     
     @abstractmethod
-    def filter_service_items(self, filter_dto: FilterServiceItemByDto) -> List[ServiceItemDto]: ...
+    def filter_service_items(self, filter_dto: FilterServiceItemByDto) -> FilterServiceItemResponseDto: ...
     
     @abstractmethod
     def get_employee_service_info(self, dto: RequestEmployeeServiceInfoDto) -> EmployeeServiceInfoDto: ...
@@ -91,30 +92,25 @@ class ServiceItemService(AbstractServiceItemService):
         service_item = self._get_service_item.get(service_item_id)
         service_item.delete()
     
-    def filter_service_items(self, filter_dto: FilterServiceItemByDto) -> List[ServiceItemDto]:
-        if filter_dto.client_id:
-            self._get_service_item.prepare_client_id_filter(filter_dto.client_id)
-        if filter_dto.start_date:
-            self._get_service_item.prepare_start_date_filter(filter_dto.start_date)
-        if filter_dto.end_date:
-            self._get_service_item.prepare_end_date_filter(filter_dto.end_date)
-        if filter_dto.status:
-            self._get_service_item.prepare_status_filter(filter_dto.status)
-        if filter_dto.service_id:
-            self._get_service_item.prepare_service_id_filter(filter_dto.service_id)
-        if filter_dto.employee_id:
-            self._get_service_item.prepare_employee_id_filter(filter_dto.employee_id)
-        service_items = self._get_service_item.get_filtered_service_items(
-            limit=filter_dto.limit,
-            offset=filter_dto.offset
+    def filter_service_items(self, filter_dto: FilterServiceItemByDto) -> FilterServiceItemResponseDto:
+        service_items, filtered_count = self._get_service_item.filter_service_items(filter_dto)
+        total_count = self._get_service_item.total_count()
+        return FilterServiceItemResponseDto(
+            service_items=[ServiceItemMapper.to_service_item_dto(item) for item in service_items],
+            total_count=total_count,
+            filtered_count=filtered_count
         )
-        return [ServiceItemMapper.to_service_item_dto(item) for item in service_items]
-    
+
     def get_employee_service_info(self, dto: RequestEmployeeServiceInfoDto) -> EmployeeServiceInfoDto:
-        self._get_service_item.prepare_employee_id_filter(dto.employee_id)
-        self._get_service_item.prepare_start_date_filter(dto.start_date)
-        self._get_service_item.prepare_end_date_filter(dto.end_date)
-        service_items = self._get_service_item.get_filtered_service_items(dto.limit, dto.offset)
+        service_items, _ = self._get_service_item.filter_service_items(
+            FilterServiceItemByDto(
+                start_date=dto.start_date,
+                end_date=dto.end_date,
+                employee_id=dto.employee_id,
+                limit=dto.limit,
+                offset=dto.offset
+            )
+        )
         return EmployeeServiceInfoDto(
             employee_id=dto.employee_id,
             start_date=dto.start_date,

@@ -11,7 +11,8 @@ class PublicidadMapper:
             service_items=publicidad.service_items,
             product_items=publicidad.product_items,
             created_date=publicidad.created_date,
-            description=publicidad.description
+            description=publicidad.description,
+            enabled=publicidad.enabled
         )
     
     @classmethod

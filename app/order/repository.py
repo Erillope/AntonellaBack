@@ -1,7 +1,7 @@
 from core.order.service.repository import GetServiceItem, GetProductItem, GetOrder
 from core.order.domain.item import ServiceItem, ProductItem
 from core.order.domain.order import Order
-from core.order.service.dto import FilterOrderDto
+from core.order.service.dto import FilterOrderDto, FilterServiceItemByDto
 from app.common.django_repository import DjangoGetModel, DjangoSaveModel, DjangoDeleteModel
 from .mapper import ServiceItemTableMapper, OrderTableMapper, ProductItemTableMapper
 from app.order.models import ServiceItemTable, OrderTable, ProductItemTable
@@ -76,33 +76,34 @@ class DjangoGetServiceItem(DjangoGetModel[ServiceItemTable, ServiceItem], GetSer
         service_item_tables = ServiceItemTable.objects.filter(order__id=order_id)
         return [self.mapper.to_model(item) for item in service_item_tables]
     
-    def prepare_client_id_filter(self, client_id: str) -> None:
-        self.filter_conditions &= Q(order__client__id=client_id)
+    def build_filter(self, filter_dto: FilterServiceItemByDto) -> Q:
+        filter_conditions = Q()
+        if filter_dto.start_date:
+            filter_conditions &= Q(date_info_day__gte=filter_dto.start_date)
+        if filter_dto.end_date:
+            filter_conditions &= Q(date_info_day__lte=filter_dto.end_date)
+        if filter_dto.client_id:
+            filter_conditions &= Q(order__client__id=filter_dto.client_id)
+        if filter_dto.status:
+            filter_conditions &= Q(status=filter_dto.status.value.lower())
+        if filter_dto.service_id:
+            filter_conditions &= Q(service__id=filter_dto.service_id)
+        if filter_dto.employee_id:
+            filter_conditions &= Q(paymenttable__employee__id=filter_dto.employee_id)
+        return filter_conditions
     
-    def prepare_start_date_filter(self, start_date: date) -> None:
-        self.filter_conditions &= Q(date_info_day__gte=start_date)
-    
-    def prepare_end_date_filter(self, end_date: date) -> None:
-        self.filter_conditions &= Q(date_info_day__lte=end_date)
-    
-    def prepare_status_filter(self, status: str) -> None:
-        self.filter_conditions &= Q(status=status)
-    
-    def prepare_service_id_filter(self, service_id: str) -> None:
-        self.filter_conditions &= Q(service__id=service_id)
-    
-    def prepare_employee_id_filter(self, employee_id: str) -> None:
-        self.filter_conditions &= Q(paymenttable__employee__id=employee_id)
-    
-    def get_filtered_service_items(self, limit: Optional[int] = None, offset: Optional[int] = None) -> List[ServiceItem]:
+    def filter_service_items(self, filter_dto: FilterServiceItemByDto) -> List[ServiceItem]:
+        self.filter_conditions = self.build_filter(filter_dto)
         service_item_tables = ServiceItemTable.objects.filter(self.filter_conditions).distinct()
-        if limit and offset:
-            service_item_tables = service_item_tables[offset:offset + limit]
-        elif limit:
-            service_item_tables = service_item_tables[:limit]
-        elif offset:
-            service_item_tables = service_item_tables[offset:]
-        self.filter_conditions = Q()
+        filtered_count = service_item_tables.count()
+        if filter_dto.only_count:
+            return [], filtered_count
+        if filter_dto.limit and filter_dto.offset:
+            service_item_tables = service_item_tables[filter_dto.offset:filter_dto.offset + filter_dto.limit]
+        elif filter_dto.limit:
+            service_item_tables = service_item_tables[:filter_dto.limit]
+        elif filter_dto.offset is not None:
+            service_item_tables = service_item_tables[filter_dto.offset:]
         return [self.mapper.to_model(item) for item in service_item_tables]
 
     def get_employee_total_facturado(self, employee_id: str, start_date: date, end_date: date) -> Decimal:

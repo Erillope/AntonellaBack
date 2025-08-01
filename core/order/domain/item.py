@@ -16,7 +16,6 @@ class ServiceItem(BaseModel):
     status: Progresstatus
     price: Optional[Price] = None
     payments: List[Payment]
-    discount: Decimal
     _order_id: str = PrivateAttr("")
     
     @model_validator(mode='after')
@@ -81,7 +80,7 @@ class ServiceItem(BaseModel):
 
 class ServiceItemFactory:
     @classmethod
-    def create(cls, service_id: str, day: date, start_time: time, base_price: Optional[Decimal], payments: List[Payment], discount: Decimal = Decimal(0)) -> ServiceItem:
+    def create(cls, service_id: str, day: date, start_time: time, base_price: Optional[Decimal], payments: List[Payment]) -> ServiceItem:
         return ServiceItem(
             id= ID.generate(),
             service_id= service_id,
@@ -89,13 +88,11 @@ class ServiceItemFactory:
             status= Progresstatus.PENDING,
             price= Price.calculate(base_price) if base_price else None,
             payments= payments,
-            discount= discount,
         )
     
     @classmethod
     def load(cls, id: str, service_id: str, order_id: str, day: DateInfo, status: Progresstatus,
-             price: Optional[Price], payments: List[Payment], discount: Decimal,
-             payment_percentage: Optional[Decimal] = None) -> ServiceItem:
+             price: Optional[Price], payments: List[Payment], payment_percentage: Optional[Decimal] = None) -> ServiceItem:
         item = ServiceItem(
             id= id,
             service_id= service_id,
@@ -104,7 +101,6 @@ class ServiceItemFactory:
             status= status,
             price= price,
             payments= payments,
-            discount= discount
         )
         item.set_order_id(order_id)
         return item
@@ -115,7 +111,6 @@ class ProductItem(BaseModel):
     product_id: str
     price: Price
     quantity: int
-    discount: Decimal
     _order_id: str = PrivateAttr("")
     
     @model_validator(mode='after')
@@ -160,23 +155,21 @@ class ProductItem(BaseModel):
 
 class ProductItemFactory:
     @classmethod
-    def create(cls, product_id: str, base_price: Decimal, quantity: int, discount: Decimal = Decimal(0)) -> ProductItem:
+    def create(cls, product_id: str, base_price: Decimal, quantity: int) -> ProductItem:
         return ProductItem(
             id= ID.generate(),
             quantity= quantity,
             product_id= product_id,
             price= Price.calculate(base_price),
-            discount= discount
         )
-    
+
     @classmethod
-    def load(cls, id: str, product_id: str, order_id: str, price: Price, quantity: int, discount: Decimal) -> ProductItem:
+    def load(cls, id: str, product_id: str, order_id: str, price: Price, quantity: int) -> ProductItem:
         item = ProductItem(
             id= id,
             product_id= product_id,
             price= price,
             quantity=quantity,
-            discount= discount
         )
         item.set_order_id(order_id)
         return item
