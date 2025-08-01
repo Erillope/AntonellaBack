@@ -94,7 +94,7 @@ class ServiceItemFilterApiView(APIView):
     def post(self, request: FilterServiceItemBySerializer) -> Response:
         filter_dto = request.to_dto()
         service_items = service_item_service.filter_service_items(filter_dto)
-        return success_response([item.model_dump() for item in service_items])
+        return success_response(service_items.model_dump())
 
 
 class EmployeeServiceInfoView(APIView):

@@ -90,6 +90,7 @@ class UpdateProductItemDto(BaseModel):
 
 
 class FilterServiceItemByDto(BaseModel):
+    only_count: Optional[bool] = False
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     client_id: Optional[str] = None

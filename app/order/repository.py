@@ -92,7 +92,7 @@ class DjangoGetServiceItem(DjangoGetModel[ServiceItemTable, ServiceItem], GetSer
             filter_conditions &= Q(paymenttable__employee__id=filter_dto.employee_id)
         return filter_conditions
     
-    def filter_service_items(self, filter_dto: FilterServiceItemByDto) -> List[ServiceItem]:
+    def filter_service_items(self, filter_dto: FilterServiceItemByDto) -> Tuple[List[ServiceItem], int]:
         self.filter_conditions = self.build_filter(filter_dto)
         service_item_tables = ServiceItemTable.objects.filter(self.filter_conditions).distinct()
         filtered_count = service_item_tables.count()
@@ -104,7 +104,7 @@ class DjangoGetServiceItem(DjangoGetModel[ServiceItemTable, ServiceItem], GetSer
             service_item_tables = service_item_tables[:filter_dto.limit]
         elif filter_dto.offset is not None:
             service_item_tables = service_item_tables[filter_dto.offset:]
-        return [self.mapper.to_model(item) for item in service_item_tables]
+        return [self.mapper.to_model(item) for item in service_item_tables], filtered_count
 
     def get_employee_total_facturado(self, employee_id: str, start_date: date, end_date: date) -> Decimal:
         total_facturado = ServiceItemTable.objects.filter(
