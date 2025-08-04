@@ -6,10 +6,11 @@ from app.common.exceptions import ModelNotFoundException
 from core.store_service.domain.events import (StoreServiceSaved, StoreServiceDeleted, QuestionSaved,
                                               QuestionDeleted)
 from .mapper import StoreServiceTableMapper, QuestionTableMapper
-from typing import List, Optional
+from typing import List, Tuple
 from core.store_service.service.repository import GetQuestion, GetService
 from core.common import ID
 from django.db.models import Q, Avg
+from core.store_service.service.dto import FilterStoreServiceDto
 
 class DjangoGetStoreService(DjangoGetModel[StoreServiceTableData, StoreService], GetService):
     def __init__(self) -> None:
@@ -23,23 +24,29 @@ class DjangoGetStoreService(DjangoGetModel[StoreServiceTableData, StoreService],
     def find_by_type(self, type: str) -> List[StoreService]:
         services = StoreServiceTableData.objects.filter(type=type.upper())
         return [self.mapper.to_model(service) for service in services]
+
+    def build_filter(self, filter_dto: FilterStoreServiceDto) -> Q:
+        filter_query = Q()
+        if filter_dto.name:
+            filter_query &= Q(name__icontains=filter_dto.name.lower())
+        if filter_dto.type:
+            filter_query &= Q(type=filter_dto.type.upper())
+        return filter_query
     
-    def prepare_service_name_filter(self, name: str) -> None:
-        self._filter &= Q(name__icontains=name.lower())
-    
-    def prepare_service_type_filter(self, type: str) -> None:
-        self._filter &= Q(type=type.upper())
-    
-    def get_filtered_services(self, limit: Optional[int] = None, offset: Optional[int] = None) -> List[StoreService]:
+    def filter_services(self, filter_dto: FilterStoreServiceDto) -> Tuple[List[StoreService], int]:
+        self._filter = self.build_filter(filter_dto)
         services = StoreServiceTableData.objects.filter(self._filter).distinct()
-        if limit and offset:
-            services = services[offset:offset + limit]
-        if limit:
-            services = services[:limit]
-        if offset:
-            services = services[offset:]
-        self._filter = Q()
-        return [self.mapper.to_model(service) for service in services]
+        filtered_count = services.count()
+        if filter_dto.only_count:
+            return [], filtered_count
+        if filter_dto.limit and filter_dto.offset:
+            services = services[filter_dto.offset:filter_dto.offset + filter_dto.limit]
+        elif filter_dto.limit:
+            services = services[:filter_dto.limit]
+        elif filter_dto.offset:
+            services = services[filter_dto.offset:]
+        return [self.mapper.to_model(service) for service in services], filtered_count
+        
     
     def get_stars(self, service_id: str) -> float:
         servicio = StoreServiceTableData.objects.get(id=service_id)

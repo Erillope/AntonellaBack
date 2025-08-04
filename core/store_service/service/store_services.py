@@ -1,7 +1,7 @@
 from .abstract_services import AbstractStoreServices, AbstractQuestionService
 from .dto import (StoreServiceDto, CreateStoreServiceDto, UpdateStoreServiceDto, FilterStoreServiceDto,
-                  CreateQuestionDto, QuestionDto, UpdateQuestionDto)
-from typing import List, Optional
+                  CreateQuestionDto, QuestionDto, UpdateQuestionDto, FilterStoreServiceResponseDto)
+from typing import List
 from .repository import GetQuestion, GetService
 from core.store_service import ImageChoiceQuestion, TextChoiceQuestion, Choice
 from .mapper import StoreServiceMapper, QuestionMapper
@@ -97,13 +97,14 @@ class StoreServices(AbstractStoreServices):
             dtos.append(StoreServiceMapper.to_dto(s, stars, questions))
         return dtos
     
-    def filter(self, dto: FilterStoreServiceDto) -> List[StoreServiceDto]:
-        if dto.type:
-            self.get_service.prepare_service_type_filter(dto.type)
-        if dto.name:
-            self.get_service.prepare_service_name_filter(dto.name)
-        services = self.get_service.get_filtered_services(limit=dto.limit, offset=dto.offset)
-        return [self.find(service.id) for service in services]
+    def filter(self, dto: FilterStoreServiceDto) -> FilterStoreServiceResponseDto:
+        services, total_count = self.get_service.filter_services(dto)
+        dtos: List[StoreServiceDto] = []
+        for service in services:
+            questions = self.question_service.service_questions(service.id)
+            stars = self.get_service.get_stars(service.id)
+            dtos.append(StoreServiceMapper.to_dto(service, stars, questions))
+        return FilterStoreServiceResponseDto(services=dtos, total_count=total_count, filtered_count=len(dtos))
     
     def get_all(self) -> List[StoreServiceDto]:
         services = self.get_service.get_all()

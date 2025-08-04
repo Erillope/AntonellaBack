@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from .dto import (StoreServiceDto, CreateStoreServiceDto, UpdateStoreServiceDto, FilterStoreServiceDto,
-                  CreateQuestionDto, QuestionDto, UpdateQuestionDto)
-from typing import List, Optional
+                  CreateQuestionDto, QuestionDto, UpdateQuestionDto, FilterStoreServiceResponseDto)
+from typing import List
 
 class AbstractStoreServices(ABC):
     @abstractmethod
@@ -20,7 +20,7 @@ class AbstractStoreServices(ABC):
     def get_all(self) -> List[StoreServiceDto]: ...
     
     @abstractmethod
-    def filter(self, dto: FilterStoreServiceDto) -> List[StoreServiceDto]: ...
+    def filter(self, dto: FilterStoreServiceDto) -> FilterStoreServiceResponseDto: ...
     
     @abstractmethod
     def find_by_type(self, type: str) -> List[StoreServiceDto]: ...

@@ -62,10 +62,10 @@ class UpdateStoreServiceDto(BaseModel):
 
 class FilterStoreServiceDto(BaseModel):
     type: Optional[ServiceType] = None
+    only_count: bool = False
     name: Optional[str] = None
     offset: Optional[int] = None
     limit: Optional[int] = None
-
 
 class QuestionDto(BaseModel):
     id: str
@@ -110,3 +110,8 @@ class StoreServiceDto(BaseModel):
         else:
             data.pop('questions')
         return data
+
+class FilterStoreServiceResponseDto(BaseModel):
+    services: List['StoreServiceDto']
+    total_count: int
+    filtered_count: int
