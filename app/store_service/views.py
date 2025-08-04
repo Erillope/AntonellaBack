@@ -38,7 +38,7 @@ class StoreServiceView(APIView):
 
 class FilterStoreServiceView(APIView):
     @validate(FilterStoreSerializer)
-    def post(request: FilterStoreSerializer) -> Response:
+    def post(self, request: FilterStoreSerializer) -> Response:
         services = store_services.filter(request.to_dto())
         return success_response([service.service_dump() for service in services])
 
