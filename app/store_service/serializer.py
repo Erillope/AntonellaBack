@@ -181,11 +181,13 @@ class FilterStoreSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=250, required=False)
     limit = serializers.IntegerField(required=False)
     offset = serializers.IntegerField(required=False)
+    only_count = serializers.BooleanField(required=False)
     
     def to_dto(self) -> FilterStoreServiceDto:
         return FilterStoreServiceDto(
             type=self.validated_data.get('type'),
             name=self.validated_data.get('name'),
             limit=self.validated_data.get('limit'),
-            offset=self.validated_data.get('offset')
+            offset=self.validated_data.get('offset'),
+            only_count=self.validated_data.get('only_count', False)
         )
