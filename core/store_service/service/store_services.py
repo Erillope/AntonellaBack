@@ -98,13 +98,14 @@ class StoreServices(AbstractStoreServices):
         return dtos
     
     def filter(self, dto: FilterStoreServiceDto) -> FilterStoreServiceResponseDto:
-        services, total_count = self.get_service.filter_services(dto)
+        services, filtered_count = self.get_service.filter_services(dto)
+        total_count = self.get_service.total_count()
         dtos: List[StoreServiceDto] = []
         for service in services:
             questions = self.question_service.service_questions(service.id)
             stars = self.get_service.get_stars(service.id)
             dtos.append(StoreServiceMapper.to_dto(service, stars, questions))
-        return FilterStoreServiceResponseDto(services=dtos, total_count=total_count, filtered_count=len(dtos))
+        return FilterStoreServiceResponseDto(services=dtos, total_count=total_count, filtered_count=filtered_count)
     
     def get_all(self) -> List[StoreServiceDto]:
         services = self.get_service.get_all()
