@@ -69,7 +69,6 @@ class DeleteStorageImage(EventSubscriber):
         if os.path.exists(os.path.join(DIR, path)) and path.startswith(MEDIA):
             os.remove(os.path.join(DIR, path))
             return
-        raise MediaNotFoundException.media_not_found(path)
     
     def handle(self, event: Event) -> None:
         if isinstance(event, ImageDeleted):
