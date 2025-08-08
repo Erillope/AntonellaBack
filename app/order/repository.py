@@ -36,7 +36,7 @@ class DjangoGetOrder(DjangoGetModel[OrderTable, Order], GetOrder):
     
     def filter_orders(self, dto: FilterOrderDto) -> Tuple[List[Order], int]:
         _filter = self.build_filter(dto)
-        orders = OrderTable.objects.filter(_filter).distinct().order_by('-order_date')
+        orders = OrderTable.objects.filter(_filter).distinct().order_by('order_date')
         orders_count = orders.count()
         if dto.only_count: return [], orders_count
         if dto.limit and dto.offset is not None:

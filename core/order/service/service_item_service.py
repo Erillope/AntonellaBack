@@ -49,7 +49,8 @@ class ServiceItemService(AbstractServiceItemService):
             start_dt = datetime.combine(dto.date_info.day, service_item.date_info.start_time)
             end_time = (start_dt + timedelta(minutes=10)).time()
             service_item.date_info.set_end_time(end_time)
-        self._order_service.set_date(order_id, dto.date_info.day)
+        start_dt = datetime.combine(dto.date_info.day, service_item.date_info.start_time)
+        self._order_service.set_date(order_id, start_dt)
         service_item.save()
         return ServiceItemMapper.to_service_item_dto(service_item)
     

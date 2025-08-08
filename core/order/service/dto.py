@@ -2,7 +2,7 @@ from decimal import Decimal
 from pydantic import BaseModel
 from ..domain.values import Progresstatus, OrderStatusInfo, DateInfo, PaymentStatus, PaymentType, OrderStatus
 from typing import Optional, List
-from datetime import date, time
+from datetime import date, time, datetime
 from core.store_service.domain.values import ServiceType
 class PaymentDto(BaseModel):
     employee_id: str
@@ -49,7 +49,7 @@ class OrderDto(BaseModel):
     client_id: str
     status: OrderStatusInfo
     created_date: date
-    order_date: Optional[date] = None
+    order_date: Optional[datetime] = None
     card_charge: Decimal
     iva: Decimal
 

@@ -4,7 +4,8 @@ from .repository import GetOrder
 from .mapper import OrderMapper
 from typing import List
 from ..domain.values import OrderStatusInfo
-from datetime import date
+from datetime import datetime
+from core.common import GuayaquilDatetime
 
 class AbstractOrderService(ABC):
     @abstractmethod
@@ -23,7 +24,7 @@ class AbstractOrderService(ABC):
     def get_all(self) -> List[OrderDto]: ...
 
     @abstractmethod
-    def set_date(self, order_id: str, date: date) -> OrderDto: ...
+    def set_date(self, order_id: str, date: datetime) -> OrderDto: ...
 
     @abstractmethod
     def filter_orders(self, dto: FilterOrderDto) -> FilterOrderResponseDto: ...
@@ -72,8 +73,8 @@ class OrderService(AbstractOrderService):
         return FilterOrderResponseDto(orders=order_dtos, total_count=total_count, filtered_count=filtered_count)
         
     
-    def set_date(self, order_id: str, date: date) -> OrderDto:
+    def set_date(self, order_id: str, date: datetime) -> OrderDto:
         order = self._get_order.get(order_id)
-        order.order_date = date
+        order.order_date = GuayaquilDatetime.localize(date)
         order.save()
         return OrderMapper.to_order_dto(order)
