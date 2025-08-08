@@ -123,6 +123,7 @@ class EmployeeServiceInfoDto(BaseModel):
     service_items: List[ServiceItemDto]
 
 class FilterOrderDto(BaseModel):
+    client_name: Optional[str] = None
     client_id: Optional[str] = None
     status: Optional[OrderStatus] = None
     progress_status: Optional[Progresstatus] = None

@@ -20,6 +20,8 @@ class DjangoGetOrder(DjangoGetModel[OrderTable, Order], GetOrder):
 
     def build_filter(self, dto: FilterOrderDto) -> Q:
         filter_conditions = Q()
+        if dto.client_name:
+            filter_conditions &= Q(client__name__icontains=dto.client_name)
         if dto.client_id:
             filter_conditions &= Q(client__id=dto.client_id)
         if dto.status:
