@@ -7,6 +7,7 @@ from typing import List, Optional
 from .mapper import ServiceItemMapper
 from .repository import GetServiceItem
 from .order_service import AbstractOrderService
+from datetime import datetime
 
 class AbstractServiceItemService(ABC):
     @abstractmethod
@@ -45,7 +46,6 @@ class ServiceItemService(AbstractServiceItemService):
         if dto.date_info.end_time:
             service_item.date_info.set_end_time(dto.date_info.end_time)
         else:
-            from datetime import datetime
             start_dt = datetime.combine(dto.date_info.day, service_item.date_info.start_time)
             end_time = (start_dt + timedelta(minutes=10)).time()
             service_item.date_info.set_end_time(end_time)
