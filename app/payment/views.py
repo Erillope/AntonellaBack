@@ -6,7 +6,7 @@ from .paymentez_api import PaymentezApi
 from .serializer import DebitPaymentSerializer, AddUserCardSerializer, AddUserCardWithCardIdSerializer
 from app.order.config import order_service
 from core.order.service.dto import UpdateOrderDto
-from core.order.domain.values import OrderStatus
+from core.order.domain.values import OrderStatus, PaymentStatus, PaymentType
 
 payment_service = PaymentezApi('NUVEISTG-EC-SERVER', 'Kn9v6ICvoRXQozQG2rK92WtjG6l08a')
 
@@ -15,7 +15,8 @@ class DebitPaymentView(APIView):
     def post(self, request: DebitPaymentSerializer) -> Response:
         data = request.to_dto()
         payment_data = payment_service.debit(data)
-        order_service.update_order(UpdateOrderDto(id=data.order_id, client_confirmed=OrderStatus.CONFIRMED))
+        order_service.update_order(UpdateOrderDto(id=data.order_id, client_confirmed=OrderStatus.CONFIRMED,
+                                                  payment_status=PaymentStatus.PAID, payment_type=PaymentType.CARD))
         return success_response(payment_data.model_dump())
 
 class ListUserCardsView(APIView):
