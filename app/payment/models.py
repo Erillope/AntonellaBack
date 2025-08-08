@@ -3,11 +3,14 @@ from app.user.models import UserAccountTableData
 from core.payment.dto import DebitResponseDto
 
 class UserCard(models.Model):
-    id = models.CharField(max_length=255, primary_key=True)
+    card_id = models.CharField(max_length=255)
     user = models.ForeignKey(UserAccountTableData, on_delete=models.CASCADE)
     
     class Meta:
         db_table = 'user_card'
+        constraints = [
+            models.UniqueConstraint(fields=['id', 'user'], name='unique_user_card')
+        ]
 
 class DebitPayment(models.Model):
     transaction_id = models.CharField(max_length=255, primary_key=True)

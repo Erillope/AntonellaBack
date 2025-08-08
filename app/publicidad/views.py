@@ -57,15 +57,8 @@ class AddPublicidadToServiceApiView(APIView):
                 "message": "Debes proporcionar al menos un servicio o producto."
             }, status=400)
 
-        if not service_id:
-            SelectedPublicidad.objects.create(
-                publicidad_id=publicidad_id,
-                product_item_id=product_id
-            )
-        
-        if not product_id:
-            SelectedPublicidad.objects.create(
-                publicidad_id=publicidad_id,
-                service_item_id=service_id
-            )
+        SelectedPublicidad.objects.create(
+            publicidad_id=publicidad_id,
+            service_item_id=service_id
+        )
         return success_response({"message": "Publicidad added to item successfully."})

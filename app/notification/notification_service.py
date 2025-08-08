@@ -14,7 +14,9 @@ class FirebaseNotificationService(NotificationService):
             firebase_admin.initialize_app(cred)
     
     def send_notification(self, message_data: NotificationMessage) -> None:
-        #if not UserNotificationToken.objects.filter(user__id=message_data.user_id).exists(): return
+        if not UserNotificationToken.objects.filter(user__id=message_data.user_id).exists(): return
+        #token = "eC147HZjJhzC58ktrBrj7e:APA91bHSV_mztdkFV1ljuOzGShnfNOIuhcouRUYC9wx5Hk0lUb8x2BmZtefYRReHed5LQAwiV5IGxXjBg2I9KVkXc6pNjUnHt8fzTpwBcDSkrESW6Zzg4eE"
+        token = UserNotificationToken.objects.get(user__id=message_data.user_id).token
         extra_data = {
                 'redirect_to': message_data.redirect_to,
                 'notification_type': message_data.notification_type,
@@ -26,7 +28,7 @@ class FirebaseNotificationService(NotificationService):
                 body=message_data.body,
             ),
             data=extra_data,
-            token="eC147HZjJhzC58ktrBrj7e:APA91bHSV_mztdkFV1ljuOzGShnfNOIuhcouRUYC9wx5Hk0lUb8x2BmZtefYRReHed5LQAwiV5IGxXjBg2I9KVkXc6pNjUnHt8fzTpwBcDSkrESW6Zzg4eE",
+            token=token,
         )
         if message_data.type == NotificationType.PROGRAMADA and message_data.publish_date:
             pass

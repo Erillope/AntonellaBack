@@ -9,20 +9,43 @@ from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
 from app.payment.models import UserCard, DebitPayment
 from core.common.config import AppConfig
+from core.payment.dto import AddUserCardDto, AddUserCardWithCardIdDto
+from app.user.models import UserAccountTableData
+from core.common import SystemException, GuayaquilDatetime
+
+class PaymentException(SystemException):
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+
+class AlreadyRegisteredCardException(SystemException):
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+
+class CardNotValidException(SystemException):
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
 
 class PaymentezApi(PaymentAPI):
     def __init__(self, api_key: str, secret_key: str) -> None:
-        self.auth_token = self._generate_auth_token(api_key, secret_key)
+        self.api_key = api_key
+        self.secret_key = secret_key
         self.url = 'https://ccapi-stg.paymentez.com/v2/'
-        self.headers = {
-            'Auth-Token': self.auth_token,
-            'Content-Type': 'application/json'
-        }
+
+
+    def add_user_card(self, dto: AddUserCardDto) -> None:
+        response = self._do_add_card_request(dto)
+        data = response['card']
+        self._save_user_card(dto.user_id, data['token'])
     
-    def add_user_card(self, card_id: str, user_id: str) -> None:
-        card = UserCard.objects.create(id=card_id, user_id=user_id)
-        card.save()
-        
+    def add_user_card_with_card_id(self, dto: AddUserCardWithCardIdDto) -> None:
+        self._save_user_card(dto.user_id, dto.card_id)
+    
+    def _save_user_card(self, user_id: str, card_id: str) -> None:
+        if not UserCard.objects.filter(card_id=card_id, user_id=user_id).exists():
+            UserCard.objects.create(card_id=card_id, user_id=user_id)
+        else:
+            UserCard.objects.filter(card_id=card_id, user_id=user_id).update(card_id=card_id)
+
     def debit(self, dto: DebitRequestDto) -> DebitResponseDto:
         response = self._do_request(dto)
         data = self._response_data(response['transaction'], dto)
@@ -32,12 +55,40 @@ class PaymentezApi(PaymentAPI):
     def _do_request(self, dto: DebitRequestDto) -> Dict[str, Any]:
         response = requests.post(
             self.url + 'transaction/debit/',
-            headers=self.headers,
+            headers=self._generate_headers(),
             json=self._json_data(dto),
         )
         if response.status_code != 200:
-            raise Exception(f"Ocurrió un error al procesar el pago")
+            raise PaymentException(f"Ocurrió un error al procesar el pago")
         data: Dict[str, Any] = response.json()
+        return data
+    
+    def _do_add_card_request(self, dto: AddUserCardDto) -> Dict[str, Any]:
+        user = UserAccountTableData.objects.get(id=dto.user_id)
+        response = requests.post(
+            self.url + 'card/add/',
+            headers=self._generate_headers(),
+            json={
+                "user": {
+                    "id": dto.user_id,
+                    "email": user.email,
+                },
+                "card": {
+                    "number": dto.number,
+                    "expiry_month": dto.expiry_month,
+                    "expiry_year": dto.expiry_year,
+                    "cvc": dto.cvc,
+                }
+            },
+        )
+        if response.status_code != 200:
+            error_data: str = response.json()['error']['type']
+            if "already" in error_data:
+                raise AlreadyRegisteredCardException(f"La tarjeta ya está registrada")
+            raise PaymentException(f"Ocurrió un error al procesar la tarjeta")
+        data: Dict[str, Any] = response.json()
+        if data['card']['status'] != 'valid':
+            raise CardNotValidException(f"La tarjeta no es válida")
         return data
     
     def _response_data(self, data: Dict[str, Any], dto: DebitRequestDto) -> DebitResponseDto:
@@ -49,7 +100,7 @@ class PaymentezApi(PaymentAPI):
             tax_percentage = AppConfig.iva(),
             amount = data['amount'],
             user_id = dto.user_id,
-            created_at = datetime.fromisoformat(data['payment_date'])
+            created_at = GuayaquilDatetime.localize(datetime.fromisoformat(data['payment_date']))
         )
         
     def _json_data(self, dto: DebitRequestDto) -> Dict[str, Any]:
@@ -61,7 +112,7 @@ class PaymentezApi(PaymentAPI):
                 'email': card.user.email,
             },
             'card': {
-                'token': card.id,
+                'token': card.card_id,
             }
         }
         
@@ -84,3 +135,9 @@ class PaymentezApi(PaymentAPI):
         token_string = f'{api_key};{unix_timestamp};{uniq_token_hash}'
         auth_token = b64encode(token_string.encode('utf-8')).decode('utf-8')
         return auth_token
+    
+    def _generate_headers(self) -> Dict[str, str]:
+        return {
+            'Auth-Token': self._generate_auth_token(self.api_key, self.secret_key),
+            'Content-Type': 'application/json'
+        }

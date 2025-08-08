@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 from decimal import Decimal
+from typing import Optional
 
 class DebitRequestDto(BaseModel):
     order_id: str
@@ -16,3 +17,16 @@ class DebitResponseDto(BaseModel):
     tax_percentage: Decimal
     user_id: str
     created_at: datetime
+
+
+class AddUserCardDto(BaseModel):
+    user_id: str
+    number: str
+    expiry_month: int
+    expiry_year: int
+    cvc: str
+
+
+class AddUserCardWithCardIdDto(BaseModel):
+    user_id: str
+    card_id: str
