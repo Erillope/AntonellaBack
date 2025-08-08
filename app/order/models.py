@@ -14,7 +14,7 @@ class OrderTable(models.Model):
     payment_status = models.CharField(max_length=50)
     payment_type = models.CharField(max_length=50)
     client_confirmed = models.CharField(max_length=50)
-    created_date = models.DateField()
+    created_date = models.DateTimeField()
     order_date = models.DateTimeField(null=True, blank=True)
     
     class Meta:

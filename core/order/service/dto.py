@@ -48,7 +48,7 @@ class OrderDto(BaseModel):
     id: str
     client_id: str
     status: OrderStatusInfo
-    created_date: date
+    created_date: datetime
     order_date: Optional[datetime] = None
     card_charge: Decimal
     iva: Decimal
