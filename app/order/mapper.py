@@ -19,8 +19,8 @@ class OrderTableMapper(TableMapper[OrderTable, Order]):
             ),
             card_charge=table.card_charge,
             iva=table.iva,
-            created_date=GuayaquilDatetime.localize(table.created_date),
-            order_date=GuayaquilDatetime.localize(table.order_date) if table.order_date else None
+            created_date=table.created_date,
+            order_date=table.order_date if table.order_date else None
         )
     
     def to_table(self, model: Order) -> OrderTable:
