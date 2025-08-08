@@ -3,6 +3,7 @@ from core.order.domain.order import Order, OrderFactory
 from core.order.domain.item import ServiceItem, ServiceItemFactory, ProductItem, ProductItemFactory
 from core.order.domain.values import OrderStatusInfo, OrderStatus, PaymentStatus, PaymentType, Progresstatus, DateInfo, Price, Payment
 from .models import OrderTable, ServiceItemTable, PaymentTable, ProductItemTable
+from core.common import GuayaquilDatetime
 
 class OrderTableMapper(TableMapper[OrderTable, Order]):
     def to_model(self, table: OrderTable) -> Order:
@@ -18,8 +19,8 @@ class OrderTableMapper(TableMapper[OrderTable, Order]):
             ),
             card_charge=table.card_charge,
             iva=table.iva,
-            created_date=table.created_date,
-            order_date=table.order_date if table.order_date else None
+            created_date=GuayaquilDatetime.localize(table.created_date),
+            order_date=GuayaquilDatetime.localize(table.order_date) if table.order_date else None
         )
     
     def to_table(self, model: Order) -> OrderTable:
