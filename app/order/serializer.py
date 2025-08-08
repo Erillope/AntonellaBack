@@ -221,6 +221,7 @@ class RequestEmployeeServiceInfoSerializer(serializers.Serializer):
 
 
 class FilterOrderSerializer(serializers.Serializer):
+    client_name = serializers.CharField(required=False)
     client_id = serializers.UUIDField(required=False)
     status = serializers.ChoiceField(choices=[(status.value, status.value) for status in OrderStatus], required=False)
     progress_status = serializers.ChoiceField(choices=[(status.value, status.value) for status in Progresstatus], required=False)
@@ -233,6 +234,7 @@ class FilterOrderSerializer(serializers.Serializer):
     
     def to_dto(self) -> FilterOrderDto:
         return FilterOrderDto(
+            client_name=self.validated_data.get('client_name'),
             client_id=str(self.validated_data.get('client_id')) if self.validated_data.get('client_id') else None,
             status=self.validated_data.get('status'),
             progress_status=self.validated_data.get('progress_status'),
