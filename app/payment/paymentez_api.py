@@ -4,14 +4,15 @@ import time
 import hashlib
 from base64 import b64encode
 import requests # type: ignore
-from typing import Dict, Any
+from typing import Dict, Any, List
 from decimal import Decimal, ROUND_HALF_UP
 from datetime import datetime
 from app.payment.models import UserCard, DebitPayment
 from core.common.config import AppConfig
-from core.payment.dto import AddUserCardDto, AddUserCardWithCardIdDto
+from core.payment.dto import AddUserCardDto, AddUserCardWithCardIdDto, UserCardDto, CardType
 from app.user.models import UserAccountTableData
 from core.common import SystemException, GuayaquilDatetime
+from typing import Optional
 
 class PaymentException(SystemException):
     def __init__(self, message: str) -> None:
@@ -25,6 +26,10 @@ class CardNotValidException(SystemException):
     def __init__(self, message: str) -> None:
         super().__init__(message)
 
+class CardNotFoundException(SystemException):
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+
 class PaymentezApi(PaymentAPI):
     def __init__(self, api_key: str, secret_key: str) -> None:
         self.api_key = api_key
@@ -32,19 +37,35 @@ class PaymentezApi(PaymentAPI):
         self.url = 'https://ccapi-stg.paymentez.com/v2/'
 
 
-    def add_user_card(self, dto: AddUserCardDto) -> None:
+    def add_user_card(self, dto: AddUserCardDto) -> UserCardDto:
         response = self._do_add_card_request(dto)
-        data = response['card']
-        self._save_user_card(dto.user_id, data['token'])
+        data: Dict[str, Any] = response['card']
+        self._save_user_card(dto.user_id, data['token'], data['number'], CardType(data['type']))
+        return UserCardDto(
+            user_id=dto.user_id,
+            card_id=data['token'],
+            number=data['number'],
+            type=data.get('type', None)
+        )
+
+    def list_user_cards(self, user_id: str) -> List[UserCardDto]:
+        user_cards = UserCard.objects.filter(user__id=user_id)
+        return [UserCardDto(
+            user_id=str(card.user.id),
+            card_id=card.card_id,
+            number=card.number,
+            type=card.type
+        ) for card in user_cards]
     
     def add_user_card_with_card_id(self, dto: AddUserCardWithCardIdDto) -> None:
-        self._save_user_card(dto.user_id, dto.card_id)
-    
-    def _save_user_card(self, user_id: str, card_id: str) -> None:
-        if not UserCard.objects.filter(card_id=card_id, user_id=user_id).exists():
-            UserCard.objects.create(card_id=card_id, user_id=user_id)
-        else:
-            UserCard.objects.filter(card_id=card_id, user_id=user_id).update(card_id=card_id)
+        self._save_user_card(dto.user_id, dto.card_id, dto.number, dto.type)
+
+    def _save_user_card(self, user_id: str, card_id: str, number: str, type: Optional[CardType]) -> UserCard:
+        card_type : str
+        if type:
+            card_type = type.value
+        card: UserCard = UserCard.objects.create(card_id=card_id, user_id=user_id, number=number, type=card_type)
+        return card
 
     def debit(self, dto: DebitRequestDto) -> DebitResponseDto:
         response = self._do_request(dto)
@@ -85,6 +106,7 @@ class PaymentezApi(PaymentAPI):
             error_data: str = response.json()['error']['type']
             if "already" in error_data:
                 raise AlreadyRegisteredCardException(f"La tarjeta ya está registrada")
+            print(f"Error al procesar la tarjeta: {response.json()}")
             raise PaymentException(f"Ocurrió un error al procesar la tarjeta")
         data: Dict[str, Any] = response.json()
         if data['card']['status'] != 'valid':
@@ -92,6 +114,7 @@ class PaymentezApi(PaymentAPI):
         return data
     
     def _response_data(self, data: Dict[str, Any], dto: DebitRequestDto) -> DebitResponseDto:
+        card = UserCard.objects.get(card_id=dto.card_id)
         return DebitResponseDto(
             transaction_id = data['id'],
             ok = data['status'] == 'success',
@@ -99,16 +122,19 @@ class PaymentezApi(PaymentAPI):
             taxable_amount = dto.taxable_amount,
             tax_percentage = AppConfig.iva(),
             amount = data['amount'],
-            user_id = dto.user_id,
+            user_id = str(card.user.id),
+            card_id = card.card_id,
             created_at = GuayaquilDatetime.localize(datetime.fromisoformat(data['payment_date']))
         )
         
     def _json_data(self, dto: DebitRequestDto) -> Dict[str, Any]:
-        card = UserCard.objects.get(user__id=dto.user_id)
+        if not UserCard.objects.filter(card_id=dto.card_id).exists():
+            raise CardNotFoundException(f"La tarjeta no fue encontrada")
+        card = UserCard.objects.get(card_id=dto.card_id)
         return {
             'order': self._order_data(dto),
             'user': {
-                'id': dto.user_id,
+                'id': str(card.user.id),
                 'email': card.user.email,
             },
             'card': {

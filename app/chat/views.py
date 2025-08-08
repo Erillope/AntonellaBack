@@ -78,6 +78,7 @@ class AdminChatView(APIView):
             user_id=str(chat.user.id),
             redirect_to='CHAT',
             extra={
+                "content_image": message.content,
                 "message_id": str(message.id),
                 "sender_id": str(user.id),
                 "user_id": str(chat.user.id),

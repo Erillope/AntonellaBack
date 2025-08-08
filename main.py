@@ -23,24 +23,25 @@ headers = {
             'Auth-Token': auth_token,
             'Content-Type': 'application/json'
         }
-'''
+
 response = requests.post(
             url + 'card/add/',
             headers=headers,
             json={
                 'user': {
-                    'id': "499997",
+                    'id': "499998",
                     'email': "email_ejemplo@gmail.com",
                 },
                 'card': {
-                    "number": "4111111111111111",
-                    "expiry_month": 12,
+                    "number": "424242424242424",
+                    "expiry_month": 1,
                     "expiry_year": 2030,
                     "cvc": "123",
+                    "type": "ax",
                 }
             },
         )
-'''
+
 '''response = requests.get(
             url + 'card/list/',
             headers=headers,
@@ -48,7 +49,7 @@ response = requests.post(
                 'uid': "e1b9e9f2-2704-4c84-9616-9dd9f97ea05e",
             }
 )'''
-
+'''
 response = requests.post(
             url + 'transaction/debit/',
             headers=headers,
@@ -69,6 +70,6 @@ response = requests.post(
                     "token": "6506287176048536245"
                 }
             }
-        )
+        )'''
 print(response.status_code)
 print(response.json())

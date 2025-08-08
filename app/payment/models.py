@@ -5,6 +5,8 @@ from core.payment.dto import DebitResponseDto
 class UserCard(models.Model):
     card_id = models.CharField(max_length=255)
     user = models.ForeignKey(UserAccountTableData, on_delete=models.CASCADE)
+    number = models.CharField(max_length=16)
+    type = models.CharField(max_length=50, null=True, blank=True)
     
     class Meta:
         db_table = 'user_card'
@@ -34,6 +36,6 @@ class DebitPayment(models.Model):
             order_id=payment_data.order_id,
             taxable_amount=payment_data.taxable_amount,
             tax_percentage=payment_data.tax_percentage,
-            user_card=UserCard.objects.get(user__id=payment_data.user_id),
+            user_card=UserCard.objects.get(card_id=payment_data.card_id),
             created_at=payment_data.created_at
         )
