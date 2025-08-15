@@ -7,6 +7,9 @@ from typing import List
 
 class AbstractProductItemService(ABC):
     @abstractmethod
+    def get_product_item(self, product_item_id: str) -> ProductItemDto: ...
+
+    @abstractmethod
     def get_product_items(self, order_id: str) -> List[ProductItemDto]: ...
 
     @abstractmethod
@@ -23,7 +26,11 @@ class ProductItemService(AbstractProductItemService):
     def __init__(self, get_product_item: GetProductItem, product_service: AbstractProductService) -> None:
         self._get_product_item = get_product_item
         self._product_service = product_service
-    
+
+    def get_product_item(self, product_item_id: str) -> ProductItemDto:
+        product_item = self._get_product_item.get(product_item_id)
+        return ProductItemMapper.to_product_item_dto(product_item)
+
     def get_product_items(self, order_id: str) -> List[ProductItemDto]:
         product_items = self._get_product_item.get_by_order_id(order_id)
         return [ProductItemMapper.to_product_item_dto(item) for item in product_items]
