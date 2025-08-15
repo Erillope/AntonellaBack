@@ -104,6 +104,16 @@ class AdminReadChatView(APIView):
     def get(self, request: Request) -> Response:
         not_readed_chats = ChatMessageTable.objects.filter(readed_by_admin=False).count()
         return success_response({"count": not_readed_chats})
+    
+    @validate()
+    def put(self, request: Request) -> Response:
+        user_id = request.GET.get('user_id')
+        user = UserAccountTableData.objects.get(id=user_id)
+        not_readed_messages = user.chatmessagetable_set.filter(readed_by_admin=False).distinct()
+        for message in not_readed_messages:
+            message.readed_by_admin = True
+            message.save()
+        return success_response({"message": "All messages marked as read by admin for user", "user_id": user_id})
 
 
 class AdminReadChatMessageView(APIView):
