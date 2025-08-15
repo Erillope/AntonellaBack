@@ -8,6 +8,7 @@ from core.common.notification import NotificationMessage
 from .serializer import AddChatMessageSerializer
 from .models import ChatTable, ChatMessageTable
 from app.user.models import UserAccountTableData
+from django.db.models import Count
 from core.chat.dto import AddMessageDto
 from core.chat.chat import MessageType
 
@@ -95,3 +96,21 @@ class AdminChatView(APIView):
         message.readed_by_admin = True
         message.save()
         return success_response({"message": "Message marked as read by admin"})
+
+
+class AdminReadChatView(APIView):
+    @validate()
+    def get(self, request: Request) -> Response:
+        not_readed_chats = ChatMessageTable.objects.filter(readed_by_admin=False).count()
+        return success_response({"count": not_readed_chats})
+
+
+class AdminReadChatMessageView(APIView):
+    @validate()
+    def get(self, request: Request) -> Response:
+        chats = ChatTable.objects.annotate(num_messages=Count('chatmessagetable')).filter(num_messages__gt=0)
+        result: dict[str, int] = {}
+        for chat in chats:
+            not_readed_messages = chat.chatmessagetable_set.filter(readed_by_admin=False).count()
+            result[str(chat.id)] = not_readed_messages
+        return success_response(result)
