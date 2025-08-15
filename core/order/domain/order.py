@@ -25,13 +25,15 @@ class Order(BaseModel):
     def _validate_data(self) -> None:
         ID.validate(self.id)
         ID.validate(self.client_id)
-    
-    def update_data(self, client_id: Optional[str] = None, status: Optional[OrderStatusInfo] = None) -> None:
+
+    def update_data(self, client_id: Optional[str] = None, status: Optional[OrderStatusInfo] = None, iva: Optional[Decimal] = None) -> None:
         if client_id is not None:
             ID.validate(client_id)
             self.client_id = client_id
         if status is not None:
             self.status = status
+        if iva is not None:
+            self.iva = iva
         self._validate_data()
     
     def save(self) -> None:
@@ -43,15 +45,15 @@ class Order(BaseModel):
 
 class OrderFactory:
     @classmethod
-    def create(cls, client_id: str, status: OrderStatusInfo) -> Order:
+    def create(cls, client_id: str, status: OrderStatusInfo, iva: Optional[bool] = None) -> Order:
         return Order(
             id=ID.generate(),
             client_id=client_id,
-            card_charge=Decimal('1'),
+            card_charge=Decimal('0'),
             status=status,
             created_date=GuayaquilDatetime.now(),
             order_date=None,
-            iva=AppConfig.iva()
+            iva=AppConfig.iva() if iva else Decimal('0')
         )
     
     @classmethod

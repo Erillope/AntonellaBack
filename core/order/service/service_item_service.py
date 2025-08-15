@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import timedelta
 from .dto import (ServiceItemDto, UpdateServiceItemDto, FilterServiceItemByDto, EmployeeServiceInfoDto,
-                  RequestEmployeeServiceInfoDto, UpdateOrderDto, FilterServiceItemResponseDto)
+                  RequestEmployeeServiceInfoDto, UpdateOrderDto, FilterServiceItemResponseDto, EmployeeCalendarDto)
 from ..domain.values import Payment, Progresstatus
 from typing import List, Optional
 from .mapper import ServiceItemMapper
@@ -27,6 +27,9 @@ class AbstractServiceItemService(ABC):
     
     @abstractmethod
     def get_employee_service_info(self, dto: RequestEmployeeServiceInfoDto) -> EmployeeServiceInfoDto: ...
+
+    @abstractmethod
+    def get_employee_calendar(self, employee_id: str) -> List[EmployeeCalendarDto]: ...
 
 
 class ServiceItemService(AbstractServiceItemService):
@@ -130,3 +133,6 @@ class ServiceItemService(AbstractServiceItemService):
             ),
             service_items=[ServiceItemMapper.to_service_item_dto(item) for item in service_items]
         )
+
+    def get_employee_calendar(self, employee_id: str) -> List[EmployeeCalendarDto]:
+        return self._get_service_item.get_employee_calendar(employee_id)

@@ -7,6 +7,7 @@ class OrderMapper:
         return OrderFactory.create(
             client_id=dto.client_id,
             status=dto.status,
+            iva=dto.iva
         )
     
     @classmethod

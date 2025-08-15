@@ -1,7 +1,7 @@
 from core.order.service.repository import GetServiceItem, GetProductItem, GetOrder
 from core.order.domain.item import ServiceItem, ProductItem
 from core.order.domain.order import Order
-from core.order.service.dto import FilterOrderDto, FilterServiceItemByDto
+from core.order.service.dto import FilterOrderDto, FilterServiceItemByDto, EmployeeCalendarDto
 from app.common.django_repository import DjangoGetModel, DjangoSaveModel, DjangoDeleteModel
 from .mapper import ServiceItemTableMapper, OrderTableMapper, ProductItemTableMapper
 from app.order.models import ServiceItemTable, OrderTable, ProductItemTable
@@ -123,6 +123,21 @@ class DjangoGetServiceItem(DjangoGetModel[ServiceItemTable, ServiceItem], GetSer
             service_item__date_info_day__lte=end_date
         ).aggregate(total=Sum('amount'))['total'] or Decimal(0)
         return total_pagado
+
+    def get_employee_calendar(self, employee_id: str) -> List[EmployeeCalendarDto]:
+        calendar = []
+        items = ServiceItemTable.objects.filter(
+            paymenttable__employee__id=employee_id,
+            order__status="confirmado",
+            date_info_day__gte=date.today()
+        )
+        for item in items:
+            calendar.append(EmployeeCalendarDto(
+                day=item.date_info_day,
+                start_time=item.date_info_start_time,
+                end_time=item.date_info_end_time
+            ))
+        return calendar
 
 
 class DjangoSaveServiceItem(DjangoSaveModel[ServiceItemTable, ServiceItem], EventSubscriber):

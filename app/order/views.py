@@ -98,6 +98,15 @@ class ServiceItemFilterApiView(APIView):
 
 
 class EmployeeServiceInfoView(APIView):
+    @validate()
+    def get(self, request: Request) -> Response:
+        employee_id = request.GET.get('employee_id')
+        if not employee_id:
+            return Response({"error": "Employee ID is required"}, status=400)
+
+        service_info = service_item_service.get_employee_calendar(employee_id)
+        return success_response([item.model_dump() for item in service_info])
+
     @validate(RequestEmployeeServiceInfoSerializer)
     def post(self, request: RequestEmployeeServiceInfoSerializer) -> Response:
         employee_service_info = service_item_service.get_employee_service_info(request.to_dto())

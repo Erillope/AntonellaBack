@@ -47,6 +47,7 @@ class OrderService(AbstractOrderService):
         order = self._get_order.get(dto.id)
         order.update_data(
             client_id=dto.client_id,
+            iva=dto.iva,
             status=OrderStatusInfo(
                 status=dto.status if dto.status else order.status.status,
                 progress_status=dto.progress_status if dto.progress_status else order.status.progress_status,

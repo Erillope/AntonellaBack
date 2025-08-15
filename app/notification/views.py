@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from app.common.response import success_response, validate
 from .serializer import AddNotificationTokenSerializer, NotificationSerializer, NotificationFilterSerializer
 from core.common.values import GuayaquilDatetime
-from app.user.models import UserAccountTableData
+from app.user.models import EmployeeAccountTableData, UserAccountTableData
 from core.common.notification import NotificationMessage
 from .config import NotificationConfig
 from django.db.models import Q
@@ -88,7 +88,12 @@ class NotificationView(APIView):
             redirect_to=redirect_to,
             notification_type=request.validated_data.get('notification_type', "")
         )
-        for user in UserAccountTableData.objects.all():
+        users = []
+        if notification.to.lower() == "client":
+            users = UserAccountTableData.objects.filter(~Q(id__in=EmployeeAccountTableData.objects.values_list('id', flat=True)))
+        elif notification.to.lower() == "employee":
+            users = EmployeeAccountTableData.objects.all()
+        for user in users:
             if UserNotificationToken.objects.filter(user=user).exists():
                 NotificationConfig.notification_service.send_notification(
                     NotificationMessage(

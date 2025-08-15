@@ -4,6 +4,7 @@ from ..domain.values import Progresstatus, OrderStatusInfo, DateInfo, PaymentSta
 from typing import Optional, List
 from datetime import date, time, datetime
 from core.store_service.domain.values import ServiceType
+
 class PaymentDto(BaseModel):
     employee_id: str
     percentage: Optional[Decimal] = None
@@ -32,6 +33,7 @@ class UpdateServiceItemDto(BaseModel):
 class CreateOrderDto(BaseModel):
     client_id: str
     status: OrderStatusInfo
+    iva: Optional[bool] = None
 
 
 class UpdateOrderDto(BaseModel):
@@ -42,7 +44,8 @@ class UpdateOrderDto(BaseModel):
     payment_status: Optional[PaymentStatus] = None
     payment_type: Optional[PaymentType] = None
     client_confirmed: Optional[OrderStatus] = None
-    
+    iva: Optional[Decimal] = None
+
 
 class OrderDto(BaseModel):
     id: str
@@ -73,6 +76,10 @@ class EmployeeScheduleDto(BaseModel):
         start_time: time
         end_time: time
 
+class EmployeeCalendarDto(BaseModel):
+    day: date
+    start_time: time
+    end_time: time
 
 class ProductItemDto(BaseModel):
     id: Optional[str] = None

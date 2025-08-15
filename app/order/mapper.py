@@ -3,7 +3,6 @@ from core.order.domain.order import Order, OrderFactory
 from core.order.domain.item import ServiceItem, ServiceItemFactory, ProductItem, ProductItemFactory
 from core.order.domain.values import OrderStatusInfo, OrderStatus, PaymentStatus, PaymentType, Progresstatus, DateInfo, Price, Payment
 from .models import OrderTable, ServiceItemTable, PaymentTable, ProductItemTable
-from core.common import GuayaquilDatetime
 
 class OrderTableMapper(TableMapper[OrderTable, Order]):
     def to_model(self, table: OrderTable) -> Order:

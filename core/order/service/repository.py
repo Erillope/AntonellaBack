@@ -1,7 +1,7 @@
 from core.common.abstract_repository import GetModel
 from ..domain.item import ServiceItem, ProductItem
 from ..domain.order import Order
-from .dto import FilterOrderDto, FilterServiceItemByDto
+from .dto import FilterOrderDto, FilterServiceItemByDto, EmployeeCalendarDto
 from abc import ABC, abstractmethod
 from typing import List, Tuple
 from datetime import date
@@ -19,6 +19,9 @@ class GetServiceItem(GetModel[ServiceItem], ABC):
     
     @abstractmethod
     def get_employee_total_pagado(self, employee_id: str, start_date: date, end_date: date) -> Decimal: ...
+
+    @abstractmethod
+    def get_employee_calendar(self, employee_id: str) -> List[EmployeeCalendarDto]: ...
 
 
 class GetProductItem(GetModel[ProductItem], ABC):

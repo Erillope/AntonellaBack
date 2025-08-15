@@ -40,7 +40,7 @@ class PaymentTable(models.Model):
     employee = models.ForeignKey(EmployeeAccountTableData, on_delete= models.SET_NULL, null=True)
     percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    service_item = models.ForeignKey(ServiceItemTable, on_delete=models.SET_NULL, null=True)
+    service_item = models.ForeignKey(ServiceItemTable, on_delete=models.CASCADE, null=True)
     
     class Meta:
         db_table = 'payment_table'

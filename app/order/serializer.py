@@ -95,7 +95,7 @@ class OrderStatusInfoSerializer(serializers.Serializer):
     payment_status = serializers.ChoiceField(choices=[(status.value, status.value) for status in PaymentStatus])
     payment_type = serializers.ChoiceField(choices=[(ptype.value, ptype.value) for ptype in PaymentType])
     client_confirmed = serializers.ChoiceField(choices=[(status.value, status.value) for status in OrderStatus])
-    
+
     def to_order_status_info(self) -> OrderStatusInfo:
         return OrderStatusInfo(
             status=OrderStatus(self.validated_data['status']),
@@ -108,13 +108,15 @@ class OrderStatusInfoSerializer(serializers.Serializer):
 class CreateOrderSerializer(serializers.Serializer):
     client_id = serializers.UUIDField()
     status = OrderStatusInfoSerializer()
-    
+    iva = serializers.BooleanField(required=False, default=False)
+
     def to_dto(self) -> CreateOrderDto:
         status_info = OrderStatusInfoSerializer(data=self.validated_data['status'])
         status_info.is_valid()
         return CreateOrderDto(
             client_id=str(self.validated_data['client_id']),
-            status=status_info.to_order_status_info()
+            status=status_info.to_order_status_info(),
+            iva=self.validated_data.get('iva')
         )
 
 class UpdateOrderSerializer(serializers.Serializer):
