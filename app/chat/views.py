@@ -11,6 +11,7 @@ from app.user.models import UserAccountTableData
 from django.db.models import Count
 from core.chat.dto import AddMessageDto
 from core.chat.chat import MessageType
+from typing import Any
 
 class ChatApiView(APIView):
     @validate()
@@ -109,8 +110,8 @@ class AdminReadChatMessageView(APIView):
     @validate()
     def get(self, request: Request) -> Response:
         chats = ChatTable.objects.annotate(num_messages=Count('chatmessagetable')).filter(num_messages__gt=0)
-        result: dict[str, int] = {}
+        result: list[dict[str, Any]] = []
         for chat in chats:
             not_readed_messages = chat.chatmessagetable_set.filter(readed_by_admin=False).count()
-            result[str(chat.id)] = not_readed_messages
+            result.append({"user_id": str(chat.user.id), "count": not_readed_messages})
         return success_response(result)
