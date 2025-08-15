@@ -1,5 +1,5 @@
 {
-    "iva": 15.00,
+    "iva": 15.0,
     "payment_percentage": 0.5,
     "start_time": "04:00",
     "end_time": "20:00",
@@ -50,5 +50,8 @@
         "CREMA",
         "ACEITE",
         "SHAMPOO"
-    ]
+    ],
+    "terminos": "Bienvenido a nuestra aplicación.\nAl utilizar nuestros servicios, aceptas los términos y condiciones que se describen a continuación.\n\n1. Uso de la aplicación: Te comprometes a utilizar la aplicación de forma legal, ética y conforme a las leyes vigentes. Cualquier uso indebido podrá dar lugar a la suspensión o eliminación de tu cuenta.\n\n2. Privacidad: Respetamos tu privacidad y protegemos tu información personal de acuerdo con nuestra política de privacidad. Al utilizar la aplicación, aceptas el tratamiento de tus datos conforme a dicha política.\n\n3. Limitación de responsabilidad: No nos hacemos responsables por daños directos o indirectos que puedan derivarse del uso o mal uso de la aplicación.\n\n4. Modificaciones: Nos reservamos el derecho de modificar estos términos en cualquier momento. Las modificaciones se publicarán en esta página y serán efectivas inmediatamente después de su publicación.",
+    "email": "ericklorenzolopez1@gmail.com",
+    "password": "oggz choq avit mqeb"
 }

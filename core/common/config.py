@@ -59,3 +59,14 @@ class AppConfig:
     @classmethod
     def producy_types(cls) -> List[str]:
         return cls.data.get('product_types', [])
+    
+    @classmethod
+    def terminos(cls) -> str:
+        return cls.data.get('terminos', '')
+    
+    @classmethod
+    def set_config_data(cls, data: Dict[str, Any]) -> None:
+        cls.data.update(data)
+        cls.data['default_super_admin']['email'] = data['email']
+        with open(os.path.join(resources_path, "config.json"), 'w', encoding='utf-8') as file:
+            json.dump(cls.data, file, ensure_ascii=False, indent=4)

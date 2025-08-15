@@ -3,6 +3,12 @@ from core.common.config import AppConfig
 from django.core.mail import EmailMessage as Message
 from django.core.mail.backends.smtp import EmailBackend
 from core.user.domain.values import UserEmail
+from core.common import SystemException
+import smtplib
+
+class AuthEmailException(SystemException):
+    def __init__(self, message: str):
+        super().__init__(message)
 
 class DjangoEmailHost(EmailHost):
     def __init__(self) -> None:
@@ -11,8 +17,11 @@ class DjangoEmailHost(EmailHost):
     def send_email(self, message: EmailMessage) -> None:
         email = self._create_message(message)
         email.connection = self.custom_backend
-        email.send()
-    
+        try:
+            email.send()
+        except smtplib.SMTPAuthenticationError as e:
+            raise AuthEmailException('Fallo al autenticar el correo electrónico')
+
     def _create_message(self, message: EmailMessage) -> Message:
         UserEmail.validate(message.to.lower())
         return Message(
