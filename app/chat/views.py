@@ -8,7 +8,7 @@ from core.common.notification import NotificationMessage
 from .serializer import AddChatMessageSerializer
 from .models import ChatTable, ChatMessageTable
 from app.user.models import UserAccountTableData
-from django.db.models import Count
+from django.db.models import Count, Max
 from core.chat.dto import AddMessageDto
 from core.chat.chat import MessageType
 from typing import Any
@@ -119,7 +119,9 @@ class AdminReadChatView(APIView):
 class AdminReadChatMessageView(APIView):
     @validate()
     def get(self, request: Request) -> Response:
-        chats = ChatTable.objects.annotate(num_messages=Count('chatmessagetable')).filter(num_messages__gt=0)
+        chats = ChatTable.objects.annotate(num_messages=Count('chatmessagetable'),
+                                           last_message_time=Max('chatmessagetable__timestamp')
+                                           ).filter(num_messages__gt=0).order_by('-last_message_time')
         result: list[dict[str, Any]] = []
         for chat in chats:
             not_readed_messages = chat.chatmessagetable_set.filter(readed_by_admin=False).count()

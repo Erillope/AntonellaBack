@@ -10,7 +10,7 @@ from core.user.domain.events import UserAccountSaved
 from core.user.domain.user import EmployeeAccount
 from core.common import ID
 from core.chat.dto import UserChatDto
-from django.db.models import Count
+from django.db.models import Count, Max
 
 class DjangoGetChatMessage(DjangoGetModel[ChatMessageTable, ChatMessage], GetChatMessage):
     def __init__(self) -> None:
@@ -22,7 +22,9 @@ class DjangoGetChatMessage(DjangoGetModel[ChatMessageTable, ChatMessage], GetCha
         return [self.mapper.to_model(table) for table in tables]
 
     def get_user_chats(self) -> List[UserChatDto]:
-        chats = ChatTable.objects.annotate(num_messages=Count('chatmessagetable')).filter(num_messages__gt=0)
+        chats = ChatTable.objects.annotate(num_messages=Count('chatmessagetable'),
+                                           last_message_time=Max('chatmessagetable__timestamp')
+                                           ).filter(num_messages__gt=0).order_by('-last_message_time')
         return [
             UserChatDto(
                 user_id=str(chat.user.id),
