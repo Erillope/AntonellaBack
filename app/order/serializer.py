@@ -207,16 +207,16 @@ class FilterServiceItemBySerializer(serializers.Serializer):
 
 class RequestEmployeeServiceInfoSerializer(serializers.Serializer):
     employee_id = serializers.UUIDField()
-    start_date = serializers.DateField()
-    end_date = serializers.DateField()
+    start_date = serializers.DateField(required=False)
+    end_date = serializers.DateField(required=False)
     limit = serializers.IntegerField(required=False)
     offset = serializers.IntegerField(required=False)
     
     def to_dto(self) -> RequestEmployeeServiceInfoDto:
         return RequestEmployeeServiceInfoDto(
             employee_id=str(self.validated_data['employee_id']),
-            start_date=self.validated_data['start_date'],
-            end_date=self.validated_data['end_date'],
+            start_date=self.validated_data.get('start_date'),
+            end_date=self.validated_data.get('end_date'),
             limit=self.validated_data.get('limit'),
             offset=self.validated_data.get('offset')
         )
@@ -247,3 +247,8 @@ class FilterOrderSerializer(serializers.Serializer):
             offset=self.validated_data.get('offset'),
             only_count=self.validated_data.get('only_count', False)
         )
+
+
+class ServiceItemProgressSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    status = serializers.ChoiceField(choices=[(status.value, status.value) for status in Progresstatus])

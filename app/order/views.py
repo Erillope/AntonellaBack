@@ -2,10 +2,15 @@ from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from app.common.response import success_response, validate
+from core.order.domain.values import Progresstatus
 from .config import order_service, service_item_service, product_item_service
 from .serializer import (CreateOrderSerializer, UpdateOrderSerializer, ServiceItemSerializer, UpdateServiceItemSerializer,
                          ProductItemSerializer, UpdateProductItemSerializer, FilterServiceItemBySerializer,
-                         RequestEmployeeServiceInfoSerializer, FilterOrderSerializer)
+                         RequestEmployeeServiceInfoSerializer, FilterOrderSerializer, ServiceItemProgressSerializer)
+from core.order.service.dto import UpdateServiceItemDto
+from app.notification.config import NotificationConfig
+from core.common.notification import NotificationMessage
+
 
 class OrderApiView(APIView):
     @validate()
@@ -64,6 +69,37 @@ class ServiceItemApiView(APIView):
     def delete(self, request: Request) -> Response:
         service_item_service.delete_service_item(request.GET.get('id'))
         return success_response({"message": "Service item deleted successfully"})
+
+
+class ServiceItemProgressApiView(APIView):
+    @validate(ServiceItemProgressSerializer)
+    def post(self, request: ServiceItemProgressSerializer) -> Response:
+        data = request.validated_data
+        service_item = service_item_service.update_service_item(
+            UpdateServiceItemDto(
+                id=data['id'],
+                status=Progresstatus(data['status'])
+            )
+        )
+        order = order_service.get_order(service_item.order_id)
+        status = service_item.status
+        if status == Progresstatus.IN_PROGRESS:
+            NotificationConfig.notification_service.send_notification(
+                NotificationMessage(
+                    title="Servicio empezado",
+                    body=f"El servicio ha comenzado.",
+                    user_id=str(order.client_id),
+                )
+            )
+        if status == Progresstatus.FINISHED:
+            NotificationConfig.notification_service.send_notification(
+                NotificationMessage(
+                    title="Servicio finalizado",
+                    body=f"El servicio ha finalizado.",
+                    user_id=str(order.client_id),
+                )
+            )
+        return success_response(service_item.model_dump())
 
 
 class ProductItemApiView(APIView):

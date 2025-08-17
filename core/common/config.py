@@ -65,6 +65,10 @@ class AppConfig:
         return cls.data.get('terminos', '')
     
     @classmethod
+    def salario(cls) -> Decimal:
+        return Decimal(cls.data.get('salario', 100))
+    
+    @classmethod
     def set_config_data(cls, data: Dict[str, Any]) -> None:
         cls.data.update(data)
         cls.data['default_super_admin']['email'] = data['email']

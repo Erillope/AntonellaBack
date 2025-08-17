@@ -13,6 +13,7 @@ from app.user.models import EmployeeAccountTableData
 from django.db.models import Q, Sum
 from datetime import date
 from decimal import Decimal
+from core.common.config import AppConfig
 
 class DjangoGetOrder(DjangoGetModel[OrderTable, Order], GetOrder):
     def __init__(self) -> None:
@@ -108,22 +109,44 @@ class DjangoGetServiceItem(DjangoGetModel[ServiceItemTable, ServiceItem], GetSer
             service_item_tables = service_item_tables[filter_dto.offset:]
         return [self.mapper.to_model(item) for item in service_item_tables], filtered_count
 
-    def get_employee_total_facturado(self, employee_id: str, start_date: date, end_date: date) -> Decimal:
-        total_facturado = ServiceItemTable.objects.filter(
-            paymenttable__employee__id=employee_id,
-            date_info_day__gte=start_date,
-            date_info_day__lte=end_date
-        ).aggregate(total=Sum('base_price'))['total'] or Decimal(0)
+    def get_employee_total_facturado(self, employee_id: str, start_date: Optional[date], end_date: Optional[date]) -> Decimal:
+        _filter = Q(paymenttable__employee__id=employee_id)
+        if start_date:
+            _filter &= Q(date_info_day__gte=start_date)
+        if end_date:
+            _filter &= Q(date_info_day__lte=end_date)
+        total_facturado = ServiceItemTable.objects.filter(_filter).aggregate(total=Sum('base_price'))['total'] or Decimal(0)
         return total_facturado
 
-    def get_employee_total_pagado(self, employee_id: str, start_date: date, end_date: date) -> Decimal:
-        total_pagado = PaymentTable.objects.filter(
-            employee__id=employee_id,
-            service_item__date_info_day__gte=start_date,
-            service_item__date_info_day__lte=end_date
-        ).aggregate(total=Sum('amount'))['total'] or Decimal(0)
-        return total_pagado
+    def get_employee_total_pagado(self, employee_id: str, start_date: Optional[date], end_date: Optional[date]) -> Decimal:
+        _filter = Q(employee__id=employee_id)
+        total_por_pagar_salario = Decimal(0)
+        if start_date:
+            _filter &= Q(service_item__date_info_day__gte=start_date)
+        if end_date:
+            _filter &= Q(service_item__date_info_day__lte=end_date)
+        total_por_pagar = PaymentTable.objects.filter(_filter).aggregate(total=Sum('amount'))['total'] or Decimal(0)
+        
+        if start_date and end_date:
+            months = self._calculate_months(start_date, end_date)
+            total_por_pagar_salario = AppConfig.salario() * months
+            return total_por_pagar + total_por_pagar_salario
+        if start_date:
+            months = self._calculate_months(start_date, date.today())
+            total_por_pagar_salario = AppConfig.salario() * months
+            return total_por_pagar + total_por_pagar_salario
+        
+        if end_date:
+            employee = EmployeeAccountTableData.objects.get(id=employee_id)
+            months = self._calculate_months(employee.created_date, end_date)
+            total_por_pagar_salario = AppConfig.salario() * months
+            return total_por_pagar + total_por_pagar_salario
 
+        return total_por_pagar
+
+    def _calculate_months(self, start_date: date, end_date: date) -> int:
+        return (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month)
+    
     def get_employee_calendar(self, employee_id: str) -> List[EmployeeCalendarDto]:
         calendar = []
         items = ServiceItemTable.objects.filter(

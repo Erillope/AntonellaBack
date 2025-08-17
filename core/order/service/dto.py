@@ -116,15 +116,15 @@ class FilterServiceItemResponseDto(BaseModel):
 
 class RequestEmployeeServiceInfoDto(BaseModel):
     employee_id: str
-    start_date: date
-    end_date: date
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
     limit: Optional[int] = None
     offset: Optional[int] = None
     
 class EmployeeServiceInfoDto(BaseModel):
     employee_id: str
-    start_date: date
-    end_date: date
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
     total_facturado: Decimal
     total_pagado: Decimal
     service_items: List[ServiceItemDto]

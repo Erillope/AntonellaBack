@@ -3,7 +3,7 @@ from ..domain.item import ServiceItem, ProductItem
 from ..domain.order import Order
 from .dto import FilterOrderDto, FilterServiceItemByDto, EmployeeCalendarDto
 from abc import ABC, abstractmethod
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 from datetime import date
 from decimal import Decimal
 
@@ -15,10 +15,10 @@ class GetServiceItem(GetModel[ServiceItem], ABC):
     def filter_service_items(self, filter_dto: FilterServiceItemByDto) -> Tuple[List[ServiceItem], int]: ...
     
     @abstractmethod
-    def get_employee_total_facturado(self, employee_id: str, start_date: date, end_date: date) -> Decimal: ...
-    
+    def get_employee_total_facturado(self, employee_id: str, start_date: Optional[date], end_date: Optional[date]) -> Decimal: ...
+
     @abstractmethod
-    def get_employee_total_pagado(self, employee_id: str, start_date: date, end_date: date) -> Decimal: ...
+    def get_employee_total_pagado(self, employee_id: str, start_date: Optional[date], end_date: Optional[date]) -> Decimal: ...
 
     @abstractmethod
     def get_employee_calendar(self, employee_id: str) -> List[EmployeeCalendarDto]: ...
