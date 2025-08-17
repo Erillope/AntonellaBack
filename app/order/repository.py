@@ -131,11 +131,17 @@ class DjangoGetServiceItem(DjangoGetModel[ServiceItemTable, ServiceItem], GetSer
             months = self._calculate_months(start_date, end_date)
             total_por_pagar_salario = AppConfig.salario() * months
             return total_por_pagar + total_por_pagar_salario
+
+        if not start_date and not end_date:
+            employee = EmployeeAccountTableData.objects.get(id=employee_id)
+            months = self._calculate_months(employee.created_date, date.today())
+            total_por_pagar_salario = AppConfig.salario() * months
+            return total_por_pagar + total_por_pagar_salario
+        
         if start_date:
             months = self._calculate_months(start_date, date.today())
             total_por_pagar_salario = AppConfig.salario() * months
             return total_por_pagar + total_por_pagar_salario
-        
         if end_date:
             employee = EmployeeAccountTableData.objects.get(id=employee_id)
             months = self._calculate_months(employee.created_date, end_date)
