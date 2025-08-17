@@ -252,3 +252,16 @@ class FilterOrderSerializer(serializers.Serializer):
 class ServiceItemProgressSerializer(serializers.Serializer):
     id = serializers.UUIDField()
     status = serializers.ChoiceField(choices=[(status.value, status.value) for status in Progresstatus])
+
+
+class EmployeePaymentSerializer(serializers.Serializer):
+    employee_id = serializers.UUIDField()
+    amount = serializers.DecimalField(max_digits=10, decimal_places=2)
+
+
+class EmployeePaymentFilterSerializer(serializers.Serializer):
+    employee_name = serializers.CharField(required=False)
+    start_date = serializers.DateField(required=False)
+    end_date = serializers.DateField(required=False)
+    limit = serializers.IntegerField(required=False)
+    offset = serializers.IntegerField(required=False)

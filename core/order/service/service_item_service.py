@@ -128,9 +128,10 @@ class ServiceItemService(AbstractServiceItemService):
             total_facturado=self._get_service_item.get_employee_total_facturado(
                 dto.employee_id, dto.start_date, dto.end_date
             ),
-            total_pagado=self._get_service_item.get_employee_total_pagado(
+            total_por_pagar=self._get_service_item.get_employee_total_por_pagar(
                 dto.employee_id, dto.start_date, dto.end_date
             ),
+            total_pagado=self._get_service_item.get_employee_total_pagado(employee_id=dto.employee_id),
             service_items=[ServiceItemMapper.to_service_item_dto(item) for item in service_items]
         )
 

@@ -8,7 +8,7 @@ from app.order.models import ServiceItemTable, OrderTable, ProductItemTable
 from typing import List, Optional, Tuple
 from core.common import EventSubscriber, Event
 from core.order.domain.events import OrderSaved, OrderDeleted, ServiceItemSaved, ServiceItemDeleted, ProductItemSaved, ProductItemDeleted
-from .models import PaymentTable
+from .models import PaymentTable, EmployeePaymentTable
 from app.user.models import EmployeeAccountTableData
 from django.db.models import Q, Sum
 from datetime import date
@@ -118,7 +118,7 @@ class DjangoGetServiceItem(DjangoGetModel[ServiceItemTable, ServiceItem], GetSer
         total_facturado = ServiceItemTable.objects.filter(_filter).aggregate(total=Sum('base_price'))['total'] or Decimal(0)
         return total_facturado
 
-    def get_employee_total_pagado(self, employee_id: str, start_date: Optional[date], end_date: Optional[date]) -> Decimal:
+    def get_employee_total_por_pagar(self, employee_id: str, start_date: Optional[date], end_date: Optional[date]) -> Decimal:
         _filter = Q(employee__id=employee_id)
         total_por_pagar_salario = Decimal(0)
         if start_date:
@@ -149,6 +149,12 @@ class DjangoGetServiceItem(DjangoGetModel[ServiceItemTable, ServiceItem], GetSer
             return total_por_pagar + total_por_pagar_salario
 
         return total_por_pagar
+    
+    def get_employee_total_pagado(self, employee_id: str) -> Decimal:
+        total_pagado = EmployeePaymentTable.objects.filter(
+            employee__id=employee_id
+            ).aggregate(total=Sum('amount'))['total'] or Decimal(0)
+        return total_pagado
 
     def _calculate_months(self, start_date: date, end_date: date) -> int:
         return (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month)

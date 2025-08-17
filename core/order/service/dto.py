@@ -126,6 +126,7 @@ class EmployeeServiceInfoDto(BaseModel):
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     total_facturado: Decimal
+    total_por_pagar: Decimal
     total_pagado: Decimal
     service_items: List[ServiceItemDto]
 

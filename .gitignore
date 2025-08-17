@@ -66,3 +66,5 @@ db.sqlite3
 .ini
 
 resources/antonella_firebase.json
+
+resources/config.json

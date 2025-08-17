@@ -1,3 +1,4 @@
+from typing import Any, Dict
 from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -6,11 +7,13 @@ from core.order.domain.values import Progresstatus
 from .config import order_service, service_item_service, product_item_service
 from .serializer import (CreateOrderSerializer, UpdateOrderSerializer, ServiceItemSerializer, UpdateServiceItemSerializer,
                          ProductItemSerializer, UpdateProductItemSerializer, FilterServiceItemBySerializer,
-                         RequestEmployeeServiceInfoSerializer, FilterOrderSerializer, ServiceItemProgressSerializer)
+                         RequestEmployeeServiceInfoSerializer, FilterOrderSerializer, ServiceItemProgressSerializer,
+                         EmployeePaymentSerializer, EmployeePaymentFilterSerializer)
 from core.order.service.dto import UpdateServiceItemDto
 from app.notification.config import NotificationConfig
 from core.common.notification import NotificationMessage
-
+from .models import EmployeePaymentTable
+from django.db.models import Q
 
 class OrderApiView(APIView):
     @validate()
@@ -150,3 +153,52 @@ class EmployeeServiceInfoView(APIView):
     def post(self, request: RequestEmployeeServiceInfoSerializer) -> Response:
         employee_service_info = service_item_service.get_employee_service_info(request.to_dto())
         return success_response(employee_service_info.model_dump())
+
+
+class EmployeePaymentView(APIView):
+    @validate(EmployeePaymentSerializer)
+    def post(self, request: EmployeePaymentSerializer) -> Response:
+        data = request.validated_data
+        employee_payment = EmployeePaymentTable.objects.create(
+            employee_id=data['employee_id'],
+            amount=data['amount']
+        )
+        return success_response(map_employee_payment(employee_payment))
+
+
+class EmployeePaymentFilterView(APIView):
+    @validate(EmployeePaymentFilterSerializer)
+    def post(self, request: EmployeePaymentFilterSerializer) -> Response:
+        data = request.validated_data
+        _filter = self._build_filter(data)
+        employees = EmployeePaymentTable.objects.filter(_filter)
+        total_count = EmployeePaymentTable.objects.count()
+        filtered_count = employees.count()
+        if data.get('offset') and data.get('limit'):
+            employees = employees[data['offset']:data['offset'] + data['limit']]
+        if data.get('offest'):
+            employees = employees[data['offset']:]
+        if data.get('limit'):
+            employees = employees[:data['limit']]
+        return success_response({
+            'total_count': total_count,
+            'filtered_count': filtered_count,
+            'payments': [map_employee_payment(emp) for emp in employees]
+        })
+
+    def _build_filter(self, data: Dict[str, Any]) -> Q:
+        filters = Q()
+        if 'employee_name' in data:
+            filters &= Q(employee__name__icontains=data['employee_name'])
+        if 'start_date' in data:
+            filters &= Q(created_date__gte=data['start_date'])
+        if 'end_date' in data:
+            filters &= Q(created_date__lte=data['end_date'])
+        return filters
+    
+def map_employee_payment(table: EmployeePaymentTable) -> Dict[str, Any]:
+    return {
+        "employee_id": str(table.employee.id),
+        "amount": table.amount,
+        "created_date": table.created_date.isoformat()
+    }

@@ -65,3 +65,12 @@ class ProductItemTable(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['order', 'product'], name='unique_order_product')
         ]
+
+
+class EmployeePaymentTable(models.Model):
+    employee = models.ForeignKey(EmployeeAccountTableData, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created_date = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'employee_payment_table'
