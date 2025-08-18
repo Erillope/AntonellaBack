@@ -133,7 +133,7 @@ class NotificationFilterView(APIView):
         offset = request.validated_data.get('offset')
         only_count = request.validated_data.get('only_count', False)
         total_count = NotificationTable.objects.count()
-        notifications = NotificationTable.objects.filter(filters)
+        notifications = NotificationTable.objects.filter(filters).order_by('-created_at')
         total_filtered = notifications.count()
         if only_count:
             return success_response({"count": total_count, "filtered_count": total_filtered, "notifications": []})
