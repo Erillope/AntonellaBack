@@ -9,20 +9,22 @@ from app.user.config import ServiceConfig
 from core.common.email import EmailMessage
 
 class ConfigDataSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    password = serializers.CharField()
-    iva = serializers.DecimalField(max_digits=5, decimal_places=2)
-    payment_percentage = serializers.DecimalField(max_digits=5, decimal_places=2)
-    terminos = serializers.CharField()
+    email = serializers.EmailField(required=False)
+    password = serializers.CharField(required=False)
+    iva = serializers.DecimalField(max_digits=5, decimal_places=2, required=False)
+    payment_percentage = serializers.DecimalField(max_digits=5, decimal_places=2, required=False)
+    terminos = serializers.CharField(required=False)
+    salario = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
 
     def get_data(self) -> Dict[str, Any]:
         data = self.validated_data
         return {
             "email": data.get("email"),
             "password": data.get("password"),
-            "iva": float(data.get("iva", 0)),
-            "payment_percentage": float(data.get("payment_percentage", 0)),
-            "terminos": data.get("terminos", "")
+            "iva": float(data.get("iva")) if data.get("iva") else None,
+            "payment_percentage": float(data.get("payment_percentage")) if data.get("payment_percentage") else None,
+            "terminos": data.get("terminos"),
+            "salario": float(data.get("salario")) if data.get("salario") else None
         }
 
 class ConfigApiView(APIView):
@@ -40,16 +42,25 @@ class ConfigApiView(APIView):
     @validate(ConfigDataSerializer)
     def put(self, request: ConfigDataSerializer) -> Response:
         config_data = request.get_data()
-        email = config_data['email']
-        password = config_data['password']
+        email = config_data.get('email')
+        password = config_data.get('password')
+        now_email = ServiceConfig.email_host.email_host
+        now_password = ServiceConfig.email_host.password
         try:
-            ServiceConfig.email_host.set_host(email, password)
-            ServiceConfig.email_host.send_email(EmailMessage(
-                subject="Configuración de antonella admin",
-                body="Este correo ha sido asociado a la configuración de antonella admin.",
-                to=email
-            ))
+            if email and password:
+                ServiceConfig.email_host.set_host(email, password)
+            if email:
+                ServiceConfig.email_host.set_host(email, now_password)
+            if password:
+                ServiceConfig.email_host.set_host(now_email, password)
+            if isinstance(email, str) and email.lower() != now_email.lower(): 
+                ServiceConfig.email_host.send_email(EmailMessage(
+                    subject="Configuración de antonella admin",
+                    body="Este correo ha sido asociado a la configuración de antonella admin.",
+                    to=email
+                ))
         except Exception as e:
+            ServiceConfig.email_host.set_host(now_email, now_password)
             return Response({"message": f"Error sending email: {str(e)}"}, status=400)
         AppConfig.set_config_data(config_data)
         return success_response({"message": "Configuration updated successfully"})

@@ -70,7 +70,10 @@ class AppConfig:
     
     @classmethod
     def set_config_data(cls, data: Dict[str, Any]) -> None:
-        cls.data.update(data)
-        cls.data['default_super_admin']['email'] = data['email']
+        for key in data:
+            if data.get(key) is not None:
+                cls.data[key] = data[key]
+        if data.get('email'):
+            cls.data['default_super_admin']['email'] = data['email']
         with open(os.path.join(resources_path, "config.json"), 'w', encoding='utf-8') as file:
             json.dump(cls.data, file, ensure_ascii=False, indent=4)
