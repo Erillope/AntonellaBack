@@ -11,6 +11,7 @@ from .serializer import (CreateOrderSerializer, UpdateOrderSerializer, ServiceIt
                          EmployeePaymentSerializer, EmployeePaymentFilterSerializer)
 from core.order.service.dto import UpdateServiceItemDto
 from app.notification.config import NotificationConfig
+from app.notification.models import NotificationLogTable, NotificationTable
 from core.common.notification import NotificationMessage
 from .models import EmployeePaymentTable
 from django.db.models import Q
@@ -48,6 +49,17 @@ class OrderApiView(APIView):
                         "user_id": str(order.client_id),
                     }
                 )
+            )
+            NotificationLogTable.objects.create(
+                notification=NotificationTable.objects.create(
+                    title="Orden confirmada",
+                    body=f"Tu orden ha sido confirmada. Revisa los detalles.",
+                    redirect_to="orden_detalle",
+                    to="client",
+                    type="INSTANTANEA",
+                ),
+                user_id=str(order.client_id),
+                readed=False
             )
             services = service_item_service.get_service_items(order.id)
             for service_item in services:
@@ -134,6 +146,17 @@ class ServiceItemProgressApiView(APIView):
                     }
                 )
             )
+            NotificationLogTable.objects.create(
+                notification=NotificationTable.objects.create(
+                    title="Servicio empezado",
+                    body=f"El servicio ha comenzado.",
+                    user_id=str(order.client_id),
+                    redirect_to="servicio_progreso",
+                    type="INSTANTANEA",
+                ),
+                user_id=str(order.client_id),
+                readed=False
+            )
         if status == Progresstatus.FINISHED:
             NotificationConfig.notification_service.send_notification(
                 NotificationMessage(
@@ -148,6 +171,17 @@ class ServiceItemProgressApiView(APIView):
                         "user_id": str(order.client_id),
                     }
                 )
+            )
+            NotificationLogTable.objects.create(
+                notification=NotificationTable.objects.create(
+                    title="Servicio finalizado",
+                    body=f"El servicio ha finalizado.",
+                    user_id=str(order.client_id),
+                    redirect_to="servicio_finalizado",
+                    type="INSTANTANEA",
+                ),
+                user_id=str(order.client_id),
+                readed=False
             )
         return success_response(service_item.model_dump())
 
