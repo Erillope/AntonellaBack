@@ -54,7 +54,7 @@ class NotificationView(APIView):
                 "notification_type": notification.notification_type,
                 "publish_date": GuayaquilDatetime.localize(notification.publish_date).isoformat() if notification.publish_date else None
             })
-        notifications = NotificationTable.objects.all()
+        notifications = NotificationTable.objects.all().order_by('-created_at')
         return success_response([
             {
                 "id": notification.id,
