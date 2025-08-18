@@ -14,6 +14,7 @@ from app.notification.config import NotificationConfig
 from app.notification.models import NotificationLogTable, NotificationTable
 from core.common.notification import NotificationMessage
 from .models import EmployeePaymentTable
+from core.common import GuayaquilDatetime
 from django.db.models import Q
 
 class OrderApiView(APIView):
@@ -57,6 +58,7 @@ class OrderApiView(APIView):
                     redirect_to="orden_detalle",
                     to="client",
                     type="INSTANTANEA",
+                    created_at=GuayaquilDatetime.now()
                 ),
                 user_id=str(order.client_id),
                 readed=False
@@ -153,6 +155,7 @@ class ServiceItemProgressApiView(APIView):
                     user_id=str(order.client_id),
                     redirect_to="servicio_progreso",
                     type="INSTANTANEA",
+                    created_at=GuayaquilDatetime.now()
                 ),
                 user_id=str(order.client_id),
                 readed=False
@@ -179,6 +182,7 @@ class ServiceItemProgressApiView(APIView):
                     user_id=str(order.client_id),
                     redirect_to="servicio_finalizado",
                     type="INSTANTANEA",
+                    created_at=GuayaquilDatetime.now()
                 ),
                 user_id=str(order.client_id),
                 readed=False
