@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.publicidad.dto import CreatePublicidadDTO, UpdatePublicidadDTO
+from core.publicidad.dto import CreatePublicidadDTO, UpdatePublicidadDTO, FilterPublicidadDTO
 from core.publicidad.publicidad import ItemData, ItemType
 from typing import Dict, Any
 
@@ -92,3 +92,22 @@ class AddPublicidadToItemSerializer(serializers.Serializer):
     publicidad_id = serializers.UUIDField(required=True)
     service_id = serializers.UUIDField(required=False, allow_null=True)
     product_id = serializers.UUIDField(required=False, allow_null=True)
+
+
+class FilterPublicidadSerializer(serializers.Serializer):
+    title = serializers.CharField(max_length=255, required=False)
+    start_date = serializers.DateField(required=False)
+    end_date = serializers.DateField(required=False)
+    limit = serializers.IntegerField(required=False, default=10)
+    offset = serializers.IntegerField(required=False, default=0)
+    onlyCount = serializers.BooleanField(required=False, default=False)
+
+    def to_dto(self) -> FilterPublicidadDTO:
+        return FilterPublicidadDTO(
+            title=self.validated_data.get('title'),
+            start_date=self.validated_data.get('start_date'),
+            end_date=self.validated_data.get('end_date'),
+            limit=self.validated_data.get('limit'),
+            offset=self.validated_data.get('offset'),
+            onlyCount=self.validated_data.get('onlyCount')
+        )

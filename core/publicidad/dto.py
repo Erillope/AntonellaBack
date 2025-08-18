@@ -30,3 +30,18 @@ class PublicidadDTO(BaseModel):
     product_items: Optional[List[ItemData]] = None
     created_date: date
     enabled: bool = True
+
+
+class FilterPublicidadDTO(BaseModel):
+    title: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    limit: Optional[int] = None
+    offset: Optional[int] = None
+    onlyCount: Optional[bool] = None
+
+
+class FilterPublicidadResponse(BaseModel):
+    total_count: int
+    filtered_count: int
+    publicidades: List[PublicidadDTO]

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 from .repository import GetPublicidad
-from .dto import CreatePublicidadDTO, UpdatePublicidadDTO, PublicidadDTO
+from .dto import CreatePublicidadDTO, FilterPublicidadDTO, UpdatePublicidadDTO, PublicidadDTO, FilterPublicidadResponse
 from .mapper import PublicidadMapper
 
 class AbstractPublicidadService(ABC):
@@ -22,6 +22,9 @@ class AbstractPublicidadService(ABC):
 
     @abstractmethod
     def get_related_publicidad(self, services_id: List[str], products_id: List[str]) -> List[PublicidadDTO]: ...
+
+    @abstractmethod
+    def filter_publicidad(self, filter_dto: FilterPublicidadDTO) -> FilterPublicidadResponse: ...
 
 
 class PublicidadService(AbstractPublicidadService):
@@ -61,3 +64,12 @@ class PublicidadService(AbstractPublicidadService):
     def get_related_publicidad(self, services_id: List[str], products_id: List[str]) -> List[PublicidadDTO]:
         publicidades = self._get_publicidad.get_related_publicidad(services_id, products_id)
         return [PublicidadMapper.to_dto(pub) for pub in publicidades]
+
+    def filter_publicidad(self, filter_dto: FilterPublicidadDTO) -> FilterPublicidadResponse:
+        publicidades, filtered_count = self._get_publicidad.filter_publicidad(filter_dto)
+        total_count = self._get_publicidad.total_count()
+        return FilterPublicidadResponse(
+            total_count=total_count,
+            filtered_count=filtered_count,
+            publicidades=[PublicidadMapper.to_dto(pub) for pub in publicidades]
+        )

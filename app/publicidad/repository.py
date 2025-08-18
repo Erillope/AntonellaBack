@@ -1,11 +1,13 @@
 from app.publicidad.models import PublicidadTable, PublicidadImage, ServicePublicidad, ProductPublicidad
+from core.publicidad.dto import FilterPublicidadDTO
 from .mapper import PublicidadTableMapper
 from app.common.django_repository import DjangoGetModel, DjangoSaveModel, DjangoDeleteModel
 from core.common import Event, EventSubscriber
 from core.publicidad.publicidad import Publicidad, ItemData
 from core.publicidad.events import PublicidadSaved, PublicidadDeleted
 from core.publicidad.repository import GetPublicidad
-from typing import List
+from typing import List, Tuple
+from django.db.models import Q
 
 class DjangoGetPublicidad(DjangoGetModel[PublicidadTable, Publicidad], GetPublicidad):
     def __init__(self) -> None:
@@ -14,6 +16,30 @@ class DjangoGetPublicidad(DjangoGetModel[PublicidadTable, Publicidad], GetPublic
     def get_related_publicidad(self, services_id: List[str], products_id: List[str]) -> List[Publicidad]:
         tables = PublicidadTable.get_publicidad_by_services_and_products(services_id, products_id)
         return [self.mapper.to_model(table) for table in tables]
+    
+    def build_filter(self, filter_dto: FilterPublicidadDTO) -> Q:
+        _filter = Q()
+        if filter_dto.title:
+            _filter &= Q(title__icontains=filter_dto.title)
+        if filter_dto.start_date:
+            _filter &= Q(created_date__gte=filter_dto.start_date)
+        if filter_dto.end_date:
+            _filter &= Q(created_date__lte=filter_dto.end_date)
+        return _filter
+
+    def filter_publicidad(self, filter_dto: FilterPublicidadDTO) -> Tuple[List[Publicidad], int]:
+        _filter = self.build_filter(filter_dto)
+        publicidades = PublicidadTable.objects.filter(_filter)
+        publicidad_count = publicidades.count()
+        if filter_dto.onlyCount:
+            return [], publicidad_count
+        if filter_dto.limit and filter_dto.offset:
+            publicidades = publicidades[filter_dto.offset:filter_dto.offset + filter_dto.limit]
+        if filter_dto.limit:
+            publicidades = publicidades[:filter_dto.limit]
+        if filter_dto.offset:
+            publicidades = publicidades[filter_dto.offset:]
+        return [self.mapper.to_model(obj) for obj in publicidades], publicidad_count
 
 
 class DjangoSavePublicidad(DjangoSaveModel[PublicidadTable, Publicidad], EventSubscriber):
