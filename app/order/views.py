@@ -92,7 +92,7 @@ class ServiceItemProgressApiView(APIView):
                     title="Servicio empezado",
                     body=f"El servicio ha comenzado.",
                     user_id=str(order.client_id),
-                    redirect_to="servicio_progreso"
+                    redirect_to="servicio_progreso",
                     extra={
                         'redirect_to': "servicio_progreso",
                         "title": "Servicio empezado",
@@ -107,7 +107,7 @@ class ServiceItemProgressApiView(APIView):
                     title="Servicio finalizado",
                     body=f"El servicio ha finalizado.",
                     user_id=str(order.client_id),
-                    redirect_to="servicio_finalizado"
+                    redirect_to="servicio_finalizado",
                     extra={
                         'redirect_to': "servicio_finalizado",
                         "title": "Servicio finalizado",
