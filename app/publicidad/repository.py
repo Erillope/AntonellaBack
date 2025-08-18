@@ -29,7 +29,7 @@ class DjangoGetPublicidad(DjangoGetModel[PublicidadTable, Publicidad], GetPublic
 
     def filter_publicidad(self, filter_dto: FilterPublicidadDTO) -> Tuple[List[Publicidad], int]:
         _filter = self.build_filter(filter_dto)
-        publicidades = PublicidadTable.objects.filter(_filter)
+        publicidades = PublicidadTable.objects.filter(_filter).order_by('-created_date')
         publicidad_count = publicidades.count()
         if filter_dto.onlyCount:
             return [], publicidad_count
