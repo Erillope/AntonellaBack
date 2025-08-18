@@ -37,7 +37,11 @@ class DjangoGetProduct(DjangoGetModel[ProductTableData, Product], GetProduct):
         elif dto.offset:
             products = products[dto.offset:]
         return [self.mapper.to_model(p) for p in products], product_count
-    
+
+    def get_by_name(self, name: str) -> List[Product]:
+        products = self.table.objects.filter(name=name)
+        return [self.mapper.to_model(p) for p in products]
+
 
 class DjangoSaveProduct(DjangoSaveModel[ProductTableData, Product], EventSubscriber):
     def __init__(self) -> None:

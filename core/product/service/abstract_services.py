@@ -23,3 +23,6 @@ class AbstractProductService(ABC):
     
     @abstractmethod
     def filter(self, dto: ProductFilterDto) -> ProductFilterResponseDto: ...
+
+    @abstractmethod
+    def get_by_name(self, name: str) -> List[ProductDto]: ...

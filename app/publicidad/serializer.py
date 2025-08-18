@@ -49,6 +49,7 @@ class CreatePublicidadSerializer(serializers.Serializer):
 class UpdatePublicidadSerializer(serializers.Serializer):
     id = serializers.UUIDField(required=True)
     title = serializers.CharField(max_length=255, required=False)
+    description = serializers.CharField(max_length=1000, required=False)
     images = serializers.ListField(
         child=serializers.CharField(), required=False
     )
@@ -63,6 +64,7 @@ class UpdatePublicidadSerializer(serializers.Serializer):
     def to_dto(self) -> UpdatePublicidadDTO:
         return UpdatePublicidadDTO(
             id=self.validated_data['id'],
+            description=self.validated_data.get('description'),
             title=self.validated_data.get('title'),
             images=self.validated_data.get('images'),
             service_items=ItemDataSerializer.to_item_data_list(self.validated_data['service_items']) if 'service_items' in self.validated_data else None,

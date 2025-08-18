@@ -15,6 +15,7 @@ class UpdatePublicidadDTO(BaseModel):
     id: str
     title: Optional[str] = None
     images: Optional[List[str]] = None
+    description: Optional[str] = None
     service_items: Optional[List[ItemData]] = None
     product_items: Optional[List[ItemData]] = None
     enabled: Optional[bool] = None

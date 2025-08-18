@@ -46,6 +46,10 @@ class ProductService(AbstractProductService):
         product = self.get_product.get(product_id)
         return ProductMapper.to_dto(product)
     
+    def get_by_name(self, name: str) -> List[ProductDto]:
+        products = self.get_product.get_by_name(name)
+        return [ProductMapper.to_dto(product) for product in products]
+    
     def get_all(self) -> List[ProductDto]:
         products = self.get_product.get_all()
         return [ProductMapper.to_dto(product) for product in products]

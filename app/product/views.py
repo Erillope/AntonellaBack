@@ -11,6 +11,9 @@ class ProductApiView(APIView):
         if request.GET.get('id'):
             product = product_service.get(request.GET.get('id'))
             return success_response(product.model_dump())
+        if request.GET.get('name'):
+            products = product_service.get_by_name(request.GET.get('name'))
+            return success_response([product.model_dump() for product in products])
         else:
             products = product_service.get_all()
             return success_response([product.model_dump() for product in products])

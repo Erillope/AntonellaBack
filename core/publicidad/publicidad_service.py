@@ -38,6 +38,7 @@ class PublicidadService(AbstractPublicidadService):
         publicidad.change_data(
             title=dto.title,
             images=dto.images,
+            description=dto.description,
             service_items=dto.service_items,
             product_items=dto.product_items,
             enabled=dto.enabled
