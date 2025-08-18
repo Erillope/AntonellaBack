@@ -80,7 +80,7 @@ class ServiceItemProgressApiView(APIView):
         data = request.validated_data
         service_item = service_item_service.update_service_item(
             UpdateServiceItemDto(
-                id=data['id'],
+                id=str(data['id']),
                 status=Progresstatus(data['status'])
             )
         )
