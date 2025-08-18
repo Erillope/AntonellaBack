@@ -53,11 +53,13 @@ class ConfigApiView(APIView):
                 ServiceConfig.email_host.set_host(email, now_password)
             if password:
                 ServiceConfig.email_host.set_host(now_email, password)
-            if isinstance(email, str) and email.lower() != now_email.lower(): 
+            email_changed = isinstance(email, str) and email.lower() != now_email.lower()
+            password_changed = isinstance(password, str) and password != now_password
+            if email_changed or password_changed:
                 ServiceConfig.email_host.send_email(EmailMessage(
                     subject="Configuración de antonella admin",
                     body="Este correo ha sido asociado a la configuración de antonella admin.",
-                    to=email
+                    to=email if email else now_email
                 ))
         except Exception as e:
             ServiceConfig.email_host.set_host(now_email, now_password)
