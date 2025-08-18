@@ -35,7 +35,8 @@ class ConfigApiView(APIView):
             "password": AppConfig.email_password(),
             "iva": AppConfig.iva(),
             "payment_percentage": AppConfig.payment_percentage(),
-            "terminos": AppConfig.terminos()
+            "terminos": AppConfig.terminos(),
+            "salario": AppConfig.salario()
         }
         return success_response(config_data)
     
