@@ -35,9 +35,9 @@ class DjangoGetPublicidad(DjangoGetModel[PublicidadTable, Publicidad], GetPublic
             return [], publicidad_count
         if filter_dto.limit and filter_dto.offset:
             publicidades = publicidades[filter_dto.offset:filter_dto.offset + filter_dto.limit]
-        if filter_dto.limit:
+        elif filter_dto.limit:
             publicidades = publicidades[:filter_dto.limit]
-        if filter_dto.offset:
+        elif filter_dto.offset:
             publicidades = publicidades[filter_dto.offset:]
         return [self.mapper.to_model(obj) for obj in publicidades], publicidad_count
 
