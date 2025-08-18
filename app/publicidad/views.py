@@ -37,7 +37,7 @@ class FilterPublicidadApiView(APIView):
     @validate(FilterPublicidadSerializer)
     def post(self, request: FilterPublicidadSerializer) -> Response:
         filtered_publicidad = publicidad_service.filter_publicidad(request.to_dto())
-        return success_response([pub.model_dump() for pub in filtered_publicidad])
+        return success_response(filtered_publicidad.model_dump())
 
 
 class RelatedPublicidadApiView(APIView):
