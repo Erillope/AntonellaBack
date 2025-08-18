@@ -49,6 +49,23 @@ class OrderApiView(APIView):
                     }
                 )
             )
+            services = service_item_service.get_service_items(order.id)
+            for service_item in services:
+                for payment in service_item.payments:
+                    NotificationConfig.notification_service.send_notification(
+                        NotificationMessage(
+                            title="Nuevo servicio asignado",
+                            body=f"Se te ha asignado un nuevo servicio.",
+                            user_id=str(payment.employee_id),
+                            redirect_to="servicio_asignado",
+                            extra={
+                                'redirect_to': "servicio_asignado",
+                                "title": "Nuevo servicio asignado",
+                                "body": f"Se te ha asignado un nuevo servicio.",
+                                "user_id": str(payment.employee_id),
+                            }
+                        )
+                    )
         return success_response(order.model_dump())
     
     @validate()
@@ -77,21 +94,6 @@ class ServiceItemApiView(APIView):
     @validate(ServiceItemSerializer)
     def post(self, request: ServiceItemSerializer) -> Response:
         service_item = service_item_service.create_service_item(request.to_dto(), request.data['order_id'])
-        for payment in service_item.payments:
-            NotificationConfig.notification_service.send_notification(
-                NotificationMessage(
-                    title="Nuevo servicio asignado",
-                    body=f"Se te ha asignado un nuevo servicio.",
-                    user_id=str(payment.employee_id),
-                    redirect_to="servicio_asignado",
-                    extra={
-                        'redirect_to': "servicio_asignado",
-                        "title": "Nuevo servicio asignado",
-                        "body": f"Se te ha asignado un nuevo servicio.",
-                        "user_id": str(payment.employee_id),
-                    }
-                )
-            )
         return success_response(service_item.model_dump())
     
     @validate(UpdateServiceItemSerializer)
