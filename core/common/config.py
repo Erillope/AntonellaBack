@@ -14,58 +14,75 @@ class AppConfig:
     client_host = "https://erillope.pythonanywhere.com/admin/"
     reset_password_url = client_host + "password/reset/"
     data = {}
-    with open(os.path.join(resources_path, "config.json"), encoding='utf-8') as file:
-        data = json.load(file)
+    
     
     @classmethod
+    def read_data(cls) -> None:
+        with open(os.path.join(resources_path, "config.json"), encoding='utf-8') as file:
+            data = json.load(file)
+            cls.data = data
+
+    @classmethod
     def payment_percentage(cls) -> Decimal:
+        cls.read_data()
         return Decimal(cls.data.get('payment_percentage', 0.5))
 
     @classmethod
     def start_time(cls) -> time:
+        cls.read_data()
         return time.fromisoformat(cls.data.get('start_time', '04:00:00'))
     
     @classmethod
     def end_time(cls) -> time:
+        cls.read_data()
         return time.fromisoformat(cls.data.get('end_time', '20:00:00'))
     
     @classmethod
     def iva(cls) -> Decimal:
+        cls.read_data()
         return Decimal(cls.data.get('iva', 15.00))
     
     @classmethod
     def default_super_admin(cls) -> Dict[str, Any]:
+        cls.read_data()
         super_admin_data =  cls.data.get('default_super_admin', {})
         super_admin_data['photo'] = os.path.join(MEDIA, super_admin_data['photo'])
         return super_admin_data 
 
     @classmethod
     def reset_password_message(cls, user_name: str, token_id: str) -> str:
+        cls.read_data()
         message: str = cls.data.get('reset_password_message', 'Null message')
         return message % (user_name, f"{cls.reset_password_url}{token_id}")
     
     @classmethod
     def email_password(cls) -> str:
+        cls.read_data()
         return cls.data.get('email_password', '')
     
     @classmethod
     def app_email(cls) -> str:
+        cls.read_data()
         return cls.data.get('app_email', '')
     
     @classmethod
     def categories_subtypes(cls) -> Dict[str, Any]:
+        cls.read_data()
         return cls.data.get('categories_subtypes', {})
     
     @classmethod
-    def producy_types(cls) -> List[str]:
+    def product_types(cls) -> List[str]:
+        cls.read_data()
         return cls.data.get('product_types', [])
     
     @classmethod
     def terminos(cls) -> str:
+        cls.read_data()
         return cls.data.get('terminos', '')
     
     @classmethod
     def salario(cls) -> Decimal:
+        cls.read_data()
         return Decimal(cls.data.get('salario', 100))
     
     @classmethod
