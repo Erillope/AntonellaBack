@@ -93,6 +93,8 @@ class DjangoGetServiceItem(DjangoGetModel[ServiceItemTable, ServiceItem], GetSer
             filter_conditions &= Q(service__id=filter_dto.service_id)
         if filter_dto.employee_id:
             filter_conditions &= Q(paymenttable__employee__id=filter_dto.employee_id)
+        if filter_dto.order_status:
+            filter_conditions &= Q(order__status=filter_dto.order_status.value.lower())
         return filter_conditions
     
     def filter_service_items(self, filter_dto: FilterServiceItemByDto) -> Tuple[List[ServiceItem], int]:

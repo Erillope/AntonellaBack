@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import timedelta
 from .dto import (ServiceItemDto, UpdateServiceItemDto, FilterServiceItemByDto, EmployeeServiceInfoDto,
                   RequestEmployeeServiceInfoDto, UpdateOrderDto, FilterServiceItemResponseDto, EmployeeCalendarDto)
-from ..domain.values import Payment, Progresstatus
+from ..domain.values import OrderStatus, Payment, Progresstatus
 from typing import List, Optional
 from .mapper import ServiceItemMapper
 from .repository import GetServiceItem
@@ -96,6 +96,13 @@ class ServiceItemService(AbstractServiceItemService):
                     id=service_item.get_order_id(),
                     progress_status=Progresstatus.FINISHED
                 ))
+        if dto.status and dto.status == Progresstatus.PENDING:
+            items = self._get_service_item.get_by_order_id(service_item.get_order_id())
+            if all(item.status == Progresstatus.PENDING for item in items):
+                self._order_service.update_order(UpdateOrderDto(
+                    id=service_item.get_order_id(),
+                    progress_status=Progresstatus.PENDING
+                ))
         return ServiceItemMapper.to_service_item_dto(service_item)
     
     def delete_service_item(self, service_item_id: str) -> None:
@@ -118,7 +125,8 @@ class ServiceItemService(AbstractServiceItemService):
                 end_date=dto.end_date,
                 employee_id=dto.employee_id,
                 limit=dto.limit,
-                offset=dto.offset
+                offset=dto.offset,
+                order_status=OrderStatus.CONFIRMED
             )
         )
         return EmployeeServiceInfoDto(

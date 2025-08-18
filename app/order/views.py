@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from app.common.response import success_response, validate
-from core.order.domain.values import Progresstatus
+from core.order.domain.values import OrderStatus, Progresstatus
 from .config import order_service, service_item_service, product_item_service
 from .serializer import (CreateOrderSerializer, UpdateOrderSerializer, ServiceItemSerializer, UpdateServiceItemSerializer,
                          ProductItemSerializer, UpdateProductItemSerializer, FilterServiceItemBySerializer,
@@ -32,7 +32,23 @@ class OrderApiView(APIView):
     
     @validate(UpdateOrderSerializer)
     def put(self, request: UpdateOrderSerializer) -> Response:
-        order = order_service.update_order(request.to_dto())
+        data = request.to_dto()
+        order = order_service.update_order(data)
+        if data.status == OrderStatus.CONFIRMED:
+            NotificationConfig.notification_service.send_notification(
+                NotificationMessage(
+                    title="Orden confirmada",
+                    body=f"Tu orden ha sido confirmada. Revisa los detalles.",
+                    user_id=str(order.client_id),
+                    redirect_to="orden_detalle",
+                    extra={
+                        'redirect_to': "orden_detalle",
+                        "title": "Orden confirmada",
+                        "body": f"Tu orden ha sido confirmada. Revisa los detalles.",
+                        "user_id": str(order.client_id),
+                    }
+                )
+            )
         return success_response(order.model_dump())
     
     @validate()
@@ -61,6 +77,21 @@ class ServiceItemApiView(APIView):
     @validate(ServiceItemSerializer)
     def post(self, request: ServiceItemSerializer) -> Response:
         service_item = service_item_service.create_service_item(request.to_dto(), request.data['order_id'])
+        for payment in service_item.payments:
+            NotificationConfig.notification_service.send_notification(
+                NotificationMessage(
+                    title="Nuevo servicio asignado",
+                    body=f"Se te ha asignado un nuevo servicio.",
+                    user_id=str(payment.employee_id),
+                    redirect_to="servicio_asignado",
+                    extra={
+                        'redirect_to': "servicio_asignado",
+                        "title": "Nuevo servicio asignado",
+                        "body": f"Se te ha asignado un nuevo servicio.",
+                        "user_id": str(payment.employee_id),
+                    }
+                )
+            )
         return success_response(service_item.model_dump())
     
     @validate(UpdateServiceItemSerializer)

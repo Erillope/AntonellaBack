@@ -102,6 +102,7 @@ class FilterServiceItemByDto(BaseModel):
     end_date: Optional[date] = None
     client_id: Optional[str] = None
     status: Optional[Progresstatus] = None
+    order_status: Optional[OrderStatus] = None
     service_id: Optional[str] = None
     employee_id: Optional[str] = None
     limit: Optional[int] = None
