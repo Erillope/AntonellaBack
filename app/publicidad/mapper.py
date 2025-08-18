@@ -15,7 +15,7 @@ class PublicidadTableMapper(TableMapper[PublicidadTable, Publicidad]):
                 for sp in ServicePublicidad.get_publicidad_services(str(table.id))
             ],
             product_items=[
-                ItemData(id=str(pp.publicidad.id), discount=pp.discount, fixed_amount=pp.fixed_amount, type=pp.type)
+                ItemData(id=str(pp.product.id), discount=pp.discount, fixed_amount=pp.fixed_amount, type=pp.type)
                 for pp in ProductPublicidad.get_publicidad_products(str(table.id))
             ],
             description=table.description,
