@@ -152,7 +152,6 @@ class ServiceItemProgressApiView(APIView):
                 notification=NotificationTable.objects.create(
                     title="Servicio empezado",
                     body=f"El servicio ha comenzado.",
-                    user_id=str(order.client_id),
                     redirect_to="servicio_progreso",
                     type="INSTANTANEA",
                     created_at=GuayaquilDatetime.now()
@@ -179,7 +178,6 @@ class ServiceItemProgressApiView(APIView):
                 notification=NotificationTable.objects.create(
                     title="Servicio finalizado",
                     body=f"El servicio ha finalizado.",
-                    user_id=str(order.client_id),
                     redirect_to="servicio_finalizado",
                     type="INSTANTANEA",
                     created_at=GuayaquilDatetime.now()
