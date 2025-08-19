@@ -127,7 +127,7 @@ class DjangoGetQuestion(DjangoGetModel[QuestionTableData, Question], GetQuestion
         return self.exists_by_title(unique)
     
     def exists_by_title(self, title: str) -> bool:
-        return QuestionTableData.objects.filter(title=title.lower()).exists()
+        return QuestionTableData.objects.filter(title__iexact=title.lower()).exists()
     
     def get(self, unique: str) -> Question:
         if ID.is_id(unique): return super().get(unique)
@@ -135,7 +135,7 @@ class DjangoGetQuestion(DjangoGetModel[QuestionTableData, Question], GetQuestion
     
     def get_by_title(self, title: str) -> Question:
         if not self.exists_by_title(title): raise ModelNotFoundException.not_found(title)
-        question_table = QuestionTableData.objects.get(title=title.lower())
+        question_table = QuestionTableData.objects.get(title__iexact=title.lower())
         return self.mapper.to_model(question_table)
     
     def get_service_questions(self, service_id: str) -> List[Question]:

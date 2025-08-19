@@ -45,9 +45,9 @@ class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount], GetUser):
         if not self.exists_by_email(email):
             raise ModelNotFoundException.not_found(email)
         if self.exists_employee_by_email(email):
-            table = EmployeeAccountTableData.objects.get(email=email.lower())
+            table = EmployeeAccountTableData.objects.get(email__iexact=email.lower())
             return self.mapper.to_model(table)
-        table = self.table.objects.get(email=email.lower())
+        table = self.table.objects.get(email__iexact=email.lower())
         return self.mapper.to_model(table)
 
     def get_by_id(self, user_id: str) -> UserAccount:
@@ -72,7 +72,7 @@ class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount], GetUser):
         return self.table.objects.filter(phone_number=phone_number).exists()
     
     def exists_by_email(self, email: str) -> bool:
-        return self.table.objects.filter(email=email.lower()).exists()
+        return self.table.objects.filter(email__iexact=email.lower()).exists()
     
     def exists_by_id(self, user_id: str) -> bool:
         return super().exists(user_id)
@@ -88,7 +88,7 @@ class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount], GetUser):
         return EmployeeAccountTableData.objects.filter(id=employee_id).exists()
     
     def exists_employee_by_email(self, email: str) -> bool:
-        return EmployeeAccountTableData.objects.filter(email=email.lower()).exists()
+        return EmployeeAccountTableData.objects.filter(email__iexact=email.lower()).exists()
     
     def exists_employee_by_phone_number(self, phone_number: str) -> bool:
         return EmployeeAccountTableData.objects.filter(phone_number=phone_number).exists()
@@ -160,7 +160,7 @@ class DjangoSaveUser(DjangoSaveModel[UserAccountTableData, UserAccount], EventSu
         EmployeeRoleTableData.objects.filter(employee=employee).delete()
         for role in roles:
             EmployeeRoleTableData.objects.create(employee=employee,
-                                                 role=RoleTableData.objects.get(name=role.lower())
+                                                 role=RoleTableData.objects.get(name__iexact=role.lower())
                                                  )
         if 'MOVIL' not in RolPermissionTableData.get_access_from_user(employee_id):
             EmployeeCategoriesTableData.objects.filter(employee=employee).delete()
@@ -207,7 +207,7 @@ class DjangoGetRole(DjangoGetModel[RoleTableData, Role]):
         return True
     
     def exists_by_name(self, rolename: str) -> bool:
-        return self.table.objects.filter(name=rolename.lower()).exists()
+        return self.table.objects.filter(name__iexact=rolename.lower()).exists()
     
     def get(self, unique: str) -> Role:
         if ID.is_id(unique):
@@ -217,7 +217,7 @@ class DjangoGetRole(DjangoGetModel[RoleTableData, Role]):
     def get_by_name(self, rolename: str) -> Role:
         if not self.exists_by_name(rolename):
             raise ModelNotFoundException.not_found(rolename)
-        table = self.table.objects.get(name=rolename.lower())
+        table = self.table.objects.get(name__iexact=rolename.lower())
         return self.mapper.to_model(table)
     
 class DjangoSaveRole(DjangoSaveModel[RoleTableData, Role], EventSubscriber):    

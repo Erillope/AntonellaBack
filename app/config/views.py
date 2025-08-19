@@ -79,5 +79,5 @@ class CategoriesApiView(APIView):
 class ProductTypesApiView(APIView):
     @validate()
     def get(self, request: Request) -> Response:
-        product_types = AppConfig.producy_types()
+        product_types = AppConfig.product_types()
         return success_response(product_types)
