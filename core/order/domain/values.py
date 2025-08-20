@@ -2,7 +2,6 @@ from pydantic import BaseModel, model_validator
 from enum import Enum
 from decimal import Decimal
 from core.common.values import AmountValue, ID
-from core.common.exceptions import InvalidTimeRange
 from datetime import date, time
 from core.common.config import AppConfig
 from typing import Optional
@@ -113,13 +112,3 @@ class DateInfo(BaseModel):
     
     def _validate_data(self) -> None:
         if not self.end_time: return
-        if not self._is_in_time_range():
-            raise InvalidTimeRange.invalid_range(self.start_time, self.end_time)
-        if(self.end_time < self.start_time):
-            raise InvalidTimeRange.invalid_range(self.start_time, self.end_time)
-    
-    def _is_in_time_range(self) -> bool:
-        if not self.end_time: return True
-        is_valid_start = AppConfig.start_time() < self.start_time < AppConfig.end_time()
-        is_valid_end = AppConfig.start_time() < self.end_time < AppConfig.end_time()
-        return is_valid_start and is_valid_end

@@ -4,7 +4,7 @@ from decimal import Decimal
 from .values import OrderStatusInfo
 from core.common.values import ID, GuayaquilDatetime
 from .events import OrderSaved, OrderDeleted
-from datetime import date, datetime
+from datetime import datetime
 from core.common.config import AppConfig
 
 class Order(BaseModel):
