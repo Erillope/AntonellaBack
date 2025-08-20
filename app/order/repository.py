@@ -129,7 +129,7 @@ class DjangoGetServiceItem(DjangoGetModel[ServiceItemTable, ServiceItem], GetSer
             _filter &= Q(service_item__date_info_day__lte=end_date)
         total_por_pagar = PaymentTable.objects.filter(_filter).aggregate(total=Sum('amount'))['total'] or Decimal(0)
         employee = EmployeeAccountTableData.objects.get(id=employee_id)
-        if not employee.payment_type.lower() == 'salario':
+        if (not employee.payment_type.lower() == 'salario') and (not employee.payment_type.lower() == 'mixto'):
             return total_por_pagar
         if start_date and end_date:
             months = self._calculate_months(start_date, end_date)
