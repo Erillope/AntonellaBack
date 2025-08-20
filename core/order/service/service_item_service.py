@@ -129,6 +129,11 @@ class ServiceItemService(AbstractServiceItemService):
                 order_status=OrderStatus.CONFIRMED
             )
         )
+        total_pagado = self._get_service_item.get_employee_total_pagado(employee_id=dto.employee_id, start_date=dto.start_date, end_date=dto.end_date)
+        pagado = self._get_service_item.get_employee_total_pagado(employee_id=dto.employee_id, start_date=None, end_date=None)
+        total_por_pagar = self._get_service_item.get_employee_total_por_pagar(employee_id=dto.employee_id, start_date=dto.start_date, end_date=dto.end_date)
+        por_pagar = self._get_service_item.get_employee_total_por_pagar(employee_id=dto.employee_id, start_date=None, end_date=None)
+        restante = por_pagar - pagado
         return EmployeeServiceInfoDto(
             employee_id=dto.employee_id,
             start_date=dto.start_date,
@@ -136,10 +141,9 @@ class ServiceItemService(AbstractServiceItemService):
             total_facturado=self._get_service_item.get_employee_total_facturado(
                 dto.employee_id, dto.start_date, dto.end_date
             ),
-            total_por_pagar=self._get_service_item.get_employee_total_por_pagar(
-                dto.employee_id, dto.start_date, dto.end_date
-            ),
-            total_pagado=self._get_service_item.get_employee_total_pagado(employee_id=dto.employee_id),
+            total_por_pagar=total_por_pagar,
+            total_pagado=total_pagado,
+            restante=restante,
             service_items=[ServiceItemMapper.to_service_item_dto(item) for item in service_items]
         )
 

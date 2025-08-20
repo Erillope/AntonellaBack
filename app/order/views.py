@@ -244,7 +244,8 @@ class EmployeePaymentView(APIView):
         data = request.validated_data
         employee_payment = EmployeePaymentTable.objects.create(
             employee_id=data['employee_id'],
-            amount=data['amount']
+            amount=data['amount'],
+            created_date=GuayaquilDatetime.now()
         )
         return success_response(map_employee_payment(employee_payment))
 

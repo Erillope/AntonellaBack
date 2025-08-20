@@ -129,6 +129,7 @@ class EmployeeServiceInfoDto(BaseModel):
     total_facturado: Decimal
     total_por_pagar: Decimal
     total_pagado: Decimal
+    restante: Decimal
     service_items: List[ServiceItemDto]
 
 class FilterOrderDto(BaseModel):
