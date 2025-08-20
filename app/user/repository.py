@@ -119,6 +119,8 @@ class DjangoGetUser(DjangoGetModel[UserAccountTableData, UserAccount], GetUser):
             _filter &= Q(phone_number__icontains=filter_data.phone_number)
         if filter_data.dni:
             _filter &= Q(dni__icontains=filter_data.dni)
+        if filter_data.only_employees:
+            _filter &= Q(id__in=EmployeeAccountTableData.objects.values_list('id', flat=True))
         return _filter
             
     def get_filtered_users(self, filter_data: FilterUserDto) -> Tuple[List[UserAccount], int]:

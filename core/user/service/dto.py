@@ -48,6 +48,7 @@ class FilterUserDto(BaseModel):
     dni: Optional[str] = None
     exact_name: Optional[str] = None
     only_clients: Optional[bool] = None
+    only_employees: Optional[bool] = None
     role: Optional[str] = None
     offset: Optional[int] = None
     limit: Optional[int] = None
