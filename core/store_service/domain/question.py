@@ -22,7 +22,6 @@ class Question(BaseModel):
     
     def _validate_data(self) -> None:
         ID.validate(self.id)
-        self.title = self.title.lower()
     
     def set_store_service(self, store_service_id: str) -> None:
         '''Establece el servicio de tienda al que pertenece la pregunta'''

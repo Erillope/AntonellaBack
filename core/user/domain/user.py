@@ -30,7 +30,6 @@ class UserAccount(BaseModel):
     
     def _validate_data(self) -> None:
         self.email = self.email.lower()
-        self.name = self.name.lower()
         ID.validate(self.id)
         UserPhoneNumber.validate(self.phone_number)
         UserEmail.validate(self.email)

@@ -28,8 +28,7 @@ class StoreService(BaseModel):
         return self
     
     def _validate_data(self) -> None:
-        self.name = self.name.lower().strip()
-        self.description = self.description.lower()
+        self.name = self.name.strip()
         ID.validate(self.id)
         ServiceName.validate(self.name)
         self.set_images(self.images)

@@ -36,8 +36,8 @@ class Publicidad(BaseModel):
     
     def _validate_data(self) -> None:
         ID.validate(self.id)
-        self.title = self.title.lower().strip()
-        self.description = self.description.lower().strip()
+        self.title = self.title.strip()
+        self.description = self.description.strip()
         self.set_images(self.images)
     
     def change_data(self, title: Optional[str] = None, images: Optional[List[str]] = None,

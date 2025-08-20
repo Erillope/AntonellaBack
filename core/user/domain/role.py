@@ -25,7 +25,6 @@ class Role(BaseModel):
         return self
     
     def _validate_data(self) -> None:
-        self.name = self.name.lower()
         ID.validate(self.id)
         if not self.MATCHER.match(self.name):
             raise InvalidRoleException.invalid_role(self.name)
