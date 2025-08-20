@@ -100,6 +100,7 @@ class FilterUserSerializer(serializers.Serializer):
     service_category = serializers.ChoiceField(
         choices=[(c.value, c.value) for c in EmployeeCategories], required=False)
     only_clients = serializers.BooleanField(default=False, required=False)
+    only_employees = serializers.BooleanField(default=False, required=False)
     only_count = serializers.BooleanField(default=False, required=False)
     name = serializers.CharField(max_length=250, required=False)
     role = serializers.CharField(max_length=250, required=False)
@@ -114,6 +115,7 @@ class FilterUserSerializer(serializers.Serializer):
         return FilterUserDto(
             service_category=self.validated_data.get('service_category'),
             only_clients=self.validated_data.get('only_clients', False),
+            only_employees=self.validated_data.get('only_employees', False),
             only_count=self.validated_data.get('only_count', False),
             exact_name=self.validated_data.get('exact_name'),
             name=self.validated_data.get('name'),
