@@ -1,7 +1,7 @@
 from pydantic import BaseModel, model_validator
 from typing import Optional
 from decimal import Decimal
-from .values import OrderStatusInfo
+from .values import OrderStatusInfo, Progresstatus
 from core.common.values import ID, GuayaquilDatetime
 from .events import OrderSaved, OrderDeleted
 from datetime import datetime
@@ -50,7 +50,13 @@ class OrderFactory:
             id=ID.generate(),
             client_id=client_id,
             card_charge=Decimal('0'),
-            status=status,
+            status=OrderStatusInfo(
+                status=status.status,
+                progress_status=Progresstatus.PENDING,
+                payment_status=status.payment_status,
+                payment_type=status.payment_type,
+                client_confirmed=status.client_confirmed
+            ),
             created_date=GuayaquilDatetime.now(),
             order_date=None,
             iva=AppConfig.iva() if iva else Decimal('0')
