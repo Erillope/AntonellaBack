@@ -98,7 +98,7 @@ class UserPhoneNumber:
 
 class UserPassword:
     '''Validador de contraseñas de usuario'''
-    REGREX = r"^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$"
+    REGREX = r"^(?=.*[0-9])(?=.*[a-z]).{8,}$"
     BCRYPT_REGREX = r'^\$2[ayb]\$[0-9]{2}\$[./A-Za-z0-9]{53}$'
     MATCHER = PatternMatcher(pattern=REGREX)
     BCRYPT_MATCHER = PatternMatcher(pattern=BCRYPT_REGREX)
